@@ -8,7 +8,7 @@ export const COLS = 5;
 export const words = {
 	...wordList,
 	contains: (word: string) => {
-		return wordList.words.includes(word) || wordList.valid.includes(word);
+		return wordList.answers.includes(word) || wordList.otherGuesses.includes(word);
 	},
 };
 
@@ -106,7 +106,7 @@ export function getRowData(n: number, board: GameBoard) {
 		exp += wd.word[pos].value ? wd.word[pos].value : `[^${[...wd.lettersNotAt(pos)].join("")}]`;
 	}
 
-	// console.log("before guessing:", board.words[n], "RegExp:", exp, "GameBoard:", board, "WordData:", wd);
+	console.log("before guessing:", board.words[n], "RegExp:", exp, "GameBoard:", board, "WordData:", wd);
 
 	return (word: string) => {
 		if (new RegExp(exp).test(word)) {
@@ -239,7 +239,8 @@ export class GameState extends Storable {
 	public guesses: number;
 	public validHard: boolean;
 	public time: number;
-	public wordNumber: number;
+	public solutionNumber: number;
+	public solution: string;
 	public board: GameBoard;
 
 	#valid = false;
@@ -256,7 +257,9 @@ export class GameState extends Storable {
 			this.guesses = 0;
 			this.validHard = true;
 			this.time = modeData.modes[mode].seed;
-			this.wordNumber = getWordNumber(mode);
+			this.solutionNumber = getWordNumber(mode);
+			let solutionIndex = seededRandomInt(0, words.answers.length, this.time);
+			this.solution = words.answers[solutionIndex];
 			this.board = {
 				words: Array(ROWS).fill(""),
 				state: Array.from({ length: ROWS }, () => (Array(COLS).fill("🔳"))),
@@ -264,6 +267,7 @@ export class GameState extends Storable {
 
 			this.#valid = true;
 		}
+		// console.log("New GameMode:", this);
 	}
 	get latestWord() {
 		return this.board.words[this.guesses];
@@ -312,12 +316,13 @@ export class GameState extends Storable {
 	}
 	private parse(str: string) {
 		const parsed = JSON.parse(str) as GameState;
-		if (parsed.wordNumber !== getWordNumber(this.#mode)) return;
+		if (parsed.solutionNumber !== getWordNumber(this.#mode)) return;
 		this.active = parsed.active;
 		this.guesses = parsed.guesses;
 		this.validHard = parsed.validHard;
 		this.time = parsed.time;
-		this.wordNumber = parsed.wordNumber;
+		this.solutionNumber = parsed.solutionNumber;
+		this.solution = parsed.solution;
 		this.board = parsed.board;
 
 		this.#valid = true;

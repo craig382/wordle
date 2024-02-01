@@ -24,12 +24,14 @@
 
 	let rows: Row[] = [];
 	let showCtx = false;
-	let pAns = 0;
-	let pSols = 0;
+	let nAnswers = 0;
+	let nOtherGuesses = 0;
+	let nAllGuesses = 0;
 	let x = 0;
 	let y = 0;
 	let word = "";
-	let pAnsWords: string[] = [];
+	let answes: string[] = [];
+	let otherGuesses: string[] = [];
 
 	function context(cx: number, cy: number, num: number, val: string) {
 		if (guesses >= num) {
@@ -39,9 +41,11 @@
 			word = guesses > num ? val : "";
 
 			const match = getRowData(num, board);
-			pAnsWords = words.words.filter((w) => match(w));
-			pAns = pAnsWords.length;
-			pSols = pAns + words.valid.filter((w) => match(w)).length;
+			answes = words.answers.filter((w) => match(w));
+			nAnswers = answes.length;
+			otherGuesses = words.otherGuesses.filter((w) => match(w));
+			nOtherGuesses = otherGuesses.length;
+			nAllGuesses = nAnswers + nOtherGuesses;
 		}
 	}
 
@@ -71,7 +75,7 @@
 </script>
 
 {#if showCtx}
-	<ContextMenu {pAns} {pSols} {x} {y} {word} {pAnsWords} />
+	<ContextMenu nAnswers={nAnswers} nOtherGuesses={nOtherGuesses} nAllGuesses={nAllGuesses} {x} {y} {word} answers={answes} otherGuesses={otherGuesses} />
 {/if}
 
 <div class="board" on:touchstart={swipeStart} on:touchend={swipeEnd} on:touchmove|preventDefault>

@@ -4,10 +4,10 @@ type Words = WordData & {
 };
 
 type WordData = {
-	/** A list of possible words to guess */
-	words: string[];
-	/** A list of words that are valid when input by the user but will never get chosen as the word to guess */
-	valid: string[];
+	/** A list of possible answers to guess */
+	answers: string[];
+	/** A list of allowed other guesses that cannot be the wordle answer */
+	otherGuesses: string[];
 };
 
 type RowData = {

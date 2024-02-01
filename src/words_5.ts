@@ -1,5 +1,5 @@
 const words = {
-	"words": [
+	"answers": [
 		"cigar",
 		"rebut",
 		"sissy",
@@ -2316,7 +2316,7 @@ const words = {
 		"rural",
 		"shave"
 	],
-	"valid": [
+	"otherGuesses": [
 		"aahed",
 		"aalii",
 		"aargh",

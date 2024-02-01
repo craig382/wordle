@@ -82,6 +82,7 @@
 			++game.guesses;
 			$letterStates.update(game.lastState, game.lastWord);
 			$letterStates = $letterStates;
+			console.log(game);
 			if (game.lastWord === solution) win();
 			else if (game.guesses === ROWS) lose();
 		} else {
@@ -125,8 +126,9 @@
 		modeData.modes[$mode].historical = false;
 		modeData.modes[$mode].seed = newSeed($mode);
 		game = new GameState($mode, localStorage.getItem(`state-${$mode}`));
-		solution = words.words[seededRandomInt(0, words.words.length, modeData.modes[$mode].seed)];
-		console.log("Cheat. The solution is: " + solution);
+		let solutionIndex = seededRandomInt(0, words.answers.length, modeData.modes[$mode].seed);
+		solution = words.answers[solutionIndex];
+		// console.log("Cheat. The solution is: " + solution + " soltionIndex: " + solutionIndex);
 		$letterStates = new LetterStates();
 		showStats = false;
 		showRefresh = false;
@@ -219,7 +221,7 @@
 		/>
 		<Share slot="2" state={game} />
 	</Separator>
-	<ShareGame wordNumber={game.wordNumber} />
+	<ShareGame solutionNumber={game.solutionNumber} />
 	{#if !game.active}
 		<Definition word={solution} alternates={2} />
 	{:else}
@@ -256,7 +258,7 @@
 					toaster.pop("localStorage cleared");
 				}}
 			>
-				{modeData.modes[$mode].name} word #{game.wordNumber}
+				{modeData.modes[$mode].name} word #{game.solutionNumber}
 			</div>
 		</div>
 	</svelte:fragment>

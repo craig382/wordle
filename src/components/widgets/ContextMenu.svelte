@@ -4,9 +4,11 @@
 	export let x = 0;
 	export let y = 0;
 	export let word = "";
-	export let pAns: number;
-	export let pSols: number;
-	export let pAnsWords: string[];
+	export let nAnswers: number;
+	export let nOtherGuesses: number;
+	export let nAllGuesses: number;
+	export let answers: string[];
+	export let otherGuesses: string[];
 	const width = +getComputedStyle(document.body).getPropertyValue("--game-width") / 2;
 
 	$: x = window.innerWidth - x < width ? window.innerWidth - width : x;
@@ -16,10 +18,11 @@
 	<div>
 		Before guessing "{word}" there were
 		<br /><br />
-		{pAns} possible answer{pAns > 1 ? "s" : ""}
+		{nAnswers} possible answer{nAnswers > 1 ? "s" : ""}
 		<br />
-		{#if void console.log(`${pAns} possible answers before guessing "${word}": ${pAnsWords}`)} "" {/if}
-		{pSols} valid guess{pSols > 1 ? "es" : ""}
+		{#if void console.log(`${nAnswers} possible answers before guessing "${word}": ${answers}`)} "" {/if}
+		{nAllGuesses} valid guess{nAllGuesses > 1 ? "es" : ""}
+		<!-- {#if void console.log(`${nOtherGuesses} other guesses before guessing "${word}": ${otherGuesses}`)} "" {/if} -->
 		<br />
 	</div>
 	{#if word !== ""}

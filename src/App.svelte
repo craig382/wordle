@@ -23,7 +23,7 @@
 	setContext("version", version);
 	localStorage.setItem("version", version);
 	let stats: Stats;
-	let word: string;
+	let solution: string;
 	let state: GameState;
 	let toaster: Toaster;
 
@@ -45,7 +45,7 @@
 		localStorage.setItem("mode", `${m}`);
 		window.location.hash = GameMode[m];
 		stats = new Stats(localStorage.getItem(`stats-${m}`) || m);
-		word = words.words[seededRandomInt(0, words.words.length, modeData.modes[m].seed)];
+		solution = words.answers[seededRandomInt(0, words.answers.length, modeData.modes[m].seed)];
 		if (modeData.modes[m].historical) {
 			state = new GameState(m, localStorage.getItem(`state-${m}-h`));
 		} else {
@@ -67,5 +67,5 @@
 
 <Toaster bind:this={toaster} />
 {#if toaster}
-	<Game {stats} bind:solution={word} {toaster} bind:game={state} />
+	<Game {stats} bind:solution={solution} {toaster} bind:game={state} />
 {/if}
