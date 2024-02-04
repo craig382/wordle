@@ -2,8 +2,8 @@ import seedRandom from "seedrandom";
 import { GameMode, ms } from "./enums";
 import wordList from "./words_5";
 
-export const ROWS = 6;
-export const COLS = 5;
+export const ROWS: number = 6;
+export const COLS: number = 5;
 
 export const words = {
 	...wordList,
@@ -12,12 +12,143 @@ export const words = {
 	},
 };
 
+class BotGroup {
+	/** The BotGroup consists of answer[fromIndex]..answer[toIndex]. */	
+	fromIndex: number = 0;
+	/** The BotGroup consists of answer[fromIndex]..answer[toIndex]. */	
+	toIndex: number = 0;
+	/** The BotGroup is given a score (penalty 
+	 * points) equal to (BotGroup.Length - 1). */	
+	score: number = 0;
+	constructor(fromIndex = 0, toIndex = 0, score = 0) {
+		this.fromIndex = fromIndex;
+		this.toIndex = toIndex;
+		this.score = score;
+	}
+}
+
+class BotAnswer {
+	/** A remaining answer. */	
+	answer: string = "";
+	/* Each remaining answer is given a groupId. */	
+	groupId: string = "";
+}
+
+function countOfAinB(a: string, b: string): number {
+	return b.split(a).length -1;
+}
+
+function calculateGroupId(key: string, test: string): string {
+	let keyChar = key.split("");
+	let testChar = test.split("");
+	let groupChar = Array<string>(COLS).fill("-");
+	let ti: number;
+	for (let i in testChar) {
+		if (testChar[i] === keyChar[i]) {
+			groupChar[i] = testChar[i].toUpperCase();
+			testChar[i] = "$";
+			keyChar[i] = "#";
+		}
+	}
+	for (let i in testChar) {
+		ti = keyChar.indexOf(testChar[i]);
+		if (ti >= 0) {
+			groupChar[i] = testChar[i];
+			testChar[i] = "+";
+			keyChar[ti] = "+";
+		}
+	}
+	let groupId = groupChar.join("");
+	// console.log("key:", key, keyChar.join(""), "test:", test, testChar.join(""), "groupId:", groupId);
+	return groupId;
+}
+
+export class GameBot {
+	/** answer[rowIndex, answerIndex].
+	 * For each row, a list of remaining answers. */	
+	public answer: BotAnswer[][] = [];
+	/** otherGuess[rowIndex, otherGuessIndex].
+	 * For each row, a list of remaining other guesses. */	
+	public otherGuess: string[][] = [];
+	/** group[rowIndex, groupIndex].
+	 * For each row, a list of answer groups. */	
+	public group: BotGroup[][] = [];
+	/** rowScore[rowIndex]. 
+	 * Each row is given a score. */
+	public rowScore = Array<number>(ROWS).fill(0);
+	/** runningScore[rowIndex].
+	 * The sum of all rowScores up to including the rowIndex row. */	
+	public runningScore = Array<number>(ROWS).fill(0);
+
+	update(game: GameState) {
+		/** ri is Row Index. */
+		let ri = game.guesses - 1;
+
+		// Initialize this.answer[ri] and this.otherGuess[ri].
+		if (ri === 0) {
+			this.answer[0] = [new BotAnswer];
+			for (let ai in words.answers) {
+				this.answer[ri][ai] = new BotAnswer;
+				this.answer[ri][ai].answer = words.answers[ai];
+			}
+			this.otherGuess[ri] = words.otherGuesses;
+		} else { 
+			this.answer[ri] = this.answer[ri-1];
+			this.otherGuess[ri] = this.otherGuess[ri-1];
+		}
+
+		// Filter answer and otherGuess arrays.
+
+		// Calculate groupId for each ansswer.
+		for (let ai in this.answer[ri]) {
+			this.answer[ri][ai].groupId = calculateGroupId(game.board.words[game.guesses -1], this.answer[ri][ai].answer);
+		}
+
+		// Sort the answer array by groupID.
+		this.answer[ri].sort( (a1,a2) => {
+			if (a1.groupId > a2.groupId) {
+				return 1;
+			}
+			if (a1.groupId < a2.groupId) {
+				return -1;
+			}
+			return 0;
+		})
+
+		// Parse the sorted answers into groups.
+		let gi = 0;
+		let fromIndex = 0;
+		let lastIndex = this.answer[ri].length - 1;
+		let score = 0;
+		this.group[ri] = [new BotGroup];		
+		for (let ai = 1; ai <= lastIndex; ++ai) {
+			if (this.answer[ri][ai].groupId != this.answer[ri][ai - 1].groupId) {
+				score = ai - fromIndex - 1;
+				this.group[ri][gi] = new BotGroup(fromIndex, ai - 1, score);
+				this.rowScore[ri] += score;
+				gi++;
+				fromIndex = ai;
+			}
+		}
+		score = lastIndex - fromIndex;
+		this.group[ri][gi] = new BotGroup(fromIndex, lastIndex, score);
+		this.rowScore[ri] += score;
+		if (ri > 0) {
+			this.runningScore[ri] = this.runningScore[ri - 1] + this.rowScore[ri];
+		} else {
+			this.runningScore[ri] = this.rowScore[ri];
+		}
+	}
+}
+
 class Tile {
 	public value: string;
 	public notSet: Set<string>;
+
 	constructor() {
 		this.notSet = new Set<string>();
 	}
+
 	not(char: string) {
 		this.notSet.add(char);
 	}
@@ -27,6 +158,7 @@ class WordData {
 	public letterCounts: Map<string, [number, boolean]>;
 	private notSet: Set<string>;
 	public word: Tile[];
+
 	constructor() {
 		this.notSet = new Set<string>();
 		this.letterCounts = new Map<string, [number, boolean]>();
@@ -35,6 +167,7 @@ class WordData {
 			this.word.push(new Tile());
 		}
 	}
+	
 	confirmCount(char: string) {
 		let c = this.letterCounts.get(char);
 		if (!c) {
@@ -43,10 +176,12 @@ class WordData {
 			c[1] = true;
 		}
 	}
+
 	countConfirmed(char: string) {
 		const val = this.letterCounts.get(char);
 		return val ? val[1] : false;
 	}
+
 	setCount(char: string, count: number) {
 		let c = this.letterCounts.get(char);
 		if (!c) {
@@ -55,14 +190,18 @@ class WordData {
 			c[0] = count;
 		}
 	}
+
 	incrementCount(char: string) {
 		++this.letterCounts.get(char)[0];
 	}
+
 	not(char: string) {
 		this.notSet.add(char);
 	}
+
 	inGlobalNotList(char: string) {
 		return this.notSet.has(char);
+	
 	}
 	lettersNotAt(pos: number) {
 		return new Set([...this.notSet, ...this.word[pos].notSet]);
@@ -114,7 +253,6 @@ export function getRowData(n: number, board: GameBoard) {
 			for (const e of wd.letterCounts) {
 				const occurrences = countOccurrences(chars, e[0]);
 				if (occurrences < e[1][0]) {
-				// if (!occurrences || (e[1][1] && occurrences !== e[1][0])) {
 					// console.log(`${occurrences} "${e[0]}" in "${word}", ${e[1][0]} or more required. RegExp: "${exp}"`);
 					return false;
 				}
@@ -269,15 +407,19 @@ export class GameState extends Storable {
 		}
 		// console.log("New GameMode:", this);
 	}
+
 	get latestWord() {
 		return this.board.words[this.guesses];
 	}
+
 	get lastState() {
 		return this.board.state[this.guesses - 1];
 	}
+
 	get lastWord() {
 		return this.board.words[this.guesses - 1];
 	}
+	
 	/**
 	* Returns an object containing the position of the character in the latest word that violates
 	* hard mode, and what type of violation it is, if there is a violation.
@@ -295,25 +437,36 @@ export class GameState extends Storable {
 		}
 		return { pos: -1, char: "", type: "⬛" };
 	}
+
 	guess(solution: string) {
 		const solChars = solution.split("");
-		const result = Array<LetterState>(COLS).fill("⬛");
+		const OldResult = Array<LetterState>(COLS).fill("⬛");
 		for (let i = 0; i < COLS; ++i) {
 			if (solChars[i] === this.latestWord.charAt(i)) {
-				result[i] = "🟩"; // letter found in correct spot
+				OldResult[i] = "🟩"; // letter found in correct spot
 				solChars[i] = "$"; // mark letter as found
 			}
 		}
 		for (let i = 0; i < COLS; ++i) {
 			const pos = solChars.indexOf(this.latestWord[i]);
-			if (result[i] !== "🟩" && pos >= 0) {
+			if (OldResult[i] !== "🟩" && pos >= 0) {
 				solChars[pos] = "-"; // mark letter as almost found
-				result[i] = "🟨"; // letter found in wrong spot
+				OldResult[i] = "🟨"; // letter found in wrong spot
 			}
 		}
-		console.log(solution, solChars);
-		return result;
+
+		const guessColors = Array<LetterState>(COLS).fill("⬛");
+		const guessGroupId = calculateGroupId(solution, this.latestWord);
+		for (let c =0; c < COLS; c++) {
+			if (guessGroupId[c] === "-") continue;
+			if (guessGroupId[c] <= "Z") { guessColors[c] = "🟩"; }
+			else { guessColors[c] = "🟨"; }
+		}
+
+		console.log(solution, this.latestWord, guessGroupId, guessColors.join(""));
+		return OldResult;
 	}
+
 	private parse(str: string) {
 		const parsed = JSON.parse(str) as GameState;
 		if (parsed.solutionNumber !== getWordNumber(this.#mode)) return;

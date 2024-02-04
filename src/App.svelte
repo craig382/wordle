@@ -8,6 +8,7 @@
 		LetterStates,
 		getWordNumber,
 		words,
+        GameBot,
 	} from "./utils";
 	import Game from "./components/Game.svelte";
 	import { letterStates, settings, mode } from "./stores";
@@ -24,7 +25,8 @@
 	localStorage.setItem("version", version);
 	let stats: Stats;
 	let solution: string;
-	let state: GameState;
+	let game: GameState;
+	let bot: GameBot;
 	let toaster: Toaster;
 
 	settings.set(new Settings(localStorage.getItem("settings")));
@@ -47,15 +49,15 @@
 		stats = new Stats(localStorage.getItem(`stats-${m}`) || m);
 		solution = words.answers[seededRandomInt(0, words.answers.length, modeData.modes[m].seed)];
 		if (modeData.modes[m].historical) {
-			state = new GameState(m, localStorage.getItem(`state-${m}-h`));
+			game = new GameState(m, localStorage.getItem(`state-${m}-h`));
 		} else {
-			state = new GameState(m, localStorage.getItem(`state-${m}`));
+			game = new GameState(m, localStorage.getItem(`state-${m}`));
 		}
 		// Set the letter states when data for a new game mode is loaded so the keyboard is correct
-		letterStates.set(new LetterStates(state.board));
+		letterStates.set(new LetterStates(game.board));
 	});
 
-	$: saveState(state);
+	$: saveState(game);
 	function saveState(state: GameState) {
 		if (modeData.modes[$mode].historical) {
 			localStorage.setItem(`state-${$mode}-h`, state.toString());
@@ -67,5 +69,5 @@
 
 <Toaster bind:this={toaster} />
 {#if toaster}
-	<Game {stats} bind:solution={solution} {toaster} bind:game={state} />
+	<Game {stats} bind:solution={solution} {toaster} bind:game={game} bind:bot={bot}/>
 {/if}

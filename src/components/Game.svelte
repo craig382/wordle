@@ -28,6 +28,7 @@
 		COLS,
 		newSeed,
 		GameState,
+		GameBot,
 		seededRandomInt,
 		LetterStates,
 		words,
@@ -38,6 +39,7 @@
 	export let solution: string;
 	export let stats: Stats;
 	export let game: GameState;
+	export let bot: GameBot;
 	export let toaster: Toaster;
 
 	setContext("toaster", toaster);
@@ -78,11 +80,15 @@
 					game.validHard = false;
 				}
 			}
+			// Submitted word is a valid guess. Process it.
 			game.board.state[game.guesses] = game.guess(solution);
 			++game.guesses;
 			$letterStates.update(game.lastState, game.lastWord);
 			$letterStates = $letterStates;
 			console.log(game);
+			if (bot === undefined) bot = new GameBot();
+			bot.update(game);
+			console.log(bot);
 			if (game.lastWord === solution) win();
 			else if (game.guesses === ROWS) lose();
 		} else {
@@ -126,6 +132,7 @@
 		modeData.modes[$mode].historical = false;
 		modeData.modes[$mode].seed = newSeed($mode);
 		game = new GameState($mode, localStorage.getItem(`state-${$mode}`));
+		bot = new GameBot();
 		let solutionIndex = seededRandomInt(0, words.answers.length, modeData.modes[$mode].seed);
 		solution = words.answers[solutionIndex];
 		// console.log("Cheat. The solution is: " + solution + " soltionIndex: " + solutionIndex);
