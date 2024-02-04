@@ -439,22 +439,6 @@ export class GameState extends Storable {
 	}
 
 	guess(solution: string) {
-		const solChars = solution.split("");
-		const OldResult = Array<LetterState>(COLS).fill("⬛");
-		for (let i = 0; i < COLS; ++i) {
-			if (solChars[i] === this.latestWord.charAt(i)) {
-				OldResult[i] = "🟩"; // letter found in correct spot
-				solChars[i] = "$"; // mark letter as found
-			}
-		}
-		for (let i = 0; i < COLS; ++i) {
-			const pos = solChars.indexOf(this.latestWord[i]);
-			if (OldResult[i] !== "🟩" && pos >= 0) {
-				solChars[pos] = "-"; // mark letter as almost found
-				OldResult[i] = "🟨"; // letter found in wrong spot
-			}
-		}
-
 		const guessColors = Array<LetterState>(COLS).fill("⬛");
 		const guessGroupId = calculateGroupId(solution, this.latestWord);
 		for (let c =0; c < COLS; c++) {
@@ -462,9 +446,8 @@ export class GameState extends Storable {
 			if (guessGroupId[c] <= "Z") { guessColors[c] = "🟩"; }
 			else { guessColors[c] = "🟨"; }
 		}
-
 		console.log(solution, this.latestWord, guessGroupId, guessColors.join(""));
-		return OldResult;
+		return guessColors;
 	}
 
 	private parse(str: string) {
