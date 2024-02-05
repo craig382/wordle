@@ -58,11 +58,11 @@
 	});
 
 	$: saveState(game);
-	function saveState(state: GameState) {
+	function saveState(game: GameState) {
 		if (modeData.modes[$mode].historical) {
-			localStorage.setItem(`state-${$mode}-h`, state.toString());
+			localStorage.setItem(`state-${$mode}-h`, game.toString());
 		} else {
-			localStorage.setItem(`state-${$mode}`, state.toString());
+			localStorage.setItem(`state-${$mode}`, game.toString());
 		}
 	}
 </script>

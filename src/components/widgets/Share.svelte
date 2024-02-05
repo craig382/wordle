@@ -5,15 +5,15 @@
 	import { failed, modeData, GameState } from "../../utils";
 	import { getContext } from "svelte";
 
-	export let state: GameState;
+	export let game: GameState;
 	const toaster = getContext<Toaster>("toaster");
 
 	function copyStats() {
 		navigator.clipboard.writeText(
-			`${modeData.modes[$mode].name} Wordle+ #${state.solutionNumber} ${
-				failed(state) ? "X" : state.guesses
-			}/${state.board.words.length}\n\n    ${state.board.state
-				.slice(0, state.guesses)
+			`${modeData.modes[$mode].name} Wordle+ #${game.solutionNumber} ${
+				failed(game) ? "X" : game.guesses
+			}/${game.board.words.length}\n\n    ${game.board.state
+				.slice(0, game.guesses)
 				.map((r) => r.join(""))
 				.join("\n    ")}\nmikhad.github.io/wordle`
 		);

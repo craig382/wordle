@@ -225,7 +225,7 @@
 			on:timeup={() => (showRefresh = true)}
 			on:reload={reload}
 		/>
-		<Share slot="2" state={game} />
+		<Share slot="2" game={game} />
 	</Separator>
 	<ShareGame solutionNumber={game.solutionNumber} />
 	{#if !game.active}
@@ -244,7 +244,7 @@
 </Modal>
 
 <Modal fullscreen={true} bind:visible={showSettings}>
-	<Settings state={game} on:historical={() => (showHistorical = true)} />
+	<Settings game={game} on:historical={() => (showHistorical = true)} />
 	{#if game.active}
 		<div class="button concede" on:click={concede} on:keydown={concede}>give up</div>
 	{/if}
