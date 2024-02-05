@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { getRowData, words } from "../../utils";
-
 	import Row from "./Row.svelte";
 	import ContextMenu from "../widgets/ContextMenu.svelte";
 	import { createEventDispatcher } from "svelte";
@@ -24,14 +22,10 @@
 
 	let rows: Row[] = [];
 	let showCtx = false;
-	let nAnswers = 0;
-	let nOtherGuesses = 0;
-	let nAllGuesses = 0;
+	let rowNum = 0;
 	let x = 0;
 	let y = 0;
 	let word = "";
-	let answes: string[] = [];
-	let otherGuesses: string[] = [];
 
 	function context(cx: number, cy: number, num: number, val: string) {
 		if (guesses >= num) {
@@ -39,13 +33,7 @@
 			y = cy;
 			showCtx = true;
 			word = guesses > num ? val : "";
-
-			const match = getRowData(num, board);
-			answes = words.answers.filter((w) => match(w));
-			nAnswers = answes.length;
-			otherGuesses = words.otherGuesses.filter((w) => match(w));
-			nOtherGuesses = otherGuesses.length;
-			nAllGuesses = nAnswers + nOtherGuesses;
+			rowNum = num;
 		}
 	}
 
@@ -75,7 +63,7 @@
 </script>
 
 {#if showCtx}
-	<ContextMenu nAnswers={nAnswers} nOtherGuesses={nOtherGuesses} nAllGuesses={nAllGuesses} {x} {y} {word} answers={answes} otherGuesses={otherGuesses} />
+	<ContextMenu {x} {y} {word} {rowNum} />
 {/if}
 
 <div class="board" on:touchstart={swipeStart} on:touchend={swipeEnd} on:touchmove|preventDefault>

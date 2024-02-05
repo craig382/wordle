@@ -4,6 +4,7 @@ import wordList from "./words_5";
 
 export const ROWS: number = 6;
 export const COLS: number = 5;
+export let game: GameState;
 
 export const words = {
 	...wordList,
@@ -66,121 +67,6 @@ class Tile {
 	not(char: string) {
 		this.notSet.add(char);
 	}
-}
-
-class WordData {
-	public letterCounts: Map<string, [number, boolean]>;
-	private notSet: Set<string>;
-	public word: Tile[];
-
-	constructor() {
-		this.notSet = new Set<string>();
-		this.letterCounts = new Map<string, [number, boolean]>();
-		this.word = [];
-		for (let col = 0; col < COLS; ++col) {
-			this.word.push(new Tile());
-		}
-	}
-	
-	confirmCount(char: string) {
-		let c = this.letterCounts.get(char);
-		if (!c) {
-			this.not(char);
-		} else {
-			c[1] = true;
-		}
-	}
-
-	countConfirmed(char: string) {
-		const val = this.letterCounts.get(char);
-		return val ? val[1] : false;
-	}
-
-	setCount(char: string, count: number) {
-		let c = this.letterCounts.get(char);
-		if (!c) {
-			this.letterCounts.set(char, [count, false]);
-		} else {
-			c[0] = count;
-		}
-	}
-
-	incrementCount(char: string) {
-		++this.letterCounts.get(char)[0];
-	}
-
-	not(char: string) {
-		this.notSet.add(char);
-	}
-
-	inGlobalNotList(char: string) {
-		return this.notSet.has(char);
-	
-	}
-	lettersNotAt(pos: number) {
-		return new Set([...this.notSet, ...this.word[pos].notSet]);
-	}
-}
-
-export function getRowData(n: number, board: GameBoard) {
-	const wd = new WordData();
-	for (let row = 0; row < n; ++row) {
-		const occurred = new Set<string>();
-		for (let col = 0; col < COLS; ++col) {
-			const state = board.state[row][col];
-			const char = board.words[row][col];
-			if (state === "⬛") { // char not in solution
-				wd.confirmCount(char);
-				// if char isn't in the global not list add it to the not list for that position
-				if (!wd.inGlobalNotList(char)) {
-					wd.word[col].not(char);
-				}
-				continue;
-			}
-			if (occurred.has(char)) { 
-				// this letter has already been seen in this row
-				wd.incrementCount(char);
-			} else if (!wd.countConfirmed(char)) { 
-				// this is the first time seeing this letter in this row
-				occurred.add(char);
-				wd.setCount(char, 1);
-			}
-			if (state === "🟩") { // if letter found in correct spot
-				wd.word[col].value = char; // set the filter for this column to the found letter
-			}
-			else {	// if (state === "🟨") if letter found in wrong spot
-				wd.word[col].not(char); // add letter to the global not list
-			}
-		}
-	}
-
-	let exp = "";
-	for (let pos = 0; pos < wd.word.length; ++pos) {
-		exp += wd.word[pos].value ? wd.word[pos].value : `[^${[...wd.lettersNotAt(pos)].join("")}]`;
-	}
-
-	console.log("before guessing:", board.words[n], "RegExp:", exp, "GameBoard:", board, "WordData:", wd);
-
-	return (word: string) => {
-		if (new RegExp(exp).test(word)) {
-			const chars = word.split("");
-			for (const e of wd.letterCounts) {
-				const occurrences = countOccurrences(chars, e[0]);
-				if (occurrences < e[1][0]) {
-					// console.log(`${occurrences} "${e[0]}" in "${word}", ${e[1][0]} or more required. RegExp: "${exp}"`);
-					return false;
-				}
-			}
-			// console.log(`"${word}" is a possible solution, matches RegExp "${exp}" and occurrences`);
-			return true;
-		}
-		// console.log(`"${word}" does not match RegExp "${exp}"`);
-		return false;
-	};
-}
-
-function countOccurrences<T>(arr: T[], val: T) {
-	return arr.reduce((count, v) => v === val ? count + 1 : count, 0);
 }
 
 export function contractNum(n: number) {
@@ -301,9 +187,6 @@ export class GameState extends Storable {
 	/** answer[rowIndex, answerIndex].
 	 * For each row, a list of remaining answers. */	
 	public answer: BotAnswer[][] = [];
-	/** otherGuess[rowIndex, otherGuessIndex].
-	 * For each row, a list of remaining other guesses. */	
-	public otherGuess: string[][] = [];
 	/** group[rowIndex, groupId].
 	 * For each row, a list of comma sepated answers. */	
 	public group: Array<Map<string, string>> = [];
@@ -349,7 +232,8 @@ export class GameState extends Storable {
 			};
 
 			this.#valid = true;
-		}		
+		}
+		game = this;
 		console.log(this);
 	}
 
@@ -383,60 +267,19 @@ export class GameState extends Storable {
 				this.answer[ri][ai] = new BotAnswer;
 				this.answer[ri][ai].answer = words.answers[ai];
 			}
-			this.otherGuess[ri] = words.otherGuesses;
-		} else { 
-			this.answer[ri] = this.answer[ri-1];
-			this.otherGuess[ri] = this.otherGuess[ri-1];
+		// } else { 
+		// 	this.answer[ri] = this.answer[ri-1];
+		// 	this.otherGuess[ri] = this.otherGuess[ri-1];
 		}
 
-		// Filter answer and otherGuess arrays.
-		const guessGroupId = calculateGroupId(this.solution, this.lastWord);
-		this.guessGroupId[ri] = guessGroupId;
-		if (ri > 0) {
-			this.runningExcludedLetters[ri] = this.runningExcludedLetters[ri - 1];
-		}
-		for (let c =0; c < COLS; c++) {
-			let char = guessGroupId[c];
-			if (char === "-") {
-				char = this.lastWord[c];
-				if (countOfAinB(char, this.runningExcludedLetters[ri]) === 0) {
-					this.runningExcludedLetters[ri] += char;
-					this.rowExcludedLetters[ri] += char;
-				}
-			} else if (char <= "Z") regExp[c] = char.toLowerCase(); 
-		}
-		let rowExcludedLetters = this.rowExcludedLetters[ri];
-		for (let c =0; c < COLS; c++) {
-			let char = guessGroupId[c];
-			if (char === "-") {
-				if (rowExcludedLetters !== "") {
-					regExp[c] = "[^" + rowExcludedLetters + "]";
-				}
-			} else if (char >= "a") {
-				regExp[c] = "[^" + char + rowExcludedLetters + "]";
-				if (countOfAinB(char, this.rowWrongPlaceLetters[ri]) === 0) {
-					this.rowWrongPlaceLetters[ri] += char;
-				}
-			}
-		}
-		this.rowRegExp[ri] = regExp.join("");
-		// console.log("regExp:", this.rowRegExp[ri]);
 
-		// Filter by regExp.
-		let rowRegExp = this.rowRegExp[ri];
-		this.answer[ri] = this.answer[ri].filter((tw) => RegExp(rowRegExp).test(tw.answer));
-		this.otherGuess[ri] = this.otherGuess[ri].filter((tw) => RegExp(rowRegExp).test(tw));
 
-		// Filter by wrong plaace letters. 
-		for (let char of this.rowWrongPlaceLetters[ri]) {
-			let lwc = countOfAinB(char, this.lastWord);
-			this.answer[ri] = this.answer[ri].filter((tw) => filterByWrongPlaceLetters(char, tw.answer, lwc));
-			this.otherGuess[ri] = this.otherGuess[ri].filter((tw) => filterByWrongPlaceLetters(char, tw, lwc));
-		}
+
 
 		// Calculate groupId for each ansswer.
 		for (let ai in this.answer[ri]) {
-			this.answer[ri][ai].groupId = calculateGroupId(this.lastWord, this.answer[ri][ai].answer);
+			// this.answer[ri][ai].groupId = calculateGroupId(this.lastWord, this.answer[ri][ai].answer);
+			this.answer[ri][ai].groupId = calculateGroupId(this.answer[ri][ai].answer, this.lastWord);
 		}
 
 		// Sort the answer array by groupID.
@@ -477,6 +320,55 @@ export class GameState extends Storable {
 			this.runningScore[ri] = this.runningScore[ri - 1] + this.rowScore[ri];
 		} else {
 			this.runningScore[ri] = this.rowScore[ri];
+		}
+
+
+
+
+
+
+
+		// Filter answer and otherGuess arrays.
+		const guessGroupId = calculateGroupId(this.solution, this.lastWord);
+		this.guessGroupId[ri] = guessGroupId;
+		if (ri > 0) {
+			this.runningExcludedLetters[ri] = this.runningExcludedLetters[ri - 1];
+		}
+		for (let c =0; c < COLS; c++) {
+			let char = guessGroupId[c];
+			if (char === "-") {
+				char = this.lastWord[c];
+				if (countOfAinB(char, this.runningExcludedLetters[ri]) === 0) {
+					this.runningExcludedLetters[ri] += char;
+					this.rowExcludedLetters[ri] += char;
+				}
+			} else if (char <= "Z") regExp[c] = char.toLowerCase(); 
+		}
+		let rowExcludedLetters = this.rowExcludedLetters[ri];
+		for (let c =0; c < COLS; c++) {
+			let char = guessGroupId[c];
+			if (char === "-") {
+				if (rowExcludedLetters !== "") {
+					regExp[c] = "[^" + rowExcludedLetters + "]";
+				}
+			} else if (char >= "a") {
+				regExp[c] = "[^" + char + rowExcludedLetters + "]";
+				if (countOfAinB(char, this.rowWrongPlaceLetters[ri]) === 0) {
+					this.rowWrongPlaceLetters[ri] += char;
+				}
+			}
+		}
+		this.rowRegExp[ri] = regExp.join("");
+		// console.log("regExp:", this.rowRegExp[ri]);
+
+		// Filter by regExp.
+		let rowRegExp = this.rowRegExp[ri];
+		this.answer[ri+1] = this.answer[ri].filter((tw) => RegExp(rowRegExp).test(tw.answer));
+
+		// Filter by wrong plaace letters. 
+		for (let char of this.rowWrongPlaceLetters[ri]) {
+			let lwc = countOfAinB(char, this.lastWord);
+			this.answer[ri+1] = this.answer[ri+1].filter((tw) => filterByWrongPlaceLetters(char, tw.answer, lwc));
 		}
 
 		// console.log(`GameState.update() completed for guess ${this.guesses}.`);
