@@ -12,21 +12,6 @@ export const words = {
 	},
 };
 
-class BotGroup {
-	/** The BotGroup consists of answer[fromIndex]..answer[toIndex]. */	
-	fromIndex: number = 0;
-	/** The BotGroup consists of answer[fromIndex]..answer[toIndex]. */	
-	toIndex: number = 0;
-	/** The BotGroup is given a score (penalty 
-	 * points) equal to (BotGroup.Length - 1). */	
-	score: number = 0;
-	constructor(fromIndex = 0, toIndex = 0, score = 0) {
-		this.fromIndex = fromIndex;
-		this.toIndex = toIndex;
-		this.score = score;
-	}
-}
-
 class BotAnswer {
 	/** A remaining answer. */	
 	answer: string = "";
@@ -36,12 +21,8 @@ class BotAnswer {
 }
 
 function compareGroupId(a1:BotAnswer, a2:BotAnswer):number {
-	if (a1.groupId > a2.groupId) {
-		return 1;
-	}
-	if (a1.groupId < a2.groupId) {
-		return -1;
-	}
+	if (a1.groupId > a2.groupId) return 1;
+	if (a1.groupId < a2.groupId) return -1;
 	return 0;
 }
 
@@ -72,160 +53,6 @@ function calculateGroupId(key: string, test: string): string {
 	let groupId = groupChar.join("");
 	// console.log("key:", key, keyChar.join(""), "test:", test, testChar.join(""), "groupId:", groupId);
 	return groupId;
-}
-
-export class GameBot {
-	/** answer[rowIndex, answerIndex].
-	 * For each row, a list of remaining answers. */	
-	public answer: BotAnswer[][] = [];
-	/** otherGuess[rowIndex, otherGuessIndex].
-	 * For each row, a list of remaining other guesses. */	
-	public otherGuess: string[][] = [];
-	/** group[rowIndex, groupIndex].
-	 * For each row, a list of answer groups. */	
-	public group: BotGroup[][] = [];
-	/** rowScore[rowIndex]. 
-	 * Each row is given a score. */
-	public rowScore = Array<number>(ROWS).fill(0);
-	/** runningScore[rowIndex].
-	 * The sum of all rowScores up to including the rowIndex row. */
-	public runningScore = Array<number>(ROWS).fill(0);
-	/** rowExcludedLetters[rowIndex]. 
-	 * Excluded letters in each row. */
-	public rowExcludedLetters = Array<string>(ROWS).fill("");
-	/** runningExcludedLetters[rowIndex].
-	 * Excluded letters in all rows up to including the rowIndex row. */	
-	public runningExcludedLetters = Array<string>(ROWS).fill("");
-	/** rowRegExp[rowIndex]. 
-	 * Regular Expression used to filter each row. */
-	public rowRegExp = Array<string>(ROWS).fill("");
-	/** guessGroupId[rowIndex]. 
-	 * GroupId of the row's guess. */
-	public guessGroupId = Array<string>(ROWS).fill("");
-	/** rowWrongPlaceLetters[rowIndex]. 
-	 * Wrong place letters in each row. */
-	public rowWrongPlaceLetters = Array<string>(ROWS).fill("");
-
-
-	constructor() {
-		// console.log(this);
-	}
-
-	update(game: GameState) {
-		/** ri is Row Index. */
-		let ri = game.guesses - 1;
-		let lastWord = game.lastWord;
-		let regExp = Array<string>(COLS).fill(".");
-
-		/** Ensure char is not empty before calling this function. */
-		function filterByWrongPlaceLetters(char: string, testWord: string, countOfCharInGuess: number): boolean {
-			if (countOfAinB(char, testWord) < countOfCharInGuess) return false;
-			else return true;
-		}
-
-		// Initialize this.answer[ri] and this.otherGuess[ri].
-		if (ri === 0) {
-			this.answer[0] = [new BotAnswer];
-			for (let ai in words.answers) {
-				this.answer[ri][ai] = new BotAnswer;
-				this.answer[ri][ai].answer = words.answers[ai];
-			}
-			this.otherGuess[ri] = words.otherGuesses;
-		} else { 
-			this.answer[ri] = this.answer[ri-1];
-			this.otherGuess[ri] = this.otherGuess[ri-1];
-		}
-
-		// Filter answer and otherGuess arrays.
-		const guessGroupId = calculateGroupId(game.solution, lastWord);
-		this.guessGroupId[ri] = guessGroupId;
-		if (ri > 0) {
-			this.runningExcludedLetters[ri] = this.runningExcludedLetters[ri - 1];
-		}
-		for (let c =0; c < COLS; c++) {
-			let char = guessGroupId[c];
-			if (char === "-") {
-				char = lastWord[c];
-				if (countOfAinB(char, this.runningExcludedLetters[ri]) === 0) {
-					this.runningExcludedLetters[ri] += char;
-					this.rowExcludedLetters[ri] += char;
-				}
-			} else if (char <= "Z") regExp[c] = char.toLowerCase(); 
-		}
-		let rowExcludedLetters = this.rowExcludedLetters[ri];
-		for (let c =0; c < COLS; c++) {
-			let char = guessGroupId[c];
-			if (char === "-") {
-				if (rowExcludedLetters !== "") {
-					regExp[c] = "[^" + rowExcludedLetters + "]";
-				}
-			} else if (char >= "a") {
-				regExp[c] = "[^" + char + rowExcludedLetters + "]";
-				if (countOfAinB(char, this.rowWrongPlaceLetters[ri]) === 0) {
-					this.rowWrongPlaceLetters[ri] += char;
-				}
-			}
-		}
-		this.rowRegExp[ri] = regExp.join("");
-		// console.log("regExp:", this.rowRegExp[ri]);
-
-		// Filter by regExp.
-		let rowRegExp = this.rowRegExp[ri];
-		this.answer[ri] = this.answer[ri].filter((tw) => RegExp(rowRegExp).test(tw.answer));
-		this.otherGuess[ri] = this.otherGuess[ri].filter((tw) => RegExp(rowRegExp).test(tw));
-
-		// Filter by wrong plaace letters. 
-		for (let char of this.rowWrongPlaceLetters[ri]) {
-			let lwc = countOfAinB(char, game.lastWord);
-			this.answer[ri] = this.answer[ri].filter((tw) => filterByWrongPlaceLetters(char, tw.answer, lwc));
-			this.otherGuess[ri] = this.otherGuess[ri].filter((tw) => filterByWrongPlaceLetters(char, tw, lwc));
-		}
-
-		// Calculate groupId for each ansswer.
-		for (let ai in this.answer[ri]) {
-			this.answer[ri][ai].groupId = calculateGroupId(lastWord, this.answer[ri][ai].answer);
-		}
-
-		// Sort the answer array by groupID.
-		this.answer[ri].sort( (a1,a2) => compareGroupId(a1, a2) );
-
-		// Parse the sorted answers into groups.
-		let gi = 0;
-		let fromIndex = 0;
-		let lastIndex = this.answer[ri].length - 1;
-		let score = 0;
-		this.group[ri] = [new BotGroup];		
-		for (let ai = 1; ai <= lastIndex; ++ai) {
-			if (this.answer[ri][ai].groupId != this.answer[ri][ai - 1].groupId) {
-				score = ai - fromIndex - 1;
-				this.group[ri][gi] = new BotGroup(fromIndex, ai - 1, score);
-				this.rowScore[ri] += score;
-				gi++;
-				fromIndex = ai;
-			}
-		}
-		score = lastIndex - fromIndex;
-		this.group[ri][gi] = new BotGroup(fromIndex, lastIndex, score);
-		this.rowScore[ri] += score;
-
-		// Add 0.5 penalty points to rowScore if lastWord
-		// is not a remaining answer from the previous row.
-		if (ri > 0) {
-			if (this.answer[ri-1].filter((tw) => countOfAinB(lastWord, tw.answer)).length === 0) {
-				this.rowScore[ri] += 0.5;
-			};
-		}
-
-		// Calculate runningScore.
-		if (ri > 0) {
-			this.runningScore[ri] = this.runningScore[ri - 1] + this.rowScore[ri];
-		} else {
-			this.runningScore[ri] = this.rowScore[ri];
-		}
-
-		// console.log(`GameBot.update() completed for guess ${game.guesses}.`);
-		console.log(this);
-	}
 }
 
 class Tile {
@@ -471,6 +298,37 @@ export class GameState extends Storable {
 	#valid = false;
 	#mode: GameMode;
 
+	/** answer[rowIndex, answerIndex].
+	 * For each row, a list of remaining answers. */	
+	public answer: BotAnswer[][] = [];
+	/** otherGuess[rowIndex, otherGuessIndex].
+	 * For each row, a list of remaining other guesses. */	
+	public otherGuess: string[][] = [];
+	/** group[rowIndex, groupId].
+	 * For each row, a list of comma sepated answers. */	
+	public group: Array<Map<string, string>> = [];
+	/** rowScore[rowIndex]. 
+	 * Each row is given a score. */
+	public rowScore = Array<number>(ROWS).fill(0);
+	/** runningScore[rowIndex].
+	 * The sum of all rowScores up to including the rowIndex row. */
+	public runningScore = Array<number>(ROWS).fill(0);
+	/** rowExcludedLetters[rowIndex]. 
+	 * Excluded letters in each row. */
+	public rowExcludedLetters = Array<string>(ROWS).fill("");
+	/** runningExcludedLetters[rowIndex].
+	 * Excluded letters in all rows up to including the rowIndex row. */	
+	public runningExcludedLetters = Array<string>(ROWS).fill("");
+	/** rowRegExp[rowIndex]. 
+	 * Regular Expression used to filter each row. */
+	public rowRegExp = Array<string>(ROWS).fill("");
+	/** guessGroupId[rowIndex]. 
+	 * GroupId of the row's guess. */
+	public guessGroupId = Array<string>(ROWS).fill("");
+	/** rowWrongPlaceLetters[rowIndex]. 
+	 * Wrong place letters in each row. */
+	public rowWrongPlaceLetters = Array<string>(ROWS).fill("");
+
 	constructor(mode: GameMode, data?: string) {
 		super();
 		this.#mode = mode;
@@ -507,6 +365,124 @@ export class GameState extends Storable {
 		return this.board.words[this.guesses - 1];
 	}
 	
+	update() {
+		/** ri is Row Index. */
+		let ri = this.guesses - 1;
+		let regExp = Array<string>(COLS).fill(".");
+
+		/** Ensure char is not empty before calling this function. */
+		function filterByWrongPlaceLetters(char: string, testWord: string, countOfCharInGuess: number): boolean {
+			if (countOfAinB(char, testWord) < countOfCharInGuess) return false;
+			else return true;
+		}
+
+		// Initialize this.answer[ri] and this.otherGuess[ri].
+		if (ri === 0) {
+			this.answer[0] = [new BotAnswer];
+			for (let ai in words.answers) {
+				this.answer[ri][ai] = new BotAnswer;
+				this.answer[ri][ai].answer = words.answers[ai];
+			}
+			this.otherGuess[ri] = words.otherGuesses;
+		} else { 
+			this.answer[ri] = this.answer[ri-1];
+			this.otherGuess[ri] = this.otherGuess[ri-1];
+		}
+
+		// Filter answer and otherGuess arrays.
+		const guessGroupId = calculateGroupId(this.solution, this.lastWord);
+		this.guessGroupId[ri] = guessGroupId;
+		if (ri > 0) {
+			this.runningExcludedLetters[ri] = this.runningExcludedLetters[ri - 1];
+		}
+		for (let c =0; c < COLS; c++) {
+			let char = guessGroupId[c];
+			if (char === "-") {
+				char = this.lastWord[c];
+				if (countOfAinB(char, this.runningExcludedLetters[ri]) === 0) {
+					this.runningExcludedLetters[ri] += char;
+					this.rowExcludedLetters[ri] += char;
+				}
+			} else if (char <= "Z") regExp[c] = char.toLowerCase(); 
+		}
+		let rowExcludedLetters = this.rowExcludedLetters[ri];
+		for (let c =0; c < COLS; c++) {
+			let char = guessGroupId[c];
+			if (char === "-") {
+				if (rowExcludedLetters !== "") {
+					regExp[c] = "[^" + rowExcludedLetters + "]";
+				}
+			} else if (char >= "a") {
+				regExp[c] = "[^" + char + rowExcludedLetters + "]";
+				if (countOfAinB(char, this.rowWrongPlaceLetters[ri]) === 0) {
+					this.rowWrongPlaceLetters[ri] += char;
+				}
+			}
+		}
+		this.rowRegExp[ri] = regExp.join("");
+		// console.log("regExp:", this.rowRegExp[ri]);
+
+		// Filter by regExp.
+		let rowRegExp = this.rowRegExp[ri];
+		this.answer[ri] = this.answer[ri].filter((tw) => RegExp(rowRegExp).test(tw.answer));
+		this.otherGuess[ri] = this.otherGuess[ri].filter((tw) => RegExp(rowRegExp).test(tw));
+
+		// Filter by wrong plaace letters. 
+		for (let char of this.rowWrongPlaceLetters[ri]) {
+			let lwc = countOfAinB(char, this.lastWord);
+			this.answer[ri] = this.answer[ri].filter((tw) => filterByWrongPlaceLetters(char, tw.answer, lwc));
+			this.otherGuess[ri] = this.otherGuess[ri].filter((tw) => filterByWrongPlaceLetters(char, tw, lwc));
+		}
+
+		// Calculate groupId for each ansswer.
+		for (let ai in this.answer[ri]) {
+			this.answer[ri][ai].groupId = calculateGroupId(this.lastWord, this.answer[ri][ai].answer);
+		}
+
+		// Sort the answer array by groupID.
+		this.answer[ri].sort( (a1,a2) => compareGroupId(a1, a2) );
+
+		// Parse the sorted answers into groups.
+		let gid = this.answer[ri][0].groupId;
+		let gList = "";
+		this.group[ri] = new Map([[gid, gList]]);
+		let fromIndex = 0;
+		let lastIndex = this.answer[ri].length - 1;
+		let score = 0;
+		for (let ai = 1; ai <= lastIndex; ++ai) {
+			if (this.answer[ri][ai].groupId != this.answer[ri][ai - 1].groupId) {
+				score = ai - fromIndex - 1;
+				this.rowScore[ri] += score;
+				gList = this.answer[ri].map(a => a.answer).slice(fromIndex, ai).join(",");
+				this.group[ri].set(gid, gList);
+				fromIndex = ai;
+				gid = this.answer[ri][ai].groupId;
+			}
+		}
+		score = lastIndex - fromIndex;
+		this.rowScore[ri] += score;
+		gList = this.answer[ri].map(a => a.answer).slice(fromIndex).join(",");
+		this.group[ri].set(gid, gList);
+
+		// Add 0.5 penalty points to rowScore if lastWord
+		// is not a remaining answer from the previous row.
+		if (ri > 0) {
+			if (this.answer[ri-1].filter((tw) => countOfAinB(this.lastWord, tw.answer)).length === 0) {
+				this.rowScore[ri] += 0.5;
+			};
+		}
+
+		// Calculate runningScore.
+		if (ri > 0) {
+			this.runningScore[ri] = this.runningScore[ri - 1] + this.rowScore[ri];
+		} else {
+			this.runningScore[ri] = this.rowScore[ri];
+		}
+
+		// console.log(`GameState.update() completed for guess ${this.guesses}.`);
+		console.log(this);
+	}
+
 	/**
 	* Returns an object containing the position of the character in the latest word that violates
 	* hard mode, and what type of violation it is, if there is a violation.

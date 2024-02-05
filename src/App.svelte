@@ -8,7 +8,6 @@
 		LetterStates,
 		getWordNumber,
 		words,
-        GameBot,
 	} from "./utils";
 	import Game from "./components/Game.svelte";
 	import { letterStates, settings, mode } from "./stores";
@@ -26,7 +25,6 @@
 	let stats: Stats;
 	let solution: string;
 	let game: GameState;
-	let bot: GameBot;
 	let toaster: Toaster;
 
 	settings.set(new Settings(localStorage.getItem("settings")));
@@ -69,5 +67,5 @@
 
 <Toaster bind:this={toaster} />
 {#if toaster}
-	<Game {stats} bind:solution={solution} {toaster} bind:game={game} bind:bot={bot}/>
+	<Game {stats} bind:solution={solution} {toaster} bind:game={game}/>
 {/if}
