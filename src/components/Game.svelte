@@ -39,7 +39,7 @@
 	export let solution: string;
 	export let stats: Stats;
 	export let game: GameState;
-	export let bot: GameBot;
+	export let bot = new GameBot();
 	export let toaster: Toaster;
 
 	setContext("toaster", toaster);
@@ -85,10 +85,8 @@
 			++game.guesses;
 			$letterStates.update(game.lastState, game.lastWord);
 			$letterStates = $letterStates;
-			console.log(game);
 			if (bot === undefined) bot = new GameBot();
 			bot.update(game);
-			console.log(bot);
 			if (game.lastWord === solution) win();
 			else if (game.guesses === ROWS) lose();
 		} else {
@@ -161,6 +159,7 @@
 
 	onMount(() => {
 		if (!game.active) setTimeout(setShowStatsTrue, delay);
+		// console.log("onMount");
 	});
 	// $: toaster.pop(word);
 </script>
