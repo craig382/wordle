@@ -15,7 +15,7 @@
 	<div>
 		Before guessing "{word}" there were
 		<br />
-		{game.answer[rowNum].length} possible answers.
+		{game.answers[rowNum].length} possible answers.
 		<br />
 	</div>
 	{#if word !== ""}
