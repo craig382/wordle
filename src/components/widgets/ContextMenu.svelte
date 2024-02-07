@@ -19,7 +19,7 @@
 		<!-- <br /> -->
 		Guess "{word}" eliminated {game.groups[ri].size} groups,
 		left {countOfAinB(",", game.guessGroups[ri]) + 1} 
-		possible answers, and scored {game.rowScores[ri]} 
+		possible answers, and scored {game.scores[ri]} 
 		penalty points.
 		<br /><br />
 		A "soft" guess earns 0.5 penalty points.
