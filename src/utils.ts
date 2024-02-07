@@ -165,7 +165,7 @@ abstract class Storable {
 
 export class GameState extends Storable {
 	public active: boolean;
-	public guesses: number;
+	public nGuesses: number;
 	public validHard: boolean;
 	public time: number;
 	public solutionNumber: number;
@@ -205,7 +205,7 @@ export class GameState extends Storable {
 		}
 		if (!this.#valid) {
 			this.active = true;
-			this.guesses = 0;
+			this.nGuesses = 0;
 			this.validHard = true;
 			this.time = modeData.modes[mode].seed;
 			this.solutionNumber = getWordNumber(mode);
@@ -223,20 +223,20 @@ export class GameState extends Storable {
 	}
 
 	get latestWord() {
-		return this.board.words[this.guesses];
+		return this.board.words[this.nGuesses];
 	}
 
 	get lastState() {
-		return this.board.state[this.guesses - 1];
+		return this.board.state[this.nGuesses - 1];
 	}
 
 	get lastWord() {
-		return this.board.words[this.guesses - 1];
+		return this.board.words[this.nGuesses - 1];
 	}
 	
 	update() {
 		/** ri is Row Index. */
-		let ri = this.guesses - 1;
+		let ri = this.nGuesses - 1;
 
 		// Initialize this.answer[ri] and this.otherGuess[ri].
 		const guessGroupId = calculateGroupId(this.solution, this.lastWord);
@@ -310,13 +310,13 @@ export class GameState extends Storable {
 	*/
 	checkHardMode(): HardModeData {
 		for (let i = 0; i < COLS; ++i) {
-			if (this.board.state[this.guesses - 1][i] === "🟩" && this.board.words[this.guesses - 1][i] !== this.board.words[this.guesses][i]) {
-				return { pos: i, char: this.board.words[this.guesses - 1][i], type: "🟩" };
+			if (this.board.state[this.nGuesses - 1][i] === "🟩" && this.board.words[this.nGuesses - 1][i] !== this.board.words[this.nGuesses][i]) {
+				return { pos: i, char: this.board.words[this.nGuesses - 1][i], type: "🟩" };
 			}
 		}
 		for (let i = 0; i < COLS; ++i) {
-			if (this.board.state[this.guesses - 1][i] === "🟨" && !this.board.words[this.guesses].includes(this.board.words[this.guesses - 1][i])) {
-				return { pos: i, char: this.board.words[this.guesses - 1][i], type: "🟨" };
+			if (this.board.state[this.nGuesses - 1][i] === "🟨" && !this.board.words[this.nGuesses].includes(this.board.words[this.nGuesses - 1][i])) {
+				return { pos: i, char: this.board.words[this.nGuesses - 1][i], type: "🟨" };
 			}
 		}
 		return { pos: -1, char: "", type: "⬛" };
@@ -338,7 +338,7 @@ export class GameState extends Storable {
 		const parsed = JSON.parse(str) as GameState;
 		if (parsed.solutionNumber !== getWordNumber(this.#mode)) return;
 		this.active = parsed.active;
-		this.guesses = parsed.guesses;
+		this.nGuesses = parsed.nGuesses;
 		this.validHard = parsed.validHard;
 		this.time = parsed.time;
 		this.solutionNumber = parsed.solutionNumber;
@@ -495,5 +495,5 @@ export function timeRemaining(m: Mode) {
 }
 
 export function failed(s: GameState) {
-	return !(s.active || (s.guesses > 0 && s.board.state[s.guesses - 1].join("") === "🟩".repeat(COLS)));
+	return !(s.active || (s.nGuesses > 0 && s.board.state[s.nGuesses - 1].join("") === "🟩".repeat(COLS)));
 }

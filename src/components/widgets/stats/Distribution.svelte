@@ -12,8 +12,8 @@
 
 <h3>guess distribution</h3>
 <div class="guess">
-	{#if game.guesses && !game.active && !failed(game)}
-		<h4>{game.guesses} Guesses in last game.</h4>
+	{#if game.nGuesses && !game.active && !failed(game)}
+		<h4>{game.nGuesses} Guesses in last game.</h4>
 		<br />
 	{/if}
 </div>
@@ -25,7 +25,7 @@
 				<span class="guess">{guess[0]}</span>
 				<div
 					class="bar"
-					class:this={g === game.guesses && !game.active && !failed(game)}
+					class:this={g === game.nGuesses && !game.active && !failed(game)}
 					style="width: {(guess[1] / max) * 100}%;"
 				>
 					{guess[1]}

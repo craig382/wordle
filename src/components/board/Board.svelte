@@ -28,7 +28,7 @@
 	let word = "";
 
 	function context(cx: number, cy: number, ri: number, val: string) {
-		// console.log("guesses:", guesses, "rowIndex:", ri);
+		// console.log("nGuesses:", guesses, "rowIndex:", ri);
 		if (guesses > ri) {
 			x = cx;
 			y = cy;
@@ -71,7 +71,7 @@
 	{#each value as _, i}
 		<Row
 			num={i}
-			{guesses}
+			guesses={guesses}
 			bind:this={rows[i]}
 			bind:value={value[i]}
 			state={board.state[i]}

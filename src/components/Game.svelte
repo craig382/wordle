@@ -58,20 +58,20 @@
 	function submitWord() {
 		if (game.latestWord.length !== COLS) {
 			toaster.pop("Not enough letters");
-			board.shake(game.guesses);
+			board.shake(game.nGuesses);
 		} else if (words.contains(game.latestWord)) {
-			if (game.guesses > 0) {
+			if (game.nGuesses > 0) {
 				const hm = game.checkHardMode();
 				if ($settings.hard[$mode]) {
 					if (hm.type === "🟩") {
 						toaster.pop(
 							`${contractNum(hm.pos + 1)} letter must be ${hm.char.toUpperCase()}`
 						);
-						board.shake(game.guesses);
+						board.shake(game.nGuesses);
 						return;
 					} else if (hm.type === "🟨") {
 						toaster.pop(`Guess must contain ${hm.char.toUpperCase()}`);
-						board.shake(game.guesses);
+						board.shake(game.nGuesses);
 						return;
 					}
 				} else if (hm.type !== "⬛") {
@@ -79,29 +79,29 @@
 				}
 			}
 			// Submitted word is a valid guess. Process it.
-			game.board.state[game.guesses] = game.guess(solution);
-			++game.guesses;
+			game.board.state[game.nGuesses] = game.guess(solution);
+			++game.nGuesses;
 			$letterStates.update(game.lastState, game.lastWord);
 			$letterStates = $letterStates;
 			game.update();
 			if (game.lastWord === solution) win();
-			else if (game.guesses === ROWS) lose();
+			else if (game.nGuesses === ROWS) lose();
 		} else {
 			toaster.pop("Not in word list");
-			board.shake(game.guesses);
+			board.shake(game.nGuesses);
 		}
 	}
 
 	function win() {
-		board.bounce(game.guesses - 1);
+		board.bounce(game.nGuesses - 1);
 		game.active = false;
 		setTimeout(
-			() => toaster.pop(PRAISE[game.guesses - 1]),
+			() => toaster.pop(PRAISE[game.nGuesses - 1]),
 			DELAY_INCREMENT * COLS + DELAY_INCREMENT
 		);
 		setTimeout(setShowStatsTrue, delay * 1.4);
 		if (!modeData.modes[$mode].historical) {
-			stats.addWin(game.guesses, modeData.modes[$mode]);
+			stats.addWin(game.nGuesses, modeData.modes[$mode]);
 			stats = stats;
 			localStorage.setItem(`stats-${$mode}`, stats.toString());
 		}
@@ -162,7 +162,7 @@
 
 <svelte:body on:click={board.hideCtx} on:contextmenu={board.hideCtx} />
 
-<main class:guesses={game.guesses !== 0} style="--rows: {ROWS}; --cols: {COLS}">
+<main class:guesses={game.nGuesses !== 0} style="--rows: {ROWS}; --cols: {COLS}">
 	<Header
 		bind:showRefresh
 		tutorial={$settings.tutorial === 2}
@@ -179,7 +179,7 @@
 		tutorial={$settings.tutorial === 1}
 		on:closeTutPopUp|once={() => ($settings.tutorial = 0)}
 		board={game.board}
-		guesses={game.guesses}
+		guesses={game.nGuesses}
 		icon={modeData.modes[$mode].icon}
 		on:swipe={onSwipe}
 	/>
@@ -188,7 +188,7 @@
 			if ($settings.tutorial) $settings.tutorial = 0;
 			board.hideCtx();
 		}}
-		bind:value={game.board.words[game.guesses === ROWS ? 0 : game.guesses]}
+		bind:value={game.board.words[game.nGuesses === ROWS ? 0 : game.nGuesses]}
 		on:submitWord={submitWord}
 		on:esc={() => {
 			showTutorial = false;

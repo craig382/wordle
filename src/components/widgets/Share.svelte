@@ -11,9 +11,9 @@
 	function copyStats() {
 		navigator.clipboard.writeText(
 			`${modeData.modes[$mode].name} Wordle+ #${game.solutionNumber} ${
-				failed(game) ? "X" : game.guesses
+				failed(game) ? "X" : game.nGuesses
 			}/${game.board.words.length}\n\n    ${game.board.state
-				.slice(0, game.guesses)
+				.slice(0, game.nGuesses)
 				.map((r) => r.join(""))
 				.join("\n    ")}\nmikhad.github.io/wordle`
 		);
