@@ -263,33 +263,33 @@ export class GameState extends Storable {
 	public groups: Array<Map<string, string>> = [];
 	/** nAnswers[rowIndex]. 
 	 * For each row, the number of remaining answers before the row's guess. */
-	public nAnswers = Array<number>(ROWS).fill(0);
-	public nAnswersHard = Array<number>(ROWS).fill(0);
-	public nAnswersSoft = Array<number>(ROWS).fill(0);
+	public nAnswers = Array<number>(ROWS+1).fill(0);
+	public nAnswersHard = Array<number>(ROWS+1).fill(0);
+	public nAnswersSoft = Array<number>(ROWS+1).fill(0);
 	/** rowScores[rowIndex]. 
 	 * Each row is given a score.
 	 * "Soft" parameters are used to store
 	 * the best score found so far. */
-	public scores = Array<number>(ROWS).fill(0);
-	public scoresHard = Array<number>(ROWS).fill(0);
-	public scoresSoft = Array<number>(ROWS).fill(100000);
+	public scores = Array<number>(ROWS+1).fill(0);
+	public scoresHard = Array<number>(ROWS+1).fill(0);
+	public scoresSoft = Array<number>(ROWS+1).fill(100000);
 	/** guesses[rowIndex]. 
 	 * Array of each row's guess. 
 	 * guesses is an alias for board.words. */
-	public guesses = Array<string>(ROWS).fill("");
-	public guessesHard = Array<string>(ROWS).fill("");
-	public guessesSoft = Array<string>(ROWS).fill("");
+	public guesses = Array<string>(ROWS+1).fill("");
+	public guessesHard = Array<string>(ROWS+1).fill("");
+	public guessesSoft = Array<string>(ROWS+1).fill("");
 	/** guessGroupIds[rowIndex]. 
 	 * GroupId of the row's guess. */
-	public guessGroupIds = Array<string>(ROWS).fill("");
-	public guessGroupIdsHard = Array<string>(ROWS).fill("");
-	public guessGroupIdsSoft = Array<string>(ROWS).fill("");
+	public guessGroupIds = Array<string>(ROWS+1).fill("");
+	public guessGroupIdsHard = Array<string>(ROWS+1).fill("");
+	public guessGroupIdsSoft = Array<string>(ROWS+1).fill("");
 	/** guessGroups[rowIndex]. 
 	 * For each row, a comma separated list of answers 
 	 * remaining after the guess. */
-	public guessGroups = Array<string>(ROWS).fill("");
-	public guessGroupsHard = Array<string>(ROWS).fill("");
-	public guessGroupsSoft = Array<string>(ROWS).fill("");
+	public guessGroups = Array<string>(ROWS+1).fill("");
+	public guessGroupsHard = Array<string>(ROWS+1).fill("");
+	public guessGroupsSoft = Array<string>(ROWS+1).fill("");
 
 	constructor(mode: GameMode, data?: string) {
 		super();
@@ -330,29 +330,29 @@ export class GameState extends Storable {
 	}
 	
 	update() {
+
+		// Process this guess.
+		processGroups(this.lastWord);
+
+		// Advance 1 guess for bot to look for best possible guesses.
+		this.nGuesses++;
 		let ri = this.nGuesses - 1;
 
 		// Search for the best posssible hard mode guess.
-		if (ri > 0) {
-			this.guessGroups[ri-1].split(",").some(aGuess => {processGroups(aGuess);});
-			this.nAnswersHard[ri] = this.nAnswersSoft[ri];
-			this.scoresHard[ri] = this.scoresSoft[ri];
-			this.guessesHard[ri] = this.guessesSoft[ri];
-			this.guessGroupIdsHard[ri] = this.guessGroupIdsSoft[ri];
-			this.guessGroupsHard[ri] = this.guessGroupsSoft[ri];
-		}
+		this.guessGroups[ri-1].split(",").some(aGuess => {processGroups(aGuess);});
+		this.nAnswersHard[ri] = this.nAnswersSoft[ri];
+		this.scoresHard[ri] = this.scoresSoft[ri];
+		this.guessesHard[ri] = this.guessesSoft[ri];
+		this.guessGroupIdsHard[ri] = this.guessGroupIdsSoft[ri];
+		this.guessGroupsHard[ri] = this.guessGroupsSoft[ri];
 
 		// Search for the best possible soft mode guess.
 		if ((this.scoresHard[ri] !== 0) || (ri === 0)) {
 			words.answers.slice(0, botWords).some(aGuess => {processGroups(aGuess);});
 		}
 
-
-		// Process this guess.
-		// Do this last, after finding the best hard and soft
-		// mode guesses. Because we want to leave the "real"
-		// game's Gamestate as the human's guess.
-		processGroups(this.lastWord);
+		// Revert 1 guess so human can take their turn.
+		this.nGuesses--;
 
 		// console.log(`GameState.update() completed for guess ${this.guesses}.`);
 		console.log(this);

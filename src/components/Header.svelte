@@ -39,7 +39,7 @@
 			onClick={() => {
 				if ((game.nGuesses > 0) && (game.nGuesses < ROWS)){
 					game.nGuesses--;
-					console.log(game);
+					console.log("last guess undone", game);
 					toaster.pop("last guess undone");
 				}
 			}}>
