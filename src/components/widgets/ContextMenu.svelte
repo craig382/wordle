@@ -1,11 +1,11 @@
 <script lang="ts">
 	import Definition from "./Definition.svelte";
-	import {game} from "../../utils";
+	import {ROWS, game, countOfAinB} from "../../utils";
 
 	export let x = 0;
 	export let y = 0;
 	export let word = "";
-	export let rowNum: number;
+	export let ri: number;
 	const width = +getComputedStyle(document.body).getPropertyValue("--game-width") / 2;
 
 	$: x = window.innerWidth - x < width ? window.innerWidth - width : x;
@@ -15,8 +15,18 @@
 	<div>
 		Before guessing "{word}" there were
 		<br />
-		{game.answers[rowNum].length} possible answers.
-		<br />
+		{game.nAnswers[ri]} possible answers.
+		<!-- <br /> -->
+		Guess "{word}" eliminated {game.groups[ri].size} groups,
+		left {countOfAinB(",", game.guessGroups[ri]) + 1} 
+		possible answers, and scored {game.rowScores[ri]} 
+		penalty points.
+		<br /><br />
+		A "soft" guess earns 0.5 penalty points.
+		<!-- <br /> -->
+		For each guess but guess {ROWS}, each word 
+		in a group (except the group's first word) 
+		earns 1 penalty point.
 	</div>
 	{#if word !== ""}
 		<Definition {word} alternates={1} />

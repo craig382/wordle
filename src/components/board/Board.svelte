@@ -22,18 +22,19 @@
 
 	let rows: Row[] = [];
 	let showCtx = false;
-	let rowNum = 0;
+	let rowIndex = 0;
 	let x = 0;
 	let y = 0;
 	let word = "";
 
-	function context(cx: number, cy: number, num: number, val: string) {
-		if (guesses >= num) {
+	function context(cx: number, cy: number, ri: number, val: string) {
+		// console.log("guesses:", guesses, "rowIndex:", ri);
+		if (guesses > ri) {
 			x = cx;
 			y = cy;
 			showCtx = true;
-			word = guesses > num ? val : "";
-			rowNum = num;
+			word = val;
+			rowIndex = ri;
 		}
 	}
 
@@ -63,7 +64,7 @@
 </script>
 
 {#if showCtx}
-	<ContextMenu {x} {y} {word} {rowNum} />
+	<ContextMenu {x} {y} {word} ri={rowIndex} />
 {/if}
 
 <div class="board" on:touchstart={swipeStart} on:touchend={swipeEnd} on:touchmove|preventDefault>

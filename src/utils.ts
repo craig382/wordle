@@ -31,7 +31,7 @@ function compareGroupId(a1:BotAnswer, a2:BotAnswer):number {
 	return 0;
 }
 
-function countOfAinB(a: string, b: string): number {
+export function countOfAinB(a: string, b: string): number {
 	return b.split(a).length -1;
 }
 
@@ -58,19 +58,6 @@ function calculateGroupId(key: string, test: string): string {
 	let groupId = groupChar.join("");
 	// console.log("key:", key, keyChar.join(""), "test:", test, testChar.join(""), "groupId:", groupId);
 	return groupId;
-}
-
-class Tile {
-	public value: string;
-	public notSet: Set<string>;
-
-	constructor() {
-		this.notSet = new Set<string>();
-	}
-
-	not(char: string) {
-		this.notSet.add(char);
-	}
 }
 
 export function contractNum(n: number) {
@@ -188,21 +175,27 @@ export class GameState extends Storable {
 	#valid = false;
 	#mode: GameMode;
 
-	/** answer[rowIndex, answerIndex].
-	 * For each row, a list of remaining answers. */	
-	public answers: BotAnswer[][] = [];
-	/** group[rowIndex, groupId].
-	 * For each row, a list of comma sepated answers. */	
+	/** answers[answerIndex].
+	 * A list of remaining answers before the row's guess. */	
+	private answers: BotAnswer[] = [];
+	/** For each row, a map of comma separated eliminated answers keyed to groupId. */	
 	public groups: Array<Map<string, string>> = [];
-	/** rowScore[rowIndex]. 
+	/** nAnswers[rowIndex]. 
+	 * For each row, the number of remaining answers before the row's guess. */
+	public nAnswers = Array<number>(ROWS).fill(0);
+	/** rowScores[rowIndex]. 
 	 * Each row is given a score. */
 	public rowScores = Array<number>(ROWS).fill(0);
-	/** runningScore[rowIndex].
+	/** runningScores[rowIndex].
 	 * The sum of all rowScores up to including the rowIndex row. */
 	public runningScores = Array<number>(ROWS).fill(0);
-	/** guessGroupId[rowIndex]. 
+	/** guessGroupIds[rowIndex]. 
 	 * GroupId of the row's guess. */
 	public guessGroupIds = Array<string>(ROWS).fill("");
+	/** guessGroups[rowIndex]. 
+	 * For each row, a comma separated list of answers 
+	 * remaining after the guess. */
+	public guessGroups = Array<string>(ROWS).fill("");
 
 	constructor(mode: GameMode, data?: string) {
 		super();
@@ -249,50 +242,54 @@ export class GameState extends Storable {
 		const guessGroupId = calculateGroupId(this.solution, this.lastWord);
 		this.guessGroupIds[ri] = guessGroupId;
 
-		this.answers[ri] = [new BotAnswer];
+		this.answers = [new BotAnswer];
 		if (ri === 0) {
 			for (let ai in words.answers) {
-				this.answers[ri][ai] = new BotAnswer(words.answers[ai]);
+				this.answers[ai] = new BotAnswer(words.answers[ai]);
 			}
 		} else { 
-			this.answers[ri] = [new BotAnswer];
+			this.answers = [new BotAnswer];
 			// console.log(`get(guessGroupId =  "${this.guessGroupIds[ri-1]}"}: ${this.groups[ri-1].get(this.guessGroupIds[ri-1])}.`);
-			this.groups[ri-1].get(this.guessGroupIds[ri-1]).split(",").map(a => {
-				this.answers[ri].push(new BotAnswer(a));
+			// this.groups[ri-1].get(this.guessGroupIds[ri-1]).split(",").map(a => {
+			this.guessGroups[ri-1].split(",").map(a => {
+				this.answers.push(new BotAnswer(a));
 			});
-			this.answers[ri].shift();
+			this.answers.shift();
 		}
+		this.nAnswers[ri]= this.answers.length;
 
 		// Calculate groupId for each ansswer.
-		this.answers[ri].map(a => a.groupId = calculateGroupId(a.answer, this.lastWord));
+		this.answers.map(a => a.groupId = calculateGroupId(a.answer, this.lastWord));
 
 		// Sort the answer array by groupID.
-		this.answers[ri].sort( (a1, a2) => compareGroupId(a1, a2) );
+		this.answers.sort( (a1, a2) => compareGroupId(a1, a2) );
 
 		// Parse the sorted answers into groups.
-		let gid = this.answers[ri][0].groupId;
+		let gid = this.answers[0].groupId;
 		let gList = "";
 		this.groups[ri] = new Map([[gid, gList]]);
 		let fromIndex = 0;
-		let lastIndex = this.answers[ri].length - 1;
-		let score = 0;
+		let lastIndex = this.answers.length - 1;
 		for (let ai = 1; ai <= lastIndex; ++ai) {
-			if (this.answers[ri][ai].groupId != this.answers[ri][ai - 1].groupId) {
-				score = ai - fromIndex - 1;
-				this.rowScores[ri] += score;
-				gList = this.answers[ri].map(a => a.answer).slice(fromIndex, ai).join(",");
+			if (this.answers[ai].groupId != this.answers[ai - 1].groupId) {
+				gList = this.answers.map(a => a.answer).slice(fromIndex, ai).join(",");
 				this.groups[ri].set(gid, gList);
 				fromIndex = ai;
-				gid = this.answers[ri][ai].groupId;
+				gid = this.answers[ai].groupId;
 			}
 		}
-		score = lastIndex - fromIndex;
-		this.rowScores[ri] += score;
-		gList = this.answers[ri].map(a => a.answer).slice(fromIndex).join(",");
+		gList = this.answers.map(a => a.answer).slice(fromIndex).join(",");
 		this.groups[ri].set(gid, gList);
+		this.guessGroups[ri]  = this.groups[ri].get(this.guessGroupIds[ri]);
+		this.groups[ri].delete(this.guessGroupIds[ri]);
 
-		// Add 0.5 penalty points to rowScore if lastWord is not a remaining answer.
-			if (this.answers[ri].filter((tw) => countOfAinB(this.lastWord, tw.answer)).length === 0) {
+		// Calculate group part of score as long as this is not guess 6.
+		if (ri < (ROWS-1)) {
+			this.rowScores[ri] = this.nAnswers[ri] - this.groups[ri].size - 1;
+		}
+
+		// Add 0.5 penalty points to rowScore if the guess is not a remaining answer.
+			if (this.answers.filter((tw) => countOfAinB(this.lastWord, tw.answer)).length === 0) {
 				this.rowScores[ri] += 0.5;
 			};
 
