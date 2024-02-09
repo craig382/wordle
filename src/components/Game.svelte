@@ -21,6 +21,8 @@
 	} from "./widgets";
 	import {
 		contractNum,
+		countOfAinB,
+		pattern,
 		DELAY_INCREMENT,
 		PRAISE,
 		modeData,
@@ -211,6 +213,7 @@
 	{#if modeData.modes[$mode].historical}
 		<h2 class="historical">Statistics not available for historical games</h2>
 	{:else}
+		<h3>Statistics ({modeData.modes[$mode].name})</h3>
 		<Statistics data={stats} />
 		<Distribution distribution={stats.guesses} {game} />
 	{/if}
@@ -235,6 +238,73 @@
 			on:keydown={concede}
 		>
 			give up
+		</div>
+	{/if}
+	{#if !game.active}
+		<h3>Bot Results For Solution "{game.solution}"</h3>
+		<div class="row">
+			<section>
+				BOT<br />
+				HARD<br />
+				MODE<br />
+			</section>
+			<section>
+				<br />HUMAN<br />
+			</section>
+			<section>
+				BOT<br />
+				EASY<br />
+				MODE<br />
+			</section>
+		</div>
+		<div class="row">
+			<section>
+				<br />
+			</section>
+			<section>
+				{game.guesses[0]}<br />
+				{pattern(game.guessGroupIds[0])}<br />
+				{game.scores[0]} points<br />
+				{game.nAnswers[1]} words left<br />
+				in group {game.guessGroupIds[0]}:<br />
+			</section>
+			<section>
+				<br />
+			</section>
+		</div>
+		{#each Array(game.nGuesses - 1) as _, ri}
+			<div class="row">
+				<section>
+					{game.guessesHard[ri+1]}<br />
+					{pattern(game.guessGroupIdsHard[ri+1])}<br />
+					{game.scoresHard[ri+1]} points<br />
+					{countOfAinB(" ", game.guessGroupsHard[ri+1]) + 1} words left<br />
+					in group {game.guessGroupIdsHard[ri+1]}:<br />
+					{game.guessGroupsHard[ri+1]}<br />
+				</section>
+				<section>
+					{game.guesses[ri+1]}<br />
+					{pattern(game.guessGroupIds[ri+1])}<br />
+					{game.scores[ri+1]} points<br />
+					{game.nAnswers[ri+2]} words left<br />
+					in group {game.guessGroupIds[ri+1]}:<br />
+					{game.guessGroups[ri+1]}<br />
+				</section>
+				<section>
+					{game.guessesEasy[ri+1]}<br />
+					{pattern(game.guessGroupIdsEasy[ri+1])}<br />
+					{game.scoresEasy[ri+1]} points<br />
+					{countOfAinB(" ", game.guessGroupsEasy[ri+1]) + 1} words left<br />
+					in group {game.guessGroupIdsEasy[ri+1]}:<br />
+					{game.guessGroupsEasy[ri+1]}<br />
+				</section>
+			</div>
+		{/each}
+		<div class="row">
+			An "easy" guess earns 0.5 penalty points.
+			For each guess but guess {ROWS}, each word 
+			in a group (except the group's first word) 
+			earns 1 penalty point.
 		</div>
 	{/if}
 </Modal>
@@ -290,4 +360,23 @@
 	.concede {
 		background-color: var(--red);
 	}
+	.row {
+		display: flex;
+		flex-direction: row;
+		align-items: flex-start;
+		justify-content: center;
+		gap: 4px;
+		border: 1px solid;
+	}
+	section {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		inline-size: 150px;
+		text-align: center;
+		overflow-wrap: break-word;
+		vertical-align: top;
+	}
+
+
 </style>

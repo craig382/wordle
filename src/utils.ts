@@ -60,7 +60,6 @@ function calculateGroupId(key: string, test: string): string {
 		}
 	}
 	let groupId = groupChar.join("");
-	// console.log("key:", key, keyChar.join(""), "test:", test, testChar.join(""), "groupId:", groupId);
 	return groupId;
 }
 
@@ -167,6 +166,17 @@ abstract class Storable {
 	toString() { return JSON.stringify(this); }
 }
 
+/** pattern returns the color pattern of a groupId. */
+export function pattern(groupId: string): string {
+	let p = "";
+	for (let i = 0; i < groupId.length; i++) {
+		if (groupId[i] === "-") p += "⬛";
+		else if (groupId[i] >= "a") p += "🟨";
+		else p += "🟩";
+	}
+	return p;
+}
+
 /** 
  * ProcessGroups[guess, gameOut].
  * Creates and scores groups assuming guess 
@@ -193,7 +203,7 @@ function processGroups(guess: string): boolean {
 		}
 	} else { 
 		answers = [new BotAnswer];
-		game.guessGroups[ri-1].split(",").map(a => {
+		game.guessGroups[ri-1].split(" ").map(a => {
 			answers.push(new BotAnswer(a));
 		});
 		answers.shift();
@@ -214,13 +224,13 @@ function processGroups(guess: string): boolean {
 	let lastIndex = answers.length - 1;
 	for (let ai = 1; ai <= lastIndex; ++ai) {
 		if (answers[ai].groupId != answers[ai - 1].groupId) {
-			gList = answers.map(a => a.answer).slice(fromIndex, ai).join(",");
+			gList = answers.map(a => a.answer).slice(fromIndex, ai).join(" ");
 			game.groups[ri].set(gid, gList);
 			fromIndex = ai;
 			gid = answers[ai].groupId;
 		}
 	}
-	gList = answers.map(a => a.answer).slice(fromIndex).join(",");
+	gList = answers.map(a => a.answer).slice(fromIndex).join(" ");
 	game.groups[ri].set(gid, gList);
 	game.guessGroups[ri]  = game.groups[ri].get(game.guessGroupIds[ri]);
 	game.groups[ri].delete(game.guessGroupIds[ri]);
@@ -236,12 +246,12 @@ function processGroups(guess: string): boolean {
 	};
 
 	// If this score is the best found so far, save it.
-	if (game.scores[ri] < game.scoresSoft[ri]) {
-		game.nAnswersSoft[ri] = game.nAnswers[ri];
-		game.scoresSoft[ri] = game.scores[ri];
-		game.guessesSoft[ri] = guess;
-		game.guessGroupIdsSoft[ri] = game.guessGroupIds[ri];
-		game.guessGroupsSoft[ri] = game.guessGroups[ri];
+	if (game.scores[ri] < game.scoresEasy[ri]) {
+		game.nAnswersEasy[ri] = game.nAnswers[ri];
+		game.scoresEasy[ri] = game.scores[ri];
+		game.guessesEasy[ri] = guess;
+		game.guessGroupIdsEasy[ri] = game.guessGroupIds[ri];
+		game.guessGroupsEasy[ri] = game.guessGroups[ri];
 	}
 
 	return (game.scores[ri] < 1);
@@ -259,37 +269,37 @@ export class GameState extends Storable {
 	#valid = false;
 	#mode: GameMode;
 
-	/** For each row, a map of comma separated eliminated answers keyed to groupId. */	
+	/** For each row, a map space separated eliminated answers keyed to groupId. */	
 	public groups: Array<Map<string, string>> = [];
 	/** nAnswers[rowIndex]. 
 	 * For each row, the number of remaining answers before the row's guess. */
 	public nAnswers = Array<number>(ROWS+1).fill(0);
 	public nAnswersHard = Array<number>(ROWS+1).fill(0);
-	public nAnswersSoft = Array<number>(ROWS+1).fill(0);
+	public nAnswersEasy = Array<number>(ROWS+1).fill(0);
 	/** rowScores[rowIndex]. 
 	 * Each row is given a score.
 	 * "Soft" parameters are used to store
 	 * the best score found so far. */
 	public scores = Array<number>(ROWS+1).fill(0);
 	public scoresHard = Array<number>(ROWS+1).fill(0);
-	public scoresSoft = Array<number>(ROWS+1).fill(100000);
+	public scoresEasy = Array<number>(ROWS+1).fill(100000);
 	/** guesses[rowIndex]. 
 	 * Array of each row's guess. 
 	 * guesses is an alias for board.words. */
 	public guesses = Array<string>(ROWS+1).fill("");
 	public guessesHard = Array<string>(ROWS+1).fill("");
-	public guessesSoft = Array<string>(ROWS+1).fill("");
+	public guessesEasy = Array<string>(ROWS+1).fill("");
 	/** guessGroupIds[rowIndex]. 
 	 * GroupId of the row's guess. */
 	public guessGroupIds = Array<string>(ROWS+1).fill("");
 	public guessGroupIdsHard = Array<string>(ROWS+1).fill("");
-	public guessGroupIdsSoft = Array<string>(ROWS+1).fill("");
+	public guessGroupIdsEasy = Array<string>(ROWS+1).fill("");
 	/** guessGroups[rowIndex]. 
 	 * For each row, a comma separated list of answers 
 	 * remaining after the guess. */
 	public guessGroups = Array<string>(ROWS+1).fill("");
 	public guessGroupsHard = Array<string>(ROWS+1).fill("");
-	public guessGroupsSoft = Array<string>(ROWS+1).fill("");
+	public guessGroupsEasy = Array<string>(ROWS+1).fill("");
 
 	constructor(mode: GameMode, data?: string) {
 		super();
@@ -339,12 +349,12 @@ export class GameState extends Storable {
 		let ri = this.nGuesses - 1;
 
 		// Search for the best posssible hard mode guess.
-		this.guessGroups[ri-1].split(",").some(aGuess => {processGroups(aGuess);});
-		this.nAnswersHard[ri] = this.nAnswersSoft[ri];
-		this.scoresHard[ri] = this.scoresSoft[ri];
-		this.guessesHard[ri] = this.guessesSoft[ri];
-		this.guessGroupIdsHard[ri] = this.guessGroupIdsSoft[ri];
-		this.guessGroupsHard[ri] = this.guessGroupsSoft[ri];
+		this.guessGroups[ri-1].split(" ").some(aGuess => {processGroups(aGuess);});
+		this.nAnswersHard[ri] = this.nAnswersEasy[ri];
+		this.scoresHard[ri] = this.scoresEasy[ri];
+		this.guessesHard[ri] = this.guessesEasy[ri];
+		this.guessGroupIdsHard[ri] = this.guessGroupIdsEasy[ri];
+		this.guessGroupsHard[ri] = this.guessGroupsEasy[ri];
 
 		// Search for the best possible soft mode guess.
 		if ((this.scoresHard[ri] !== 0) || (ri === 0)) {
@@ -384,7 +394,6 @@ export class GameState extends Storable {
 			if (guessGroupId[c] <= "Z") { guessColors[c] = "🟩"; }
 			else { guessColors[c] = "🟨"; }
 		}
-		// console.log(solution, this.latestWord, guessGroupId, guessColors.join(""));
 		return guessColors;
 	}
 

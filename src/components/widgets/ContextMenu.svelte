@@ -22,25 +22,24 @@
 		penalty points.
 		<br /><br />
 		{#if ri > 0}
-			Instead of "{word}", the bot in hard (soft) mode
-			chose "{game.guessesHard[ri]}" ("{game.guessesSoft[ri]}"),
-			leaving {countOfAinB(",", game.guessGroupsHard[ri]) + 1} 
-			({countOfAinB(",", game.guessGroupsSoft[ri]) + 1}) possible
-			answers and scoring {game.scoresHard[ri]} ({game.scoresSoft[ri]})
+			Instead of "{word}", the bot in hard (easy) mode
+			chose "{game.guessesHard[ri]}" ("{game.guessesEasy[ri]}"),
+			leaving {countOfAinB(" ", game.guessGroupsHard[ri]) + 1} 
+			({countOfAinB(" ", game.guessGroupsEasy[ri]) + 1}) possible
+			answers and scoring {game.scoresHard[ri]} ({game.scoresEasy[ri]})
 			penalty points.
 			<br /><br />
 		{/if}
 		{#if word != game.solution}
-			For the guess after "{word}", the bot in hard (soft) mode
-			chose "{game.guessesHard[ri+1]}" ("{game.guessesSoft[ri+1]}"),
-			leaving {countOfAinB(",", game.guessGroupsHard[ri+1]) + 1} 
-			({countOfAinB(",", game.guessGroupsSoft[ri+1]) + 1}) possible
-			answers and scoring {game.scoresHard[ri+1]} ({game.scoresSoft[ri+1]})
+			For the guess after "{word}", the bot in hard (easy) mode
+			chose "{game.guessesHard[ri+1]}" ("{game.guessesEasy[ri+1]}"),
+			leaving {countOfAinB(" ", game.guessGroupsHard[ri+1]) + 1} 
+			({countOfAinB(" ", game.guessGroupsEasy[ri+1]) + 1}) possible
+			answers and scoring {game.scoresHard[ri+1]} ({game.scoresEasy[ri+1]})
 			penalty points.
 			<br /><br />
 		{/if}
-		A "soft" guess earns 0.5 penalty points.
-		<!-- <br /> -->
+		An "easy" guess earns 0.5 penalty points.
 		For each guess but guess {ROWS}, each word 
 		in a group (except the group's first word) 
 		earns 1 penalty point.
