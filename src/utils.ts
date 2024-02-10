@@ -17,24 +17,6 @@ export const words = {
 	},
 };
 
-class BotAnswer {
-	/** A remaining answer. */	
-	answer: string = "";
-	/* Each remaining answer is given a groupId. */	
-	groupId: string = "";
-
-	constructor(answer?: string, groupId?: string) {
-		if (answer) this.answer = answer;
-		if (groupId) this.groupId = groupId;
-	}
-}
-
-function compareGroupId(a1:BotAnswer, a2:BotAnswer):number {
-	if (a1.groupId > a2.groupId) return 1;
-	if (a1.groupId < a2.groupId) return -1;
-	return 0;
-}
-
 export function countOfAinB(a: string, b: string): number {
 	return b.split(a).length -1;
 }
@@ -187,7 +169,7 @@ function processGroups(guess: string): boolean {
 
 	/** answers[answerIndex].
 	 * A list of remaining answers before the row's guess. */	
-	let answers: BotAnswer[] = [];
+	let answers: string[] = [];
 
 	/** ri is Row Index. */
 	let ri = game.nGuesses - 1;
@@ -196,42 +178,21 @@ function processGroups(guess: string): boolean {
 	const guessGroupId = calculateGroupId(game.solution, guess);
 	game.guessGroupIds[ri] = guessGroupId;
 
-	answers = [new BotAnswer];
-	if (ri === 0) {
-		for (let ai in words.answers) {
-			answers[ai] = new BotAnswer(words.answers[ai]);
-		}
-	} else { 
-		answers = [new BotAnswer];
-		game.guessGroups[ri-1].split(" ").map(a => {
-			answers.push(new BotAnswer(a));
-		});
-		answers.shift();
-	}
+	if (ri === 0) answers = words.answers;
+	else answers = game.guessGroups[ri-1].split(" ");
+	
 	game.nAnswers[ri]= answers.length;
 
-	// Calculate groupId for each ansswer.
-	answers.map(a => a.groupId = calculateGroupId(a.answer, guess));
-
-	// Sort the answer array by groupID.
-	answers.sort( (a1, a2) => compareGroupId(a1, a2) );
-
-	// Parse the sorted answers into groups.
-	let gid = answers[0].groupId;
-	let gList = "";
-	game.groups[ri] = new Map([[gid, gList]]);
-	let fromIndex = 0;
-	let lastIndex = answers.length - 1;
-	for (let ai = 1; ai <= lastIndex; ++ai) {
-		if (answers[ai].groupId != answers[ai - 1].groupId) {
-			gList = answers.map(a => a.answer).slice(fromIndex, ai).join(" ");
-			game.groups[ri].set(gid, gList);
-			fromIndex = ai;
-			gid = answers[ai].groupId;
-		}
+	// Create the groups map.
+	game.groups[ri] = new Map([[guessGroupId, undefined]]);
+	for (let a = 0; a < answers.length; a++) {
+		let gid = calculateGroupId(answers[a], guess);
+		let gList = game.groups[ri].get(gid);
+		if (gList === undefined) game.groups[ri].set(gid, answers[a]);
+		else game.groups[ri].set(gid, (gList + " " + answers[a]));
 	}
-	gList = answers.map(a => a.answer).slice(fromIndex).join(" ");
-	game.groups[ri].set(gid, gList);
+
+	// Find guessGroup and remove it from groups.
 	game.guessGroups[ri]  = game.groups[ri].get(game.guessGroupIds[ri]);
 	game.groups[ri].delete(game.guessGroupIds[ri]);
 
@@ -241,7 +202,7 @@ function processGroups(guess: string): boolean {
 	}
 
 	// Add 0.5 penalty points to rowScore if the guess is not a remaining answer.
-	if (answers.filter((tw) => countOfAinB(guess, tw.answer)).length === 0) {
+	if (answers.filter((tw) => countOfAinB(guess, tw)).length === 0) {
 		game.scores[ri] += 0.5;
 	};
 
@@ -340,6 +301,11 @@ export class GameState extends Storable {
 	}
 	
 	update() {
+
+		// Search for the best possible soft mode guess for the first guess only.
+		if (this.nGuesses === 1) {
+			words.answers.slice(0, botWords).some(aGuess => {processGroups(aGuess);});
+		}
 
 		// Process this guess.
 		processGroups(this.lastWord);

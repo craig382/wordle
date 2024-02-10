@@ -240,7 +240,8 @@
 			give up
 		</div>
 	{/if}
-	{#if !game.active}
+	<!-- {#if !game.active} -->
+	{#if (game.nGuesses > 0)}
 		<h3>Bot Results For Solution "{game.solution}"</h3>
 		<div class="row">
 			<section>
@@ -269,7 +270,11 @@
 				in group {game.guessGroupIds[0]}:<br />
 			</section>
 			<section>
-				<br />
+				{game.guessesEasy[0]}<br />
+				{pattern(game.guessGroupIdsEasy[0])}<br />
+				{game.scoresEasy[0]} points<br />
+				{countOfAinB(" ", game.guessGroupsEasy[0]) + 1} words left<br />
+				in group {game.guessGroupIdsEasy[0]}:<br />
 			</section>
 		</div>
 		{#each Array(game.nGuesses - 1) as _, ri}
