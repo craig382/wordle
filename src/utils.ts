@@ -218,6 +218,21 @@ function processGroups(guess: string): boolean {
 	return (game.scores[ri] < 1);
 }
 
+export function randomSample(anArray: Array<any>) {
+	let i: number = Math.random() * anArray.length;
+	let [rs] = anArray.splice(i, 1);
+	// console.log("randomSample", rs, anArray);
+	return rs;
+}
+
+function copyEasyToHard(ri: number) {
+	game.nAnswersHard[ri] = game.nAnswersEasy[ri];
+	game.scoresHard[ri] = game.scoresEasy[ri];
+	game.guessesHard[ri] = game.guessesEasy[ri];
+	game.guessGroupIdsHard[ri] = game.guessGroupIdsEasy[ri];
+	game.guessGroupsHard[ri] = game.guessGroupsEasy[ri];
+}
+
 export class GameState extends Storable {
 	public active: boolean;
 	public nGuesses: number;
@@ -226,20 +241,27 @@ export class GameState extends Storable {
 	public solutionNumber: number;
 	public solution: string;
 	public board: GameBoard;
+	/** Space separated list of top 12 New York Times 
+	 * WordleBot openers (each with 97+ NYT WordleBot score). */
+	public openers = "trace crane slate crate plate saint least stare stale snare plane place";
+	// Bot scores: trace 2165, crane 2173, slate 2168, crate 2167, plate 2184,
+	// saint 2186, least 2175, stare 2182, stale 2173, snare 2183, plane 2183, place 2187
 
 	#valid = false;
 	#mode: GameMode;
 
-	/** For each row, a map space separated eliminated answers keyed to groupId. */	
+	/** For each row, a map of 
+	 * space separated eliminated answers keyed to groupId. */	
 	public groups: Array<Map<string, string>> = [];
 	/** nAnswers[rowIndex]. 
-	 * For each row, the number of remaining answers before the row's guess. */
+	 * For each row, the number of remaining 
+	 * answers before the row's guess. */
 	public nAnswers = Array<number>(ROWS+1).fill(0);
 	public nAnswersHard = Array<number>(ROWS+1).fill(0);
 	public nAnswersEasy = Array<number>(ROWS+1).fill(0);
 	/** rowScores[rowIndex]. 
 	 * Each row is given a score.
-	 * "Soft" parameters are used to store
+	 * "Easy" parameters are used to store
 	 * the best score found so far. */
 	public scores = Array<number>(ROWS+1).fill(0);
 	public scoresHard = Array<number>(ROWS+1).fill(0);
@@ -256,8 +278,8 @@ export class GameState extends Storable {
 	public guessGroupIdsHard = Array<string>(ROWS+1).fill("");
 	public guessGroupIdsEasy = Array<string>(ROWS+1).fill("");
 	/** guessGroups[rowIndex]. 
-	 * For each row, a comma separated list of answers 
-	 * remaining after the guess. */
+	 * For each row, a space separated list of 
+	 * answers remaining after the guess. */
 	public guessGroups = Array<string>(ROWS+1).fill("");
 	public guessGroupsHard = Array<string>(ROWS+1).fill("");
 	public guessGroupsEasy = Array<string>(ROWS+1).fill("");
@@ -299,12 +321,16 @@ export class GameState extends Storable {
 	get lastWord() {
 		return this.board.words[this.nGuesses - 1];
 	}
-	
+
 	update() {
 
-		// Search for the best possible soft mode guess for the first guess only.
+		// Randomly pick a hard and easy mode opener for the first guess.
+		// Search for the best possible easy mode guess for the first guess only.
 		if (this.nGuesses === 1) {
-			words.answers.slice(0, botWords).some(aGuess => {processGroups(aGuess);});
+			let openersArray = this.openers.split(" ");
+			processGroups(randomSample(openersArray)); // hard mode opener
+			copyEasyToHard(0);
+			processGroups(randomSample(openersArray)); // easy mode opener
 		}
 
 		// Process this guess.
@@ -316,13 +342,9 @@ export class GameState extends Storable {
 
 		// Search for the best posssible hard mode guess.
 		this.guessGroups[ri-1].split(" ").some(aGuess => {processGroups(aGuess);});
-		this.nAnswersHard[ri] = this.nAnswersEasy[ri];
-		this.scoresHard[ri] = this.scoresEasy[ri];
-		this.guessesHard[ri] = this.guessesEasy[ri];
-		this.guessGroupIdsHard[ri] = this.guessGroupIdsEasy[ri];
-		this.guessGroupsHard[ri] = this.guessGroupsEasy[ri];
+		copyEasyToHard(ri);
 
-		// Search for the best possible soft mode guess.
+		// Search for the best possible easy mode guess.
 		if ((this.scoresHard[ri] !== 0) || (ri === 0)) {
 			words.answers.slice(0, botWords).some(aGuess => {processGroups(aGuess);});
 		}

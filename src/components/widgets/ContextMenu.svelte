@@ -21,15 +21,13 @@
 		possible answers and scored {game.scores[ri]} 
 		penalty points.
 		<br /><br />
-		{#if ri > 0}
-			Instead of "{word}", the bot in hard (easy) mode
-			chose "{game.guessesHard[ri]}" ("{game.guessesEasy[ri]}"),
-			leaving {countOfAinB(" ", game.guessGroupsHard[ri]) + 1} 
-			({countOfAinB(" ", game.guessGroupsEasy[ri]) + 1}) possible
-			answers and scoring {game.scoresHard[ri]} ({game.scoresEasy[ri]})
-			penalty points.
-			<br /><br />
-		{/if}
+		Instead of "{word}", the bot in hard (easy) mode
+		chose "{game.guessesHard[ri]}" ("{game.guessesEasy[ri]}"),
+		leaving {countOfAinB(" ", game.guessGroupsHard[ri]) + 1} 
+		({countOfAinB(" ", game.guessGroupsEasy[ri]) + 1}) possible
+		answers and scoring {game.scoresHard[ri]} ({game.scoresEasy[ri]})
+		penalty points.
+		<br /><br />
 		{#if word != game.solution}
 			For the guess after "{word}", the bot in hard (easy) mode
 			chose "{game.guessesHard[ri+1]}" ("{game.guessesEasy[ri+1]}"),

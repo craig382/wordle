@@ -240,9 +240,12 @@
 			give up
 		</div>
 	{/if}
-	<!-- {#if !game.active} -->
 	{#if (game.nGuesses > 0)}
 		<h3>Bot Results For Solution "{game.solution}"</h3>
+		<div class="row">
+			Top New York Times WordleBot openers (each 
+			with 97+ NYT WordleBot score): {game.openers}.
+		</div>
 		<div class="row">
 			<section>
 				BOT<br />
@@ -258,52 +261,37 @@
 				MODE<br />
 			</section>
 		</div>
-		<div class="row">
-			<section>
-				<br />
-			</section>
-			<section>
-				{game.guesses[0]}<br />
-				{pattern(game.guessGroupIds[0])}<br />
-				{game.scores[0]} points<br />
-				{game.nAnswers[1]} words left<br />
-				in group {game.guessGroupIds[0]}:<br />
-			</section>
-			<section>
-				{game.guessesEasy[0]}<br />
-				{pattern(game.guessGroupIdsEasy[0])}<br />
-				{game.scoresEasy[0]} points<br />
-				{countOfAinB(" ", game.guessGroupsEasy[0]) + 1} words left<br />
-				in group {game.guessGroupIdsEasy[0]}:<br />
-			</section>
-		</div>
-		{#each Array(game.nGuesses - 1) as _, ri}
-			<div class="row">
-				<section>
-					{game.guessesHard[ri+1]}<br />
-					{pattern(game.guessGroupIdsHard[ri+1])}<br />
-					{game.scoresHard[ri+1]} points<br />
-					{countOfAinB(" ", game.guessGroupsHard[ri+1]) + 1} words left<br />
-					in group {game.guessGroupIdsHard[ri+1]}:<br />
-					{game.guessGroupsHard[ri+1]}<br />
-				</section>
-				<section>
-					{game.guesses[ri+1]}<br />
-					{pattern(game.guessGroupIds[ri+1])}<br />
-					{game.scores[ri+1]} points<br />
-					{game.nAnswers[ri+2]} words left<br />
-					in group {game.guessGroupIds[ri+1]}:<br />
-					{game.guessGroups[ri+1]}<br />
-				</section>
-				<section>
-					{game.guessesEasy[ri+1]}<br />
-					{pattern(game.guessGroupIdsEasy[ri+1])}<br />
-					{game.scoresEasy[ri+1]} points<br />
-					{countOfAinB(" ", game.guessGroupsEasy[ri+1]) + 1} words left<br />
-					in group {game.guessGroupIdsEasy[ri+1]}:<br />
-					{game.guessGroupsEasy[ri+1]}<br />
-				</section>
-			</div>
+		{#each Array(game.nGuesses + 1) as _, ri}
+			{#if game.active || ri < game.nGuesses}
+				<div class="row">
+					<section>
+						{game.guessesHard[ri]}<br />
+						{pattern(game.guessGroupIdsHard[ri])}<br />
+						{game.scoresHard[ri]} points<br />
+						{countOfAinB(" ", game.guessGroupsHard[ri]) + 1} words left<br />
+						in group {game.guessGroupIdsHard[ri]}:<br />
+						{game.guessGroupsHard[ri]}<br />
+					</section>
+					<section>
+						{#if (ri < game.nGuesses)}
+							{game.guesses[ri]}<br />
+							{pattern(game.guessGroupIds[ri])}<br />
+							{game.scores[ri]} points<br />
+							{game.nAnswers[ri+1]} words left<br />
+							in group {game.guessGroupIds[ri]}:<br />
+							{game.guessGroups[ri]}<br />
+						{/if}
+					</section>
+					<section>
+						{game.guessesEasy[ri]}<br />
+						{pattern(game.guessGroupIdsEasy[ri])}<br />
+						{game.scoresEasy[ri]} points<br />
+						{countOfAinB(" ", game.guessGroupsEasy[ri]) + 1} words left<br />
+						in group {game.guessGroupIdsEasy[ri]}:<br />
+						{game.guessGroupsEasy[ri]}<br />
+					</section>
+				</div>
+			{/if}
 		{/each}
 		<div class="row">
 			An "easy" guess earns 0.5 penalty points.

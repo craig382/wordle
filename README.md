@@ -24,6 +24,10 @@
 - The following message will briefly pop up: "localStorage cleared".
 - All your stats will be erased, and you will be able to play any game number that you have already played from the beginning, with new guesses.
 
+### AI Mode
+- AI Mode is a new mode. The other modes are Daily, Hourly, and Infinite. In AI Mode, the Bot makes the "Human's" choices.
+-
+
 ### Craig's Research and Modifications
 - Board.svelte\context calls utils.ts\getRowData to filter utils.ts\words.words to pAnsWords list of remaining solutions.
 - utils.ts\getRowData has a "duplicate letters bug" that returns false remaining solution(s) for the case where the tiles have revealed duplicate letters. This is the same bug as Mikha Davids' Wordle repository Issue #69 titled "Potential answer / guess count displayed 0 for 'Dolly' ".
