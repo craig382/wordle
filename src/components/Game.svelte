@@ -23,6 +23,7 @@
 		contractNum,
 		countOfAinB,
 		pattern,
+		randomSample,
 		DELAY_INCREMENT,
 		PRAISE,
 		modeData,
@@ -36,6 +37,7 @@
 		Stats,
 	} from "../utils";
 	import { letterStates, settings, mode } from "../stores";
+    import { GameMode } from "../enums";
 
 	export let solution: string;
 	export let stats: Stats;
@@ -146,6 +148,21 @@
 		showStats = false;
 		showRefresh = false;
 		timer.reset($mode);
+		if ($mode === GameMode.ai) {
+			// console.log("Wordle reloaded in AI mode.");
+			// console.log($settings);
+			let openersArray = game.openers.split(" ");
+			game.board.words[game.nGuesses] = randomSample(openersArray);
+			do {
+				processValidGuess();
+				if (!game.active) break;
+				if ($settings.hard[$mode]) {
+					game.board.words[game.nGuesses] = game.guessesHard[game.nGuesses];
+				} else {
+					game.board.words[game.nGuesses] = game.guessesEasy[game.nGuesses];
+				}
+			} while (true);
+		}
 	}
 
 	function setShowStatsTrue() {

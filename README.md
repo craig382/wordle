@@ -26,7 +26,8 @@
 
 ### AI Mode
 - AI Mode is a new mode. The other modes are Daily, Hourly, and Infinite. In AI Mode, the Bot makes the "Human's" choices.
--
+- To enter AI mode, click on "WORDLE+" in the header to switch modes until the temporary mode pop up displays "AI".
+- Once in AI mode, each time you click on the "Refresh" icon in the upper left corner, the Bot will play one randomly selected Wordle game. 
 
 ### Craig's Research and Modifications
 - Board.svelte\context calls utils.ts\getRowData to filter utils.ts\words.words to pAnsWords list of remaining solutions.
