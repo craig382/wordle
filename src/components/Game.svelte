@@ -241,7 +241,7 @@
 		</div>
 	{/if}
 	{#if (game.nGuesses > 0)}
-		<h3>Bot Results{#if game.active} For Solution "{game.solution}"{/if}</h3>
+		<h3>Bot Results{#if !game.active} For Solution "{game.solution}"{/if}</h3>
 		<div class="row">
 			Top New York Times WordleBot openers (each 
 			with 97+ NYT WordleBot score): {game.openers}.
