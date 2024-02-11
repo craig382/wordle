@@ -116,7 +116,6 @@ export const modeData: ModeData = {
 			seed: newSeed(GameMode.infinite),
 			historical: false,
 			icon: "m7,200v-200l93,100l93,-100v200",
-			// icon: "m7,100c0,-50 68,-50 93,0c25,50 93,50 93,0c0,-50 -68,-50 -93,0c-25,50 -93,50 -93,0z",
 			streak: true,
 		},
 		// {
