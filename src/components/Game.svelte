@@ -268,63 +268,84 @@
 		</div>
 	{/if}
 	{#if (game.nGuesses > 0)}
-		<h3>Bot Results{#if !game.active} For Solution "{game.solution}"{/if}</h3>
+		<br /><h3>Bot Results {#if !game.active}For Solution "{game.solution}"{/if}</h3>
+		<div class="row">
+			The Wordle dictionary has {words.answers.length} possible 
+			solutions and {words.otherGuesses.length} additional other
+			words you may use as guesses. All words counted and listed
+			below are from the possible solutions dictionary.
+		</div>
 		<div class="row">
 			Top New York Times WordleBot openers (each 
 			with 97+ NYT WordleBot score): {game.openers}.
 		</div>
-		<div class="row">
-			<section>
-				BOT<br />
-				HARD<br />
-				MODE<br />
-			</section>
-			<section>
-				<br />HUMAN<br />
-			</section>
-			<section>
-				BOT<br />
-				EASY<br />
-				MODE<br />
-			</section>
-		</div>
 		{#each Array(game.nGuesses + 1) as _, ri}
 			{#if game.active || ri < game.nGuesses}
+				{@const nLeftHard = countOfAinB(" ", game.guessGroupsHard[ri]) + 1}
+				{@const nLeft = countOfAinB(" ", game.guessGroups[ri]) + 1}
+				{@const nLeftEasy = countOfAinB(" ", game.guessGroupsEasy[ri]) + 1}
+				<h1>Guess # {(ri + 1)}</h1>
 				<div class="row">
-					<section>
-						{game.guessesHard[ri]}<br />
-						{pattern(game.guessGroupIdsHard[ri])}<br />
-						{game.scoresHard[ri]} points<br />
-						{countOfAinB(" ", game.guessGroupsHard[ri]) + 1} words left<br />
-						in group {game.guessGroupIdsHard[ri]}:<br />
-						{game.guessGroupsHard[ri]}<br />
-					</section>
-					<section>
-						{#if (ri < game.nGuesses)}
-							{game.guesses[ri]}<br />
-							{pattern(game.guessGroupIds[ri])}<br />
-							{game.scores[ri]} points<br />
-							{game.nAnswers[ri+1]} words left<br />
-							in group {game.guessGroupIds[ri]}:<br />
-							{game.guessGroups[ri]}<br />
-						{/if}
-					</section>
-					<section>
-						{game.guessesEasy[ri]}<br />
-						{pattern(game.guessGroupIdsEasy[ri])}<br />
-						{game.scoresEasy[ri]} points<br />
-						{countOfAinB(" ", game.guessGroupsEasy[ri]) + 1} words left<br />
-						in group {game.guessGroupIdsEasy[ri]}:<br />
-						{game.guessGroupsEasy[ri]}<br />
-					</section>
+						<section>
+							Bot Hard Mode<br /><br />
+							{game.guessesHard[ri].toUpperCase()}<br />
+							{pattern(game.guessGroupIdsHard[ri])}<br />
+							{game.scoresHard[ri]} points<br /><br />
+							Eliminated {game.nAnswers[ri] - nLeftHard} words<br />
+							in {game.groupsHard[ri].size} groups:
+							{#if ri > 0}
+								<br />{Array.from(game.groupsHard[ri].values()).sort((a, b) => a.length - b.length).join(", ")}
+							{/if}
+							<br /><br />{nLeftHard} words left:
+							{#if ri > 0}
+								<br />{game.guessGroupsHard[ri]}
+							{/if}
+						</section>
+						<section>
+							{#if ri < game.nGuesses}
+								Human<br /><br />
+								{game.guesses[ri].toUpperCase()}<br />
+								{pattern(game.guessGroupIds[ri])}<br />
+								{game.scores[ri]} points<br /><br />
+								Eliminated {game.nAnswers[ri] - nLeft} words<br />
+								in {game.groups[ri].size} groups:
+								{#if ri > 0}
+									<br />{Array.from(game.groups[ri].values()).sort((a, b) => a.length - b.length).join(", ")}
+								{/if}
+								<br /><br />{nLeft}  words left:
+								{#if ri > 0}
+									<br />{game.guessGroups[ri]}
+								{/if}
+							{/if}
+						</section>
+						<section>
+							Bot Easy Mode<br /><br />
+							{game.guessesEasy[ri].toUpperCase()}<br />
+							{pattern(game.guessGroupIdsEasy[ri])}<br />
+							{game.scoresEasy[ri]} points<br /><br />
+							Eliminated {game.nAnswers[ri] - nLeftEasy} words<br />
+							in {game.groupsEasy[ri].size} groups:
+							{#if ri > 0}
+								<br />{Array.from(game.groupsEasy[ri].values()).sort((a, b) => a.length - b.length).join(", ")}
+							{/if}
+							<br /><br />{nLeftEasy} words left:
+							{#if ri > 0}
+							<br />{game.guessGroupsEasy[ri]}
+							{/if}
+						</section>
 				</div>
 			{/if}
 		{/each}
 		<div class="row">
-			An "easy" guess earns 0.5 penalty points.
-			For each guess but guess {ROWS}, each word 
-			in a group (except the group's first word) 
-			earns 1 penalty point.
+			Like golf, a lower score is better.<br />
+			Zero is the perfect score.<br />
+			For some moves, a score of zero is not possible.<br /><br />
+			Score (penalty point) formula...<br /><br />
+			For guess 6, start with Score = 0.<br />
+			For guesses 1 to 5, start with the Score in the formula below.<br /><br />
+			Score = nWordsLeftBeforeThisGuess - nGroupsEliminatedByThisGuess - 1.<br /><br />
+			Score = Score + 0.5 if guess was "easy" (guess was not one of 
+			the words left before this guess).
 		</div>
 	{/if}
 </Modal>

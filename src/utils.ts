@@ -172,9 +172,9 @@ export function pattern(groupId: string): string {
 }
 
 /** 
- * ProcessGroups[guess, gameOut].
+ * ProcessGroups(guess).
  * Creates and scores groups assuming guess 
- * is the latest guess. Outputs to gameOut.
+ * is the latest guess.
  * Returns true for a score < 1.
  */
 function processGroups(guess: string): boolean {
@@ -219,13 +219,7 @@ function processGroups(guess: string): boolean {
 	};
 
 	// If this score is the best found so far, save it.
-	if (game.scores[ri] < game.scoresEasy[ri]) {
-		game.nAnswersEasy[ri] = game.nAnswers[ri];
-		game.scoresEasy[ri] = game.scores[ri];
-		game.guessesEasy[ri] = guess;
-		game.guessGroupIdsEasy[ri] = game.guessGroupIds[ri];
-		game.guessGroupsEasy[ri] = game.guessGroups[ri];
-	}
+	if (game.scores[ri] < game.scoresEasy[ri]) copyHumanToEasy(ri, guess);
 
 	return (game.scores[ri] < 1);
 }
@@ -237,12 +231,20 @@ export function randomSample(anArray: Array<any>) {
 	return rs;
 }
 
+function copyHumanToEasy(ri: number, guess: string) {
+	game.scoresEasy[ri] = game.scores[ri];
+	game.guessesEasy[ri] = guess;
+	game.guessGroupIdsEasy[ri] = game.guessGroupIds[ri];
+	game.guessGroupsEasy[ri] = game.guessGroups[ri];
+	game.groupsEasy[ri] = game.groups[ri];
+}
+
 function copyEasyToHard(ri: number) {
-	game.nAnswersHard[ri] = game.nAnswersEasy[ri];
 	game.scoresHard[ri] = game.scoresEasy[ri];
 	game.guessesHard[ri] = game.guessesEasy[ri];
 	game.guessGroupIdsHard[ri] = game.guessGroupIdsEasy[ri];
 	game.guessGroupsHard[ri] = game.guessGroupsEasy[ri];
+	game.groupsHard[ri] = game.groupsEasy[ri];
 }
 
 export class GameState extends Storable {
@@ -265,12 +267,12 @@ export class GameState extends Storable {
 	/** For each row, a map of 
 	 * space separated eliminated answers keyed to groupId. */	
 	public groups: Array<Map<string, string>> = [];
+	public groupsHard: Array<Map<string, string>> = [];
+	public groupsEasy: Array<Map<string, string>> = [];
 	/** nAnswers[rowIndex]. 
 	 * For each row, the number of remaining 
 	 * answers before the row's guess. */
 	public nAnswers = Array<number>(ROWS+1).fill(0);
-	public nAnswersHard = Array<number>(ROWS+1).fill(0);
-	public nAnswersEasy = Array<number>(ROWS+1).fill(0);
 	/** rowScores[rowIndex]. 
 	 * Each row is given a score.
 	 * "Easy" parameters are used to store
@@ -340,9 +342,12 @@ export class GameState extends Storable {
 		// Search for the best possible easy mode guess for the first guess only.
 		if (this.nGuesses === 1) {
 			let openersArray = this.openers.split(" ");
+			let guess = "";
 			processGroups(randomSample(openersArray)); // hard mode opener
+			// copyHumanToEasy(0);
 			copyEasyToHard(0);
-			processGroups(randomSample(openersArray)); // easy mode opener
+			processGroups(guess = randomSample(openersArray)); // easy mode opener
+			copyHumanToEasy(0, guess);
 		}
 
 		// Process this guess.
