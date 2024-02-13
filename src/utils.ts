@@ -457,6 +457,7 @@ export class GameState extends Storable {
 
 		this.#valid = true;
 	}
+
 }
 
 export class Settings extends Storable {
