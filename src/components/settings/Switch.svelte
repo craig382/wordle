@@ -1,10 +1,11 @@
 <script lang="ts">
 	export let value: boolean;
+	export let options: (string | number)[] = [];
 	export let disabled = false;
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div on:click={(e) => !disabled && (value = !value)} class:checked={value} {disabled} />
+<div on:click={(e) => !disabled && (value = !value)} class:checked={value} {options} {disabled} />
 
 <style lang="scss">
 	div[disabled="true"] {

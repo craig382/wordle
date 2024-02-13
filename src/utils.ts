@@ -18,54 +18,37 @@ export const words = {
 };
 
 export function countOfAinB(a: string, b: string): number {
-	return b.split(a).length -1;
+	return b.split(a).length - 1;
 }
 
-function calculateGroupIdOld(key: string, test: string): string {
-	let keyChar = key.split("");
-	let testChar = test.split("");
-	let groupChar = Array<string>(COLS).fill("-");
-	let ti: number;
-	for (let i in testChar) {
-		if (testChar[i] === keyChar[i]) {
-			groupChar[i] = testChar[i].toUpperCase();
-			testChar[i] = "$";
-			keyChar[i] = "#";
-		}
-	}
-	for (let i in testChar) {
-		ti = keyChar.indexOf(testChar[i]);
-		if (ti >= 0) {
-			groupChar[i] = testChar[i];
-			testChar[i] = "+";
-			keyChar[ti] = "+";
-		}
-	}
-	let groupId = groupChar.join("");
-	return groupId;
-}
-
-function calculateGroupId(key: string[], test: string[]): string {
+/** Returns groupId string with # = green, $ = yellow, and - = blank. */
+function calculateGroupId(key: string, test: string[]): string {
 	let yi: number;
-	let yKey = key; // array of possible yellow key letters
-	let yTest: Array<[number, string]> = []; // array of possible yellow test leters
-	for (let i = 0; i < COLS; i++) {
+	/** Array of possible yellow test leters. */
+	let yKey: Array<string> = [...key]; 
+	/** Array of possible yellow test leters. */
+	let yTest: Array<[number, string]> = []; 
+	let groupId = Array<string>(COLS).fill("-");
+
+	// Loop through the test and key words backwards
+	// so that, even as letters are removed from
+	// the yKey array, yKey[i] is still equal to key[i]
+	// (for the letters still to be tested).
+	for (let i = COLS - 1; i >= 0; i--) {
 		if (test[i] === key[i]) {
-			test[i] = "#"; // set test[i] = green letter
+			groupId[i] = "#"; // set groupId[i] = green letter
 			yKey.splice(i, 1); // remove letter i from the yKey array
-		} else {
-			yTest.push([i, test[i]]);
-			test[i] = "-"; // set test[i] = blank letter
-		}
+		} else yTest.push([i, test[i]]);
 	}
+
 	for (let i = 0; i < yTest.length; i++) {
 		yi = yKey.indexOf(yTest[i][1]);
-		if (yi) {
-			test[yTest[i][0]] = "$"; // set found char in test to yellow
+		if (yi >= 0) {
+			groupId[yTest[i][0]] = "$"; // set found char in groupId to yellow
 			yKey.splice(yi, 1); // remove letter yi from the yKey array
 		}
 	}
-	return test.join("");
+	return groupId.join("");
 }
 
 export function contractNum(n: number) {
@@ -80,7 +63,8 @@ export function contractNum(n: number) {
 export const keys = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
 
 /**
- * Return a deterministic number based on the given mode and current or given time.
+ * Return a deterministic number based on the given 
+ * mode and current or given time.
  * @param mode - The mode
  * @param time - The time. If omitted current time is used
  */
@@ -153,10 +137,13 @@ export const modeData: ModeData = {
 	]
 };
 /**
- * Return the word number for the given mode at the time that that mode's seed was set.
+ * Return the word number for the given mode at the 
+ * time that that mode's seed was set.
  * @param mode - The game mode
- * @param current - If true the word number will be for the current time rather than for the current
- * seed for the given mode. Useful if you want the current game number during a historical game.
+ * @param current - If true the word number will be for 
+ * the current time rather than for the current
+ * seed for the given mode. Useful if you want the current 
+ * game number during a historical game.
  */
 export function getWordNumber(mode: GameMode, current?: boolean) {
 	const seed = current ? newSeed(mode) : modeData.modes[mode].seed;
@@ -184,17 +171,6 @@ abstract class Storable {
 }
 
 /** pattern returns the color pattern of a groupId. */
-export function patternOld(groupId: string): string {
-	let p = "";
-	for (let i = 0; i < groupId.length; i++) {
-		if (groupId[i] === "-") p += "⬛";
-		else if (groupId[i] >= "a") p += "🟨";
-		else p += "🟩";
-	}
-	return p;
-}
-
-/** pattern returns the color pattern of a groupId. */
 export function pattern(groupId: string): string {
 	let p = "";
 	for (let i = 0; i < groupId.length; i++) {
@@ -210,7 +186,7 @@ export function pattern(groupId: string): string {
 
 /** 
  * ProcessGroups(guess).
- * Creates and scores groups assuming guess 
+ * Creates and scores groups assuming guessString 
  * is the latest guess.
  * Returns true for a score < 1.
  */
@@ -227,7 +203,7 @@ function processGroups(guessString: string): boolean {
 	let guess = guessString.split("");
 
 	// Initialize this.answer[ri] and this.otherGuess[ri].
-	const guessGroupId = calculateGroupId(game.solution.split(""), guess);
+	const guessGroupId = calculateGroupId(game.solution, guess);
 	game.guessGroupIds[ri] = guessGroupId;
 
 	if (ri === 0) answers = words.answers;
@@ -238,7 +214,7 @@ function processGroups(guessString: string): boolean {
 	// Create the groups map.
 	game.groups[ri] = new Map([[guessGroupId, undefined]]);
 	for (let a = 0; a < answers.length; a++) {
-		let gid = calculateGroupId(answers[a].split(""), guess);
+		let gid = calculateGroupId(answers[a], guess);
 		let gList = game.groups[ri].get(gid);
 		if (gList === undefined) game.groups[ri].set(gid, answers[a]);
 		else game.groups[ri].set(gid, (gList + " " + answers[a]));
@@ -414,18 +390,21 @@ export class GameState extends Storable {
 	}
 
 	/**
-	* Returns an object containing the position of the character in the latest word that violates
-	* hard mode, and what type of violation it is, if there is a violation.
+	* Returns an object containing the position of the 
+	* character in the latest word that violates
+	* hard mode, and what type of violation it is, 
+	* if there is a violation.
 	*/
 	checkHardMode(): HardModeData {
+		let ri = this.nGuesses - 1;
 		for (let i = 0; i < COLS; ++i) {
-			if (this.board.state[this.nGuesses - 1][i] === "🟩" && this.board.words[this.nGuesses - 1][i] !== this.board.words[this.nGuesses][i]) {
-				return { pos: i, char: this.board.words[this.nGuesses - 1][i], type: "🟩" };
+			if (this.board.state[ri][i] === "🟩" && this.board.words[ri][i] !== this.board.words[this.nGuesses][i]) {
+				return { pos: i, char: this.board.words[ri][i], type: "🟩" }; // green tile
 			}
 		}
 		for (let i = 0; i < COLS; ++i) {
-			if (this.board.state[this.nGuesses - 1][i] === "🟨" && !this.board.words[this.nGuesses].includes(this.board.words[this.nGuesses - 1][i])) {
-				return { pos: i, char: this.board.words[this.nGuesses - 1][i], type: "🟨" };
+			if (this.board.state[ri][i] === "🟨" && !this.board.words[this.nGuesses].includes(this.board.words[ri][i])) {
+				return { pos: i, char: this.board.words[ri][i], type: "🟨" }; // yellow tile
 			}
 		}
 		return { pos: -1, char: "", type: "⬛" };
@@ -433,13 +412,14 @@ export class GameState extends Storable {
 
 	guess(solution: string) {
 		const guessColors = Array<LetterState>(COLS).fill("⬛");
-		const guessGroupId = calculateGroupId(solution.split(""), this.latestWord.split(""));
+		const guessGroupId = calculateGroupId(solution, this.latestWord.split(""));
 		for (let c =0; c < COLS; c++) {
-		switch (guessGroupId[c]) {
-			case "-": guessColors[c] = "⬛"; break; // blank tile
-			case "$": guessColors[c] = "🟨"; break; // yellow tile
-			case "#": guessColors[c] = "🟩"; break; // green tile
-			default: console.log("ERROR in function guess()"); break;
+			switch (guessGroupId[c]) {
+				// case "-": guessColors[c] = "⬛"; break; // blank tile
+				case "$": guessColors[c] = "🟨"; break; // yellow tile
+				case "#": guessColors[c] = "🟩"; break; // green tile
+				// default: console.log("ERROR in function guess()"); break;
+			}
 		}
 		return guessColors;
 	}
