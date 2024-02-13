@@ -184,7 +184,7 @@
 
 	onMount(() => {
 		if (!game.active) setTimeout(setShowStatsTrue, delay);
-		// console.log("onMount");
+		// console.log("Wordle restarted");
 	});
 	// $: toaster.pop(word);
 </script>
@@ -202,6 +202,13 @@
 		on:settings={() => (showSettings = true)}
 		on:reload={reload}
 	/>
+	{#if $mode === GameMode.ai}
+		<p>
+			In AI Mode. The Bot will play one randomly selected 
+			Wordle game each time the "Refresh" icon
+			in the upper left corner is clicked.
+		</p>
+	{/if}
 	<Board
 		bind:this={board}
 		bind:value={game.board.words}

@@ -7,7 +7,7 @@ export const COLS: number = 5;
 /** botWords is the max number of words the
  * bot will search for the best possible guess.
  */
-const botWords = 300;
+const botWords = 500;
 export let game: GameState;
 
 export const words = {
@@ -44,6 +44,31 @@ function calculateGroupId(key: string, test: string): string {
 	let groupId = groupChar.join("");
 	return groupId;
 }
+
+function calculateGroupIdNew(key: string[], test: string[]): string {
+	let keyChar = key.split("");
+	let testChar = test.split("");
+	let groupChar = Array<string>(COLS).fill("-");
+	let wi: number;
+	let wrongPlaceLetters: string[] = [];
+	for (let i = 0; i < COLS; i++) {
+		if (test[i] === key[i]) test[i] = test[i].toUpperCase();
+		else wrongPlaceLetters.push(test[i]);
+	}
+	for (let i = 0; i < COLS; i++) {
+		wi = wrongPlaceLetters.indexOf(test[i]);
+		if (wi >= 0) 
+		{
+			groupChar[i] = testChar[i];
+			test[i] = "+";
+			keyChar[ti] = "+";
+		} 
+		else test[i] = "-";
+	}
+	let groupId = test.join("");
+	return groupId;
+}
+
 
 export function contractNum(n: number) {
 	switch (n % 10) {
@@ -115,7 +140,7 @@ export const modeData: ModeData = {
 			start: 1642428600000,	// 17/01/2022 4:10:00pm UTC+2
 			seed: newSeed(GameMode.infinite),
 			historical: false,
-			icon: "m7,200v-200l93,100l93,-100v200",
+			// icon: "m7,200v-200l93,100l93,-100v200",
 			streak: true,
 		},
 		// {
