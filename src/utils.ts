@@ -21,7 +21,7 @@ export function countOfAinB(a: string, b: string): number {
 	return b.split(a).length -1;
 }
 
-function calculateGroupId(key: string, test: string): string {
+function calculateGroupIdOld(key: string, test: string): string {
 	let keyChar = key.split("");
 	let testChar = test.split("");
 	let groupChar = Array<string>(COLS).fill("-");
@@ -45,30 +45,28 @@ function calculateGroupId(key: string, test: string): string {
 	return groupId;
 }
 
-function calculateGroupIdNew(key: string[], test: string[]): string {
-	let keyChar = key.split("");
-	let testChar = test.split("");
-	let groupChar = Array<string>(COLS).fill("-");
-	let wi: number;
-	let wrongPlaceLetters: string[] = [];
+function calculateGroupId(key: string[], test: string[]): string {
+	let yi: number;
+	let yKey = key; // array of possible yellow key letters
+	let yTest: Array<[number, string]> = []; // array of possible yellow test leters
 	for (let i = 0; i < COLS; i++) {
-		if (test[i] === key[i]) test[i] = test[i].toUpperCase();
-		else wrongPlaceLetters.push(test[i]);
+		if (test[i] === key[i]) {
+			test[i] = "#"; // set test[i] = green letter
+			yKey.splice(i, 1); // remove letter i from the yKey array
+		} else {
+			yTest.push([i, test[i]]);
+			test[i] = "-"; // set test[i] = blank letter
+		}
 	}
-	for (let i = 0; i < COLS; i++) {
-		wi = wrongPlaceLetters.indexOf(test[i]);
-		if (wi >= 0) 
-		{
-			groupChar[i] = testChar[i];
-			test[i] = "+";
-			keyChar[ti] = "+";
-		} 
-		else test[i] = "-";
+	for (let i = 0; i < yTest.length; i++) {
+		yi = yKey.indexOf(yTest[i][1]);
+		if (yi) {
+			test[yTest[i][0]] = "$"; // set found char in test to yellow
+			yKey.splice(yi, 1); // remove letter yi from the yKey array
+		}
 	}
-	let groupId = test.join("");
-	return groupId;
+	return test.join("");
 }
-
 
 export function contractNum(n: number) {
 	switch (n % 10) {
@@ -186,12 +184,26 @@ abstract class Storable {
 }
 
 /** pattern returns the color pattern of a groupId. */
-export function pattern(groupId: string): string {
+export function patternOld(groupId: string): string {
 	let p = "";
 	for (let i = 0; i < groupId.length; i++) {
 		if (groupId[i] === "-") p += "⬛";
 		else if (groupId[i] >= "a") p += "🟨";
 		else p += "🟩";
+	}
+	return p;
+}
+
+/** pattern returns the color pattern of a groupId. */
+export function pattern(groupId: string): string {
+	let p = "";
+	for (let i = 0; i < groupId.length; i++) {
+		switch (groupId[i]) {
+			case "-": p += "⬛"; break; // blank tile
+			case "$": p += "🟨"; break; // yellow tile
+			case "#": p += "🟩"; break; // green tile
+			default: console.log("ERROR in function pattern()"); break;
+		}
 	}
 	return p;
 }
@@ -202,7 +214,7 @@ export function pattern(groupId: string): string {
  * is the latest guess.
  * Returns true for a score < 1.
  */
-function processGroups(guess: string): boolean {
+function processGroups(guessString: string): boolean {
 
 	/** answers[answerIndex].
 	 * A list of remaining answers before the row's guess. */	
@@ -211,8 +223,11 @@ function processGroups(guess: string): boolean {
 	/** ri is Row Index. */
 	let ri = game.nGuesses - 1;
 
+	/** guess is the guessString as an array of letters. */
+	let guess = guessString.split("");
+
 	// Initialize this.answer[ri] and this.otherGuess[ri].
-	const guessGroupId = calculateGroupId(game.solution, guess);
+	const guessGroupId = calculateGroupId(game.solution.split(""), guess);
 	game.guessGroupIds[ri] = guessGroupId;
 
 	if (ri === 0) answers = words.answers;
@@ -223,7 +238,7 @@ function processGroups(guess: string): boolean {
 	// Create the groups map.
 	game.groups[ri] = new Map([[guessGroupId, undefined]]);
 	for (let a = 0; a < answers.length; a++) {
-		let gid = calculateGroupId(answers[a], guess);
+		let gid = calculateGroupId(answers[a].split(""), guess);
 		let gList = game.groups[ri].get(gid);
 		if (gList === undefined) game.groups[ri].set(gid, answers[a]);
 		else game.groups[ri].set(gid, (gList + " " + answers[a]));
@@ -239,12 +254,12 @@ function processGroups(guess: string): boolean {
 	}
 
 	// Add 0.5 penalty points to rowScore if the guess is not a remaining answer.
-	if (answers.filter((tw) => countOfAinB(guess, tw)).length === 0) {
+	if (answers.filter((tw) => countOfAinB(guessString, tw)).length === 0) {
 		game.scores[ri] += 0.5;
 	};
 
 	// If this score is the best found so far, save it.
-	if (game.scores[ri] < game.scoresEasy[ri]) copyHumanToEasy(ri, guess);
+	if (game.scores[ri] < game.scoresEasy[ri]) copyHumanToEasy(ri, guessString);
 
 	return (game.scores[ri] < 1);
 }
@@ -418,11 +433,13 @@ export class GameState extends Storable {
 
 	guess(solution: string) {
 		const guessColors = Array<LetterState>(COLS).fill("⬛");
-		const guessGroupId = calculateGroupId(solution, this.latestWord);
+		const guessGroupId = calculateGroupId(solution.split(""), this.latestWord.split(""));
 		for (let c =0; c < COLS; c++) {
-			if (guessGroupId[c] === "-") continue;
-			if (guessGroupId[c] <= "Z") { guessColors[c] = "🟩"; }
-			else { guessColors[c] = "🟨"; }
+		switch (guessGroupId[c]) {
+			case "-": guessColors[c] = "⬛"; break; // blank tile
+			case "$": guessColors[c] = "🟨"; break; // yellow tile
+			case "#": guessColors[c] = "🟩"; break; // green tile
+			default: console.log("ERROR in function guess()"); break;
 		}
 		return guessColors;
 	}
