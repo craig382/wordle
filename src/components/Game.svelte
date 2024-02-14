@@ -152,14 +152,14 @@
 			// console.log("Wordle reloaded in AI mode.");
 			// console.log($settings);
 			let openersArray = game.openers.split(" ");
-			game.board.words[game.nGuesses] = randomSample(openersArray);
+			game.board.guesses[game.nGuesses] = randomSample(openersArray);
 			do {
 				processValidGuess();
 				if (!game.active) break;
 				if ($settings.hard[$mode]) {
-					game.board.words[game.nGuesses] = game.guessesHard[game.nGuesses];
+					game.board.guesses[game.nGuesses] = game.guessesHard[game.nGuesses];
 				} else {
-					game.board.words[game.nGuesses] = game.guessesEasy[game.nGuesses];
+					game.board.guesses[game.nGuesses] = game.guessesEasy[game.nGuesses];
 				}
 			} while (true);
 		}
@@ -211,11 +211,11 @@
 	{/if}
 	<Board
 		bind:this={board}
-		bind:value={game.board.words}
+		bind:guesses={game.board.guesses}
 		tutorial={$settings.tutorial === 1}
 		on:closeTutPopUp|once={() => ($settings.tutorial = 0)}
 		board={game.board}
-		guesses={game.nGuesses}
+		nGuesses={game.nGuesses}
 		icon={modeData.modes[$mode].icon}
 		on:swipe={onSwipe}
 	/>
@@ -224,7 +224,7 @@
 			if ($settings.tutorial) $settings.tutorial = 0;
 			board.hideCtx();
 		}}
-		bind:value={game.board.words[game.nGuesses === ROWS ? 0 : game.nGuesses]}
+		bind:value={game.board.guesses[game.nGuesses === ROWS ? 0 : game.nGuesses]}
 		on:submitWord={submitWord}
 		on:esc={() => {
 			showTutorial = false;

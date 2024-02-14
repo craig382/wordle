@@ -2,7 +2,7 @@
 	import { createEventDispatcher, getContext } from "svelte";
 	import { scale, fade } from "svelte/transition";
 	import { mode } from "../stores";
-	import { modeData, timeRemaining, game, ROWS } from "../utils";
+	import { modeData, timeRemaining, toggleShowRowHints } from "../utils";
 	import GameIcon from "./GameIcon.svelte";
 	import type { Toaster } from "./widgets";
 
@@ -38,8 +38,8 @@
 		<!-- svelte-ignore a11y-click-events-have-key-events -->
 		<p
 			on:click|self={() => {
-				console.log("Toggled Show Word Count");
-				toaster.pop("Toggled Show Word Count");
+				toaster.pop("Toggled Show Row Hints");
+				toggleShowRowHints();
 			}}
 		>
 			<br>&nbsp;+/-&nbsp;

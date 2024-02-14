@@ -4,6 +4,7 @@ import wordList from "./words_5";
 
 export const ROWS: number = 6;
 export const COLS: number = 5;
+export let showRowHints = true;
 /** botWords is the max number of words the
  * bot will search for the best possible guess.
  */
@@ -19,6 +20,12 @@ export const words = {
 
 export function countOfAinB(a: string, b: string): number {
 	return b.split(a).length - 1;
+}
+
+export function toggleShowRowHints() { 
+	showRowHints = !showRowHints;
+	console.log("Toggled Show Row Hints, new value is:", showRowHints);
+	return showRowHints;
 }
 
 /** Returns groupId string with # = green, $ = yellow, and - = blank. */
@@ -329,11 +336,11 @@ export class GameState extends Storable {
 			let solutionIndex = seededRandomInt(0, words.answers.length, this.time);
 			this.solution = words.answers[solutionIndex];
 			this.board = {
-				words: Array(ROWS).fill(""),
+				guesses: Array(ROWS).fill(""),
 				state: Array.from({ length: ROWS }, () => (Array(COLS).fill("🔳"))),
 			};
 
-			this.guesses = this.board.words;
+			this.guesses = this.board.guesses;
 			this.#valid = true;
 		}
 		game = this;
@@ -341,7 +348,7 @@ export class GameState extends Storable {
 	}
 
 	get latestWord() {
-		return this.board.words[this.nGuesses];
+		return this.board.guesses[this.nGuesses];
 	}
 
 	get lastState() {
@@ -349,7 +356,7 @@ export class GameState extends Storable {
 	}
 
 	get lastWord() {
-		return this.board.words[this.nGuesses - 1];
+		return this.board.guesses[this.nGuesses - 1];
 	}
 
 	update() {
@@ -398,13 +405,13 @@ export class GameState extends Storable {
 	checkHardMode(): HardModeData {
 		let ri = this.nGuesses - 1;
 		for (let i = 0; i < COLS; ++i) {
-			if (this.board.state[ri][i] === "🟩" && this.board.words[ri][i] !== this.board.words[this.nGuesses][i]) {
-				return { pos: i, char: this.board.words[ri][i], type: "🟩" }; // green tile
+			if (this.board.state[ri][i] === "🟩" && this.board.guesses[ri][i] !== this.board.guesses[this.nGuesses][i]) {
+				return { pos: i, char: this.board.guesses[ri][i], type: "🟩" }; // green tile
 			}
 		}
 		for (let i = 0; i < COLS; ++i) {
-			if (this.board.state[ri][i] === "🟨" && !this.board.words[this.nGuesses].includes(this.board.words[ri][i])) {
-				return { pos: i, char: this.board.words[ri][i], type: "🟨" }; // yellow tile
+			if (this.board.state[ri][i] === "🟨" && !this.board.guesses[this.nGuesses].includes(this.board.guesses[ri][i])) {
+				return { pos: i, char: this.board.guesses[ri][i], type: "🟨" }; // yellow tile
 			}
 		}
 		return { pos: -1, char: "", type: "⬛" };
@@ -554,9 +561,9 @@ export class LetterStates {
 	constructor(board?: GameBoard) {
 		if (board) {
 			for (let row = 0; row < ROWS; ++row) {
-				for (let col = 0; col < board.words[row].length; ++col) {
-					if (this[board.words[row][col]] === "🔳" || board.state[row][col] === "🟩") {
-						this[board.words[row][col]] = board.state[row][col];
+				for (let col = 0; col < board.guesses[row].length; ++col) {
+					if (this[board.guesses[row][col]] === "🔳" || board.state[row][col] === "🟩") {
+						this[board.guesses[row][col]] = board.state[row][col];
 					}
 				}
 			}

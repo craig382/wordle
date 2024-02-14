@@ -18,7 +18,7 @@ type RowData = {
 type LetterState = "🔳" | "⬛" | "🟨" | "🟩";
 
 type GameBoard = {
-	words: string[],
+	guesses: string[],
 	state: LetterState[][],
 };
 

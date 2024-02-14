@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { createEventDispatcher } from "svelte";
-	import { COLS } from "../../utils";
+	import { COLS, showRowHints } from "../../utils";
 
 	import Tile from "./Tile.svelte";
-	export let guesses: number;
+	export let nGuesses: number;
 	export let num: number;
 	export let value = "";
 	export let state: LetterState[];
@@ -40,17 +40,29 @@
 	on:touchstart={onTouch}
 	on:animationend={() => (animation = "")}
 	data-animation={animation}
-	class:complete={guesses > num}
+	class:complete={nGuesses > num}
 >
 	{#each Array(COLS) as _, i}
 		<Tile bind:this={tiles[i]} state={state[i]} value={value.charAt(i)} position={i} />
 	{/each}
+	{#if num < nGuesses && showRowHints}
+		<section>{num}<br />1602<br />{showRowHints}</section>
+	{/if}
 </div>
+<!-- <p>2304</p> -->
 
 <style lang="scss">
+	section {
+		// align-items: normal;
+		text-align: center;
+		// align-content: center;
+		// overflow-wrap: break-word;
+		// vertical-align: bottom;
+	}
 	.board-row {
 		display: grid;
-		grid-template-columns: repeat(var(--cols), 1fr);
+		// grid-template-columns: repeat(var(--cols), 1fr);
+		grid-template-columns: repeat(calc(var(--cols) + 1), 1fr);
 		gap: 5px;
 		&[data-animation="shake"] {
 			animation: shake 0.6s;

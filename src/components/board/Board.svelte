@@ -4,9 +4,9 @@
 	import { createEventDispatcher } from "svelte";
 	import { scale } from "svelte/transition";
 
-	export let value: string[];
+	export let guesses: string[];
 	export let board: GameBoard;
-	export let guesses: number;
+	export let nGuesses: number;
 	export let icon: string;
 	export let tutorial: boolean;
 	export function shake(row: number) {
@@ -29,7 +29,7 @@
 
 	function context(cx: number, cy: number, ri: number, val: string) {
 		// console.log("nGuesses:", guesses, "rowIndex:", ri);
-		if (guesses > ri) {
+		if (nGuesses > ri) {
 			x = cx;
 			y = cy;
 			showCtx = true;
@@ -68,15 +68,16 @@
 {/if}
 
 <div class="board" on:touchstart={swipeStart} on:touchend={swipeEnd} on:touchmove|preventDefault>
-	{#each value as _, i}
+	{#each guesses as _, i}
 		<Row
 			num={i}
-			guesses={guesses}
+			nGuesses={nGuesses}
 			bind:this={rows[i]}
-			bind:value={value[i]}
+			bind:value={guesses[i]}
 			state={board.state[i]}
-			on:ctx={(e) => context(e.detail.x, e.detail.y, i, value[i])}
+			on:ctx={(e) => context(e.detail.x, e.detail.y, i, guesses[i])}
 		/>
+		<!-- <p>3201</p> -->
 	{/each}
 	{#if icon}
 		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
