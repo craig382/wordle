@@ -4,7 +4,6 @@ import wordList from "./words_5";
 
 export const ROWS: number = 6;
 export const COLS: number = 5;
-export let showRowHints = true;
 /** botWords is the max number of words the
  * bot will search for the best possible guess.
  */
@@ -20,12 +19,6 @@ export const words = {
 
 export function countOfAinB(a: string, b: string): number {
 	return b.split(a).length - 1;
-}
-
-export function toggleShowRowHints() { 
-	showRowHints = !showRowHints;
-	console.log("Toggled Show Row Hints, new value is:", showRowHints);
-	return showRowHints;
 }
 
 /** Returns groupId string with # = green, $ = yellow, and - = blank. */
@@ -272,6 +265,7 @@ function copyEasyToHard(ri: number) {
 
 export class GameState extends Storable {
 	public active: boolean;
+	public guessProcessed: boolean = false;
 	public nGuesses: number;
 	public validHard: boolean;
 	public time: number;
@@ -324,9 +318,9 @@ export class GameState extends Storable {
 	constructor(mode: GameMode, data?: string) {
 		super();
 		this.#mode = mode;
-		if (data) {
-			this.parse(data);
-		}
+		// if (data) {
+		// 	this.parse(data);
+		// }
 		if (!this.#valid) {
 			this.active = true;
 			this.nGuesses = 0;
@@ -360,7 +354,6 @@ export class GameState extends Storable {
 	}
 
 	update() {
-
 		// Randomly pick a hard and easy mode opener for the first guess.
 		// Search for the best possible easy mode guess for the first guess only.
 		if (this.nGuesses === 1) {
@@ -391,8 +384,11 @@ export class GameState extends Storable {
 
 		// Revert 1 guess so human can take their turn.
 		this.nGuesses--;
+		ri = this.nGuesses - 1;
+		this.guesses[ri] = this.board.guesses[ri];
 
 		// console.log(`GameState.update() completed for guess ${this.guesses}.`);
+		game = this;
 		console.log(this);
 	}
 
@@ -441,6 +437,7 @@ export class GameState extends Storable {
 		this.solutionNumber = parsed.solutionNumber;
 		this.solution = parsed.solution;
 		this.board = parsed.board;
+		this.guesses = this.board.guesses;
 
 		this.#valid = true;
 	}

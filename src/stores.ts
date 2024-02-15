@@ -88,3 +88,5 @@ export const mode = new Writable<GameMode>();
 export const letterStates = writable(new LetterStates());
 
 export const settings = writable(new Settings());
+
+export const showRowHints = writable(true);

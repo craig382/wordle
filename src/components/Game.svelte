@@ -36,7 +36,7 @@
 		words,
 		Stats,
 	} from "../utils";
-	import { letterStates, settings, mode } from "../stores";
+	import { letterStates, settings, mode, showRowHints } from "../stores";
     import { GameMode } from "../enums";
 
 	export let solution: string;
@@ -67,13 +67,17 @@
 	 * (including bot calculations).
 	 */
 	 export function processValidGuess() {
+			game.guessProcessed = false;
 			game.board.state[game.nGuesses] = game.guess(solution);
 			++game.nGuesses;
-			$letterStates.update(game.lastState, game.lastWord);
-			$letterStates = $letterStates;
 			game.update();
 			if (game.lastWord === solution) win();
 			else if (game.nGuesses === ROWS) lose();
+			game.guessProcessed = true;
+			game = game;
+			$showRowHints = $showRowHints;
+			$letterStates.update(game.lastState, game.lastWord);
+			$letterStates = $letterStates;
 	}
 
 	function submitWord() {
@@ -113,7 +117,7 @@
 			() => toaster.pop(PRAISE[game.nGuesses - 1]),
 			DELAY_INCREMENT * COLS + DELAY_INCREMENT
 		);
-		setTimeout(setShowStatsTrue, delay * 1.4);
+		// setTimeout(setShowStatsTrue, delay * 1.4);
 		if (!modeData.modes[$mode].historical) {
 			stats.addWin(game.nGuesses, modeData.modes[$mode]);
 			stats = stats;
@@ -202,14 +206,20 @@
 		on:settings={() => (showSettings = true)}
 		on:reload={reload}
 	/>
-	{#if $mode === GameMode.ai}
-		<p>
-			In AI Mode. The Bot will play one randomly selected 
+	<p>
+		{#if $mode === GameMode.ai}
+			In AI Mode, the Bot plays one randomly selected 
 			Wordle game each time the "Refresh" icon
-			in the upper left corner is clicked.
-		</p>
-	{/if}
-	<Board
+			in the upper left corner is clicked.<br />
+		{/if}
+		{#if $showRowHints}
+			<br />Row Hint Format. "B &divide; G &rArr; A". "B" 
+			possible solutions Before the guess &divide; (divided 
+			into) "G" Groups by the guess &rArr; 
+			(yields) "A" possible solutions left After the guess.
+		{/if}
+	</p>
+<Board
 		bind:this={board}
 		bind:guesses={game.board.guesses}
 		tutorial={$settings.tutorial === 1}
@@ -424,6 +434,10 @@
 		text-align: center;
 		overflow-wrap: break-word;
 		vertical-align: top;
+	}
+	p {
+		text-align: center;
+		max-width: 330px;
 	}
 
 

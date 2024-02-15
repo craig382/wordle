@@ -1,10 +1,13 @@
 <script lang="ts">
 	import { createEventDispatcher } from "svelte";
-	import { COLS, showRowHints } from "../../utils";
+	import { COLS, game, countOfAinB } from "../../utils";
 
 	import Tile from "./Tile.svelte";
+	import { showRowHints } from "../../stores";
+
 	export let nGuesses: number;
-	export let num: number;
+	/** Row Index.*/
+	export let ri: number;
 	export let value = "";
 	export let state: LetterState[];
 	export function shake() {
@@ -31,6 +34,7 @@
 			lastTouch = Date.now();
 		}
 	}
+	
 </script>
 
 <div
@@ -40,16 +44,24 @@
 	on:touchstart={onTouch}
 	on:animationend={() => (animation = "")}
 	data-animation={animation}
-	class:complete={nGuesses > num}
+	class:complete={nGuesses > ri}
 >
 	{#each Array(COLS) as _, i}
 		<Tile bind:this={tiles[i]} state={state[i]} value={value.charAt(i)} position={i} />
 	{/each}
-	{#if num < nGuesses && showRowHints}
-		<section>{num}<br />1602<br />{showRowHints}</section>
-	{/if}
+	<section>
+		{#await game.guessProcessed === true}
+			x
+		{:then}
+			{#if ri < nGuesses && $showRowHints}
+				{@const nBefore = game.nAnswers[ri]}
+				{@const nAfter = countOfAinB(" ", game.guessGroups[ri]) + 1}
+				{@const nGroups = game.groups[ri].size + 1}	
+				{nBefore}<br />&divide; {nGroups}<br />&rArr; {nAfter}
+			{/if}
+		{/await}
+	</section>
 </div>
-<!-- <p>2304</p> -->
 
 <style lang="scss">
 	section {

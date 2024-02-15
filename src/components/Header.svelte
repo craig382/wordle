@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { createEventDispatcher, getContext } from "svelte";
 	import { scale, fade } from "svelte/transition";
-	import { mode } from "../stores";
-	import { modeData, timeRemaining, toggleShowRowHints } from "../utils";
+	import { mode, showRowHints } from "../stores";
+	import { modeData, timeRemaining } from "../utils";
 	import GameIcon from "./GameIcon.svelte";
 	import type { Toaster } from "./widgets";
 
@@ -18,6 +18,17 @@
 			showRefresh = false;
 		}
 	});
+
+	export function toggleShowRowHints() { 
+		$showRowHints = !$showRowHints;
+		// console.log("Toggled Show Row Hints, new value is:", showRowHints);
+		return showRowHints;
+	}
+
+	export function updateRowHints() {
+		return $showRowHints = $showRowHints;
+	}
+
 </script>
 
 <header>
@@ -38,7 +49,6 @@
 		<!-- svelte-ignore a11y-click-events-have-key-events -->
 		<p
 			on:click|self={() => {
-				toaster.pop("Toggled Show Row Hints");
 				toggleShowRowHints();
 			}}
 		>

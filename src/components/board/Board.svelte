@@ -68,16 +68,15 @@
 {/if}
 
 <div class="board" on:touchstart={swipeStart} on:touchend={swipeEnd} on:touchmove|preventDefault>
-	{#each guesses as _, i}
+	{#each guesses as _, ri}
 		<Row
-			num={i}
+			ri={ri}
 			nGuesses={nGuesses}
-			bind:this={rows[i]}
-			bind:value={guesses[i]}
-			state={board.state[i]}
-			on:ctx={(e) => context(e.detail.x, e.detail.y, i, guesses[i])}
+			bind:this={rows[ri]}
+			bind:value={guesses[ri]}
+			state={board.state[ri]}
+			on:ctx={(e) => context(e.detail.x, e.detail.y, ri, guesses[ri])}
 		/>
-		<!-- <p>3201</p> -->
 	{/each}
 	{#if icon}
 		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
