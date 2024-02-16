@@ -22,7 +22,8 @@
 	import {
 		contractNum,
 		countOfAinB,
-		pattern,
+		patternString,
+		patternArray,
 		randomSample,
 		DELAY_INCREMENT,
 		PRAISE,
@@ -68,7 +69,11 @@
 	 */
 	 export function processValidGuess() {
 			game.guessProcessed = false;
-			game.board.state[game.nGuesses] = game.guess(solution);
+			if ($mode != GameMode.solver) {
+				game.board.state[game.nGuesses] = game.guess(solution);
+			} else {
+				game.board.state[game.nGuesses] = patternArray(game.guessGroupIds[game.nGuesses]);
+			}
 			++game.nGuesses;
 			game.update();
 			if (game.lastWord === solution) win();
@@ -86,6 +91,7 @@
 			board.shake(game.nGuesses);
 		} else if (words.contains(game.latestWord)) {
 			if (game.nGuesses > 0) {
+				// In Solver mode, user enters guessId here.
 				const hm = game.checkHardMode();
 				if ($settings.hard[$mode]) {
 					if (hm.type === "🟩") {
@@ -207,16 +213,18 @@
 		on:reload={reload}
 	/>
 	<p>
+		{modeData.modes[$mode].name} Mode.
 		{#if $mode === GameMode.ai}
-			AI Mode. In this mode, the Bot plays one 
+			In AI mode, the Bot plays one 
 			randomly selected Wordle game each time you 
-			click the "Refresh" icon in the upper left corner.<br />
+			click the "Refresh" icon in the upper left corner.
 		{:else if $mode == GameMode.solver}
-			Solver Mode. In this mode, you and the Bot 
+			In Solver mode, you and the Bot 
 			work together to solve the Wordle. Each time 
 			you enter a guess you must also enter the 
-			color of each letter.<br />
+			color of each letter.
 		{/if}
+		<br />
 		{#if $showRowHints}
 			<br />Row Hint Format. "B &divide; G &rArr; A". "B" 
 			possible solutions Before the guess &divide; (divided 
@@ -311,7 +319,7 @@
 						<section>
 							Bot Hard Mode<br /><br />
 							{game.guessesHard[ri].toUpperCase()}<br />
-							{pattern(game.guessGroupIdsHard[ri])}<br />
+							{patternString(game.guessGroupIdsHard[ri])}<br />
 							{game.scoresHard[ri]} points<br /><br />
 							Eliminated {game.nAnswers[ri] - nLeftHard} words<br />
 							in {game.groupsHard[ri].size} groups:
@@ -327,7 +335,7 @@
 							{#if ri < game.nGuesses}
 								Human<br /><br />
 								{game.guesses[ri].toUpperCase()}<br />
-								{pattern(game.guessGroupIds[ri])}<br />
+								{patternString(game.guessGroupIds[ri])}<br />
 								{game.scores[ri]} points<br /><br />
 								Eliminated {game.nAnswers[ri] - nLeft} words<br />
 								in {game.groups[ri].size} groups:
@@ -343,7 +351,7 @@
 						<section>
 							Bot Easy Mode<br /><br />
 							{game.guessesEasy[ri].toUpperCase()}<br />
-							{pattern(game.guessGroupIdsEasy[ri])}<br />
+							{patternString(game.guessGroupIdsEasy[ri])}<br />
 							{game.scoresEasy[ri]} points<br /><br />
 							Eliminated {game.nAnswers[ri] - nLeftEasy} words<br />
 							in {game.groupsEasy[ri].size} groups:

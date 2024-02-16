@@ -180,45 +180,58 @@ abstract class Storable {
 }
 
 /** pattern returns the color pattern of a groupId. */
-export function pattern(groupId: string): string {
-	let p = "";
-	for (let i = 0; i < groupId.length; i++) {
-		switch (groupId[i]) {
-			case "-": p += "⬛"; break; // blank tile
-			case "$": p += "🟨"; break; // yellow tile
-			case "#": p += "🟩"; break; // green tile
-			default: console.log("ERROR in function pattern()"); break;
+export function patternArray(groupId: string): LetterState[] {
+	const p = Array<LetterState>(COLS).fill("⬛");
+	for (let c =0; c < COLS; c++) {
+		switch (groupId[c]) {
+			case "$": p[c] = "🟨"; break; // yellow tile
+			case "#": p[c] = "🟩"; break; // green tile
 		}
 	}
 	return p;
 }
 
+/** pattern returns the color pattern of a groupId. */
+export function patternString(groupId: string): string {
+	return patternArray(groupId).join("");
+}
+
 /** 
  * ProcessGroups(guess).
  * Creates and scores groups assuming guessString 
- * is the latest guess.
+ * is the latest guess and ri is the row index.
  * Returns true for a score < 1.
  */
-function processGroups(guessString: string): boolean {
+function processGroups(guessString: string, ri: number): boolean {
 
 	/** answers[answerIndex].
 	 * A list of remaining answers before the row's guess. */	
 	let answers: string[] = [];
 
-	/** ri is Row Index. */
-	let ri = game.nGuesses - 1;
+	// Initialize answers[ri].
+	if (ri === 0) answers = words.answers;
+	else answers = game.guessGroups[ri-1].split(" ");	
+	game.nAnswers[ri]= answers.length;
 
 	/** guess is the guessString as an array of letters. */
 	let guess = guessString.split("");
 
-	// Initialize this.answer[ri] and this.otherGuess[ri].
-	const guessGroupId = calculateGroupId(game.solution, guess);
-	game.guessGroupIds[ri] = guessGroupId;
-
-	if (ri === 0) answers = words.answers;
-	else answers = game.guessGroups[ri-1].split(" ");
-	
-	game.nAnswers[ri]= answers.length;
+	// Initialize guessGroupId and guessGroupIds[ri].
+	let guessGroupId = "";
+	if ( game.mode === GameMode.solver ) {
+		if (ri < game.nGuesses) {
+			// In Solver mode, the user already entered
+			// guessGroupIds[ri] right after entering guesses[ri].
+			 guessGroupId = game.guessGroupIds[ri];	
+		} else {
+			// Calculate a fake guessGroupId so that later
+			// a new Map can be created for game.groups[ri]
+			guessGroupId = calculateGroupId(answers[0], guess);
+		}
+	} else {
+		guessGroupId = calculateGroupId(game.solution, guess);
+		game.guessGroupIds[ri] = guessGroupId;	
+	}
 
 	// Create the groups map.
 	game.groups[ri] = new Map([[guessGroupId, undefined]]);
@@ -229,19 +242,21 @@ function processGroups(guessString: string): boolean {
 		else game.groups[ri].set(gid, (gList + " " + answers[a]));
 	}
 
-	// Find guessGroup and remove it from groups.
-	game.guessGroups[ri]  = game.groups[ri].get(game.guessGroupIds[ri]);
-	game.groups[ri].delete(game.guessGroupIds[ri]);
-
 	// Calculate group part of score as long as this is not guess 6.
 	if (ri < (ROWS-1)) {
-		game.scores[ri] = game.nAnswers[ri] - game.groups[ri].size - 1;
+		game.scores[ri] = game.nAnswers[ri] - game.groups[ri].size;
 	}
 
 	// Add 0.5 penalty points to rowScore if the guess is not a remaining answer.
 	if (answers.filter((tw) => countOfAinB(guessString, tw)).length === 0) {
 		game.scores[ri] += 0.5;
 	};
+
+	if ( ri < game.nGuesses || game.mode != GameMode.solver ) {
+		// Find guessGroup and remove it from groups.
+		game.guessGroups[ri]  = game.groups[ri].get(game.guessGroupIds[ri]);
+		game.groups[ri].delete(game.guessGroupIds[ri]);
+	}
 
 	// If this score is the best found so far, save it.
 	if (game.scores[ri] < game.scoresEasy[ri]) copyHumanToEasy(ri, guessString);
@@ -288,7 +303,7 @@ export class GameState extends Storable {
 	// saint 2186, least 2175, stare 2182, stale 2173, snare 2183, plane 2183, place 2187
 
 	#valid = false;
-	#mode: GameMode;
+	mode: GameMode;
 
 	/** For each row, a map of 
 	 * space separated eliminated answers keyed to groupId. */	
@@ -326,7 +341,7 @@ export class GameState extends Storable {
 
 	constructor(mode: GameMode, data?: string) {
 		super();
-		this.#mode = mode;
+		this.mode = mode;
 		// if (data) {
 		// 	this.parse(data);
 		// }
@@ -363,36 +378,37 @@ export class GameState extends Storable {
 	}
 
 	update() {
+		// Set ri for this guess.
+		let ri = this.nGuesses - 1;
+
 		// Randomly pick a hard and easy mode opener for the first guess.
 		// Search for the best possible easy mode guess for the first guess only.
 		if (this.nGuesses === 1) {
 			let openersArray = this.openers.split(" ");
 			let guess = "";
-			processGroups(randomSample(openersArray)); // hard mode opener
+			processGroups(randomSample(openersArray), ri); // hard mode opener
 			// copyHumanToEasy(0);
 			copyEasyToHard(0);
-			processGroups(guess = randomSample(openersArray)); // easy mode opener
+			processGroups(guess = randomSample(openersArray), ri); // easy mode opener
 			copyHumanToEasy(0, guess);
 		}
 
 		// Process this guess.
-		processGroups(this.lastWord);
+		processGroups(this.lastWord, ri);
 
-		// Advance 1 guess for bot to look for best possible guesses.
-		this.nGuesses++;
-		let ri = this.nGuesses - 1;
+		// Advance ri 1 guess for bot to look for best possible guesses.
+		ri = this.nGuesses;
 
 		// Search for the best posssible hard mode guess.
-		this.guessGroups[ri-1].split(" ").some(aGuess => {processGroups(aGuess);});
+		this.guessGroups[ri-1].split(" ").some(aGuess => {processGroups(aGuess, ri);});
 		copyEasyToHard(ri);
 
 		// Search for the best possible easy mode guess.
 		if ((this.scoresHard[ri] !== 0) || (ri === 0)) {
-			words.answers.slice(0, botWords).some(aGuess => {processGroups(aGuess);});
+			words.answers.slice(0, botWords).some(aGuess => {processGroups(aGuess, ri);});
 		}
 
-		// Revert 1 guess so human can take their turn.
-		this.nGuesses--;
+		// Revert ri 1 guess so human can take their turn.
 		ri = this.nGuesses - 1;
 		this.guesses[ri] = this.board.guesses[ri];
 
@@ -422,23 +438,13 @@ export class GameState extends Storable {
 		return { pos: -1, char: "", type: "⬛" };
 	}
 
-	guess(solution: string) {
-		const guessColors = Array<LetterState>(COLS).fill("⬛");
-		const guessGroupId = calculateGroupId(solution, this.latestWord.split(""));
-		for (let c =0; c < COLS; c++) {
-			switch (guessGroupId[c]) {
-				// case "-": guessColors[c] = "⬛"; break; // blank tile
-				case "$": guessColors[c] = "🟨"; break; // yellow tile
-				case "#": guessColors[c] = "🟩"; break; // green tile
-				// default: console.log("ERROR in function guess()"); break;
-			}
-		}
-		return guessColors;
+	guess(solution: string): LetterState[] {
+		return patternArray(calculateGroupId(solution, this.latestWord.split("")));
 	}
 
 	private parse(str: string) {
 		const parsed = JSON.parse(str) as GameState;
-		if (parsed.solutionNumber !== getWordNumber(this.#mode)) return;
+		if (parsed.solutionNumber !== getWordNumber(this.mode)) return;
 		this.active = parsed.active;
 		this.nGuesses = parsed.nGuesses;
 		this.validHard = parsed.validHard;
