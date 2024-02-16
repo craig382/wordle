@@ -3,6 +3,7 @@ export enum GameMode {
 	"hourly",
 	"infinite",
 	"ai",
+	"solver"
 };
 
 export const enum ms {

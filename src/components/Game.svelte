@@ -208,9 +208,14 @@
 	/>
 	<p>
 		{#if $mode === GameMode.ai}
-			In AI Mode, the Bot plays one randomly selected 
-			Wordle game each time the "Refresh" icon
-			in the upper left corner is clicked.<br />
+			AI Mode. In this mode, the Bot plays one 
+			randomly selected Wordle game each time you 
+			click the "Refresh" icon in the upper left corner.<br />
+		{:else if $mode == GameMode.solver}
+			Solver Mode. In this mode, you and the Bot 
+			work together to solve the Wordle. Each time 
+			you enter a guess you must also enter the 
+			color of each letter.<br />
 		{/if}
 		{#if $showRowHints}
 			<br />Row Hint Format. "B &divide; G &rArr; A". "B" 

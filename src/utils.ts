@@ -125,6 +125,15 @@ export const modeData: ModeData = {
 			// icon: "m7,200v-200l93,100l93,-100v200",
 			streak: true,
 		},
+		{
+			name: "Solver",
+			unit: ms.SECOND,
+			start: 1642428600000,	// 17/01/2022 4:10:00pm UTC+2
+			seed: newSeed(GameMode.infinite),
+			historical: false,
+			// icon: "m7,200v-200l93,100l93,-100v200",
+			streak: true,
+		},
 		// {
 		// 	name: "Minutely",
 		// 	unit: ms.MINUTE,
