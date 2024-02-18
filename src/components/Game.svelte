@@ -89,7 +89,7 @@
 				toaster.pop(`No possible solutions left. Did you enter some color(s) wrong? Or maybe the other Wordle's solution dictionary has some words not in this Wordle's dictionary.`, 10);
 				lose();
 			} 
-			// app.guessProcessed = true;
+			app.guessProcessed = true;
 			$showRowHints = $showRowHints;
 			$letterStates.update(app.lastState, app.lastWord);
 			$letterStates = $letterStates;

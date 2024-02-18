@@ -379,7 +379,7 @@ export class GameState extends Storable {
 			this.guesses = this.board.guesses;
 			this.#valid = true;
 
-			if (mode = GameMode.solver) {
+			if (mode === GameMode.solver) {
 				this.board.state[0].fill("⬛");
 				this.solution = "";
 			}
