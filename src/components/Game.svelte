@@ -183,11 +183,11 @@
 		switch (e.detail.direction) {
 			case "left":
 				$mode = ($mode + 1) % modeData.modes.length;
-				toaster.pop(modeData.modes[$mode].name);
+				// toaster.pop(modeData.modes[$mode].name);
 				break;
 			case "right":
 				$mode = ($mode - 1 + modeData.modes.length) % modeData.modes.length;
-				toaster.pop(modeData.modes[$mode].name);
+				// toaster.pop(modeData.modes[$mode].name);
 				break;
 		}
 	}
@@ -196,7 +196,6 @@
 		if (!app.active) setTimeout(setShowStatsTrue, delay);
 		// console.log("Wordle restarted");
 	});
-	// $: toaster.pop(word);
 </script>
 
 <svelte:body on:click={board.hideCtx} on:contextmenu={board.hideCtx} />
@@ -226,10 +225,9 @@
 		{/if}
 		<br />
 		{#if $showRowHints}
-			<br />Row Hint Format. "B &divide; G &rArr; A". "B" 
-			possible solutions Before the guess &divide; (divided 
-			into) "G" Groups by the guess &rArr; 
-			(yields) "A" possible solutions left After the guess.
+			<br />Row Hint. &lt;&nbsp;words before&nbsp;&gt; &divide; 
+			(&nbsp;divided by&nbsp;) &lt;&nbsp;n groups&nbsp;&gt; 
+			&rArr; (&nbsp;yields&nbsp;) &lt;&nbsp;words after&nbsp;&gt;.
 		{/if}
 	</p>
 	<Board
@@ -261,7 +259,7 @@
 	on:close|once={() => $settings.tutorial === 3 && --$settings.tutorial}
 	fullscreen={$settings.tutorial === 0}
 >
-	<Tutorial visible={showTutorial} />
+	<Tutorial visible={showTutorial} app={app} />
 </Modal>
 
 <Modal bind:visible={showStats}>

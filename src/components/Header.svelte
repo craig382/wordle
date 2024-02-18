@@ -10,7 +10,7 @@
 	export let tutorial: boolean;
 	export let showRefresh: boolean;
 
-	export let toaster = getContext<Toaster>("toaster");
+	export const toaster = getContext<Toaster>("toaster");
 
 	const dispatch = createEventDispatcher();
 	mode.subscribe((m) => {
@@ -59,11 +59,11 @@
 	<h1
 		on:click|self={() => {
 			$mode = ($mode + 1) % modeData.modes.length;
-			toaster.pop(modeData.modes[$mode].name);
+			// toaster.pop(modeData.modes[$mode].name);
 		}}
 		on:contextmenu|preventDefault|self={() => {
 			$mode = ($mode - 1 + modeData.modes.length) % modeData.modes.length;
-			toaster.pop(modeData.modes[$mode].name);
+			// toaster.pop(modeData.modes[$mode].name);
 		}}
 	>
 		wordle+
