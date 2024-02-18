@@ -159,7 +159,6 @@
 		modeData.modes[$mode].historical = false;
 		modeData.modes[$mode].seed = newSeed($mode);
 		app = new GameState($mode, localStorage.getItem(`state-${$mode}`));
-		console.log("Cheat. The solution is: " + app.solution + ".");
 		$letterStates = new LetterStates();
 		showStats = false;
 		showRefresh = false;
