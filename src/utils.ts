@@ -307,7 +307,6 @@ function copyEasyToHard(ri: number) {
 
 export class GameState extends Storable {
 	public active: boolean;
-	public guessProcessed: boolean = false;
 	public nGuesses: number;
 	public validHard: boolean;
 	public time: number;

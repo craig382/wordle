@@ -59,16 +59,12 @@
 			ri={ri} ci={ci} />
 	{/each}
 	<section>
-		{#await app.guessProcessed === true}
-			x
-		{:then}
-			{#if ri < app.nGuesses && $showRowHints}
-				{@const nBefore = app.nAnswers[ri]}
-				{@const nAfter = countOfAinB(" ", app.guessGroups[ri]) + 1}
-				{@const nGroups = app.groups[ri].size + 1}	
-				{nBefore}<br />&divide; {nGroups}<br />&rArr; {nAfter}
-			{/if}
-		{/await}
+		{#if ri < app.nGuesses && $showRowHints}
+			{@const nBefore = app.nAnswers[ri]}
+			{@const nAfter = countOfAinB(" ", app.guessGroups[ri]) + 1}
+			{@const nGroups = app.groups[ri].size + 1}	
+			{nBefore}<br />&divide; {nGroups}<br />&rArr; {nAfter}
+		{/if}
 	</section>
 </div>
 
