@@ -3,13 +3,17 @@
 
 	import { mode } from "../../stores";
 
-	import { DELAY_INCREMENT, ROWS } from "../../utils";
+	import { DELAY_INCREMENT, ROWS, game } from "../../utils";
+
+	import { GameMode } from "../../enums";
 
 	export let value = "";
 	export let state: LetterState;
-	export let position = 0;
+	export let ri = 0;
+	export let ci = 0;
+	
 	export function bounce() {
-		setTimeout(() => (animation = "bounce"), (ROWS + position) * DELAY_INCREMENT);
+		setTimeout(() => (animation = "bounce"), (ROWS + ci) * DELAY_INCREMENT);
 	}
 	let s: string;
 	let pop = false;
@@ -28,14 +32,37 @@
 	setTimeout(() => (pop = true), 200);
 
 	onDestroy(unsub);
+
+	function enterColor(ri: number, ci: number) {
+		if ( game.mode === GameMode.solver && ri === game.nGuesses ) {
+			let s = game.board.state[ri];
+			switch (s[ci]) {
+				case "🔳": s[ci] = "⬛"; break;
+				case "⬛": s[ci] = "🟨"; break;
+				case "🟨": s[ci] = "🟩"; break;
+				case "🟩": s[ci] = "⬛"; break;
+			}
+			state = s[ci];
+			value = value;
+			// animation = "shake";
+			// game.board.shake(ri);
+			// $letterStates.update(game.board.state[ri], game.board.guesses[ri]);
+			// $letterStates = $letterStates;
+			// game.board = game.board;
+			console.log("enterColor nGuesses, ri, ci:", game.nGuesses, ri, ci, value, state, game.board.guesses[ri], game.board.state[ri]);
+		}
+	}
+
 </script>
 
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <div
 	data-animation={animation}
 	class:value
 	class:pop
 	class="tile {state} {s}"
-	style="transition-delay: {position * DELAY_INCREMENT}ms"
+	style="transition-delay: {ci * DELAY_INCREMENT}ms"
+	on:click={() => enterColor(ri, ci)} 
 >
 	<div class="front">{value}</div>
 	<div class="back">{value}</div>

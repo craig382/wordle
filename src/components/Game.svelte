@@ -23,7 +23,6 @@
 		contractNum,
 		countOfAinB,
 		patternString,
-		patternArray,
 		randomSample,
 		DELAY_INCREMENT,
 		PRAISE,
@@ -32,15 +31,15 @@
 		COLS,
 		newSeed,
 		GameState,
-		seededRandomInt,
 		LetterStates,
 		words,
 		Stats,
+        groupIdFromRow,
 	} from "../utils";
 	import { letterStates, settings, mode, showRowHints } from "../stores";
     import { GameMode } from "../enums";
 
-	export let solution: string;
+	// export let solution: string;
 	export let stats: Stats;
 	export let game: GameState;
 	export let toaster: Toaster;
@@ -69,14 +68,20 @@
 	 */
 	 export function processValidGuess() {
 			game.guessProcessed = false;
-			if ($mode != GameMode.solver) {
-				game.board.state[game.nGuesses] = game.guess(solution);
-			} else {
-				game.board.state[game.nGuesses] = patternArray(game.guessGroupIds[game.nGuesses]);
-			}
+			if ($mode === GameMode.solver) {
+				let errorIndex = 0;
+				let gid = "";
+				[ gid, errorIndex ] = groupIdFromRow(game.nGuesses);
+				if (errorIndex > -1) {
+					toaster.pop(`Give letter ${errorIndex + 1} a color then resubmit your guess.`);
+					return;
+				}
+				game.guessGroupIds[game.nGuesses] = gid;
+				if (gid = "#####") game.solution = game.board.guesses[game.nGuesses];
+			} else game.board.state[game.nGuesses] = game.guess(game.solution);
 			++game.nGuesses;
 			game.update();
-			if (game.lastWord === solution) win();
+			if (game.lastWord === game.solution) win();
 			else if (game.nGuesses === ROWS) lose();
 			game.guessProcessed = true;
 			game = game;
@@ -151,9 +156,7 @@
 		modeData.modes[$mode].historical = false;
 		modeData.modes[$mode].seed = newSeed($mode);
 		game = new GameState($mode, localStorage.getItem(`state-${$mode}`));
-		let solutionIndex = seededRandomInt(0, words.answers.length, modeData.modes[$mode].seed);
-		solution = words.answers[solutionIndex];
-		// console.log("Cheat. The solution is: " + solution + " soltionIndex: " + solutionIndex);
+		console.log("Cheat. The solution is: " + game.solution + ".");
 		$letterStates = new LetterStates();
 		showStats = false;
 		showRefresh = false;
@@ -218,7 +221,7 @@
 			In AI mode, the Bot plays one 
 			randomly selected Wordle game each time you 
 			click the "Refresh" icon in the upper left corner.
-		{:else if $mode == GameMode.solver}
+		{:else if $mode === GameMode.solver}
 			In Solver mode, you and the Bot 
 			work together to solve the Wordle. Each time 
 			you enter a guess you must also enter the 
@@ -285,7 +288,7 @@
 	</Separator>
 	<ShareGame solutionNumber={game.solutionNumber} />
 	{#if !game.active}
-		<Definition word={solution} alternates={2} />
+		<Definition word={game.solution} alternates={2} />
 	{:else}
 		<!-- Fade with delay is to prevent a bright red button from appearing as soon as refresh is pressed -->
 		<div

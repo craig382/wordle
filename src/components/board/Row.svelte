@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from "svelte";
 	import { COLS, game, countOfAinB } from "../../utils";
-
 	import Tile from "./Tile.svelte";
 	import { showRowHints } from "../../stores";
 
@@ -27,6 +26,7 @@
 	 * because listening to touch events on Board prevents Row from receiving dblclick events.
 	 */
 	function onTouch(e: TouchEvent) {
+		console.log("onTouch", this)
 		if (Date.now() - lastTouch <= MAX_DOUBLE_CLICK_INTERVAL) {
 			e.preventDefault();
 			dispatch("ctx", { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY });
@@ -34,7 +34,7 @@
 			lastTouch = Date.now();
 		}
 	}
-	
+
 </script>
 
 <div
@@ -46,8 +46,9 @@
 	data-animation={animation}
 	class:complete={nGuesses > ri}
 >
-	{#each Array(COLS) as _, i}
-		<Tile bind:this={tiles[i]} state={state[i]} value={value.charAt(i)} position={i} />
+	{#each Array(COLS) as _, ci}
+		<Tile bind:this={tiles[ci]} state={state[ci]} value={value.charAt(ci)} 
+			ri={ri} ci={ci} />
 	{/each}
 	<section>
 		{#await game.guessProcessed === true}

@@ -179,7 +179,25 @@ abstract class Storable {
 	toString() { return JSON.stringify(this); }
 }
 
-/** pattern returns the color pattern of a groupId. */
+/** groupsIdFromState(rowIndex) returns [ groupId, errorIndex ]. */
+export function groupIdFromRow(ri: number): 
+	[ string, number ] {
+	const state = game.board.state[ri];
+	const id = Array<string>(COLS).fill(" ");
+	let errorIndex = -1; // -1 means no failure.
+	for (let c =0; c < COLS; c++) {
+		switch (state[c]) {
+			case "⬛": id[c] = "-"; break; // blank tile
+			case "🟨": id[c] = "$"; break; // yellow tile
+			case "🟩": id[c] = "#"; break; // green tile
+		}
+	}
+	errorIndex = id.indexOf(" ");
+	console.log("groupIdFromRow:", id, errorIndex);
+	return [id.join(""), errorIndex];
+}
+
+/** patternArray returns the color pattern of a groupId. */
 export function patternArray(groupId: string): LetterState[] {
 	const p = Array<LetterState>(COLS).fill("⬛");
 	for (let c =0; c < COLS; c++) {
@@ -191,7 +209,7 @@ export function patternArray(groupId: string): LetterState[] {
 	return p;
 }
 
-/** pattern returns the color pattern of a groupId. */
+/** patternString returns the color pattern of a groupId. */
 export function patternString(groupId: string): string {
 	return patternArray(groupId).join("");
 }
