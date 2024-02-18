@@ -3,15 +3,16 @@
 
 	import { mode } from "../../stores";
 
-	import { DELAY_INCREMENT, ROWS, game } from "../../utils";
+	import { DELAY_INCREMENT, ROWS, GameState } from "../../utils";
 
 	import { GameMode } from "../../enums";
 
+	export let app: GameState;
 	export let value = "";
 	export let state: LetterState;
 	export let ri = 0;
 	export let ci = 0;
-	
+
 	export function bounce() {
 		setTimeout(() => (animation = "bounce"), (ROWS + ci) * DELAY_INCREMENT);
 	}
@@ -22,7 +23,7 @@
 	// reset animation when value changes, because for some reason changing anination to "" when the game is over causes the tiles to flash
 	$: !value && (animation = "");
 
-	// ensure all animations play
+	// ensure all animations playl
 	const unsub = mode.subscribe(() => {
 		animation = "";
 		s = "🔳";
@@ -34,22 +35,16 @@
 	onDestroy(unsub);
 
 	function enterColor(ri: number, ci: number) {
-		if ( game.mode === GameMode.solver && ri === game.nGuesses ) {
-			let s = game.board.state[ri];
-			switch (s[ci]) {
-				case "🔳": s[ci] = "⬛"; break;
-				case "⬛": s[ci] = "🟨"; break;
-				case "🟨": s[ci] = "🟩"; break;
-				case "🟩": s[ci] = "⬛"; break;
+		if ( app.mode === GameMode.solver && ri === app.nGuesses ) {
+			let rs = app.board.state[ri]; // rowState[ci] array.
+			switch (rs[ci]) {
+				case "🔳": rs[ci]= "⬛"; break;
+				case "⬛": rs[ci] = "🟨"; break;
+				case "🟨": rs[ci] = "🟩"; break;
+				case "🟩": rs[ci] = "⬛"; break;
 			}
-			state = s[ci];
-			value = value;
-			// animation = "shake";
-			// game.board.shake(ri);
-			// $letterStates.update(game.board.state[ri], game.board.guesses[ri]);
-			// $letterStates = $letterStates;
-			// game.board = game.board;
-			console.log("enterColor nGuesses, ri, ci:", game.nGuesses, ri, ci, value, state, game.board.guesses[ri], game.board.state[ri]);
+			state = rs[ci];
+			// console.log("enterColor nGuesses, ri, ci:", app.nGuesses, ri, ci, value, app.board.guesses[ri], app.board.state[ri]);
 		}
 	}
 
@@ -62,7 +57,7 @@
 	class:pop
 	class="tile {state} {s}"
 	style="transition-delay: {ci * DELAY_INCREMENT}ms"
-	on:click={() => enterColor(ri, ci)} 
+	on:click={() => {enterColor(ri, ci);}}
 >
 	<div class="front">{value}</div>
 	<div class="back">{value}</div>

@@ -1,6 +1,6 @@
 //! IF ANYTHING IN THIS FILE IS CHANGED MAKE SURE setVersion.js HAS ALSO BEEN UPDATED
 // Increase the v number when the app is updated
-const version = "1.5.2";
+const version = "2.0.0";
 const cacheName = `wordle+-v${version}`;
 
 const assetsToCache = [

@@ -3,24 +3,27 @@
 	import ContextMenu from "../widgets/ContextMenu.svelte";
 	import { createEventDispatcher } from "svelte";
 	import { scale } from "svelte/transition";
+	import type { GameState } from "../../utils";
 
-	export let guesses: string[];
-	export let board: GameBoard;
-	export let nGuesses: number;
+	export let app: GameState;
+	export let rows: Row[] = [];
 	export let icon: string;
 	export let tutorial: boolean;
+
 	export function shake(row: number) {
 		rows[row].shake();
 	}
+
 	export function bounce(row: number) {
 		rows[row].bounce();
 	}
+
 	export function hideCtx(e?: MouseEvent) {
 		if (!e || !e.defaultPrevented) showCtx = false;
 	}
+
 	const dispatch = createEventDispatcher();
 
-	let rows: Row[] = [];
 	let showCtx = false;
 	let rowIndex = 0;
 	let x = 0;
@@ -29,7 +32,7 @@
 
 	function context(cx: number, cy: number, ri: number, val: string) {
 		// console.log("nGuesses:", guesses, "rowIndex:", ri);
-		if (nGuesses > ri) {
+		if (app.nGuesses > ri) {
 			x = cx;
 			y = cy;
 			showCtx = true;
@@ -68,14 +71,12 @@
 {/if}
 
 <div class="board" on:touchstart={swipeStart} on:touchend={swipeEnd} on:touchmove|preventDefault>
-	{#each guesses as _, ri}
+	{#each app.guesses as guess, ri}
 		<Row
 			ri={ri}
-			nGuesses={nGuesses}
 			bind:this={rows[ri]}
-			bind:value={guesses[ri]}
-			state={board.state[ri]}
-			on:ctx={(e) => context(e.detail.x, e.detail.y, ri, guesses[ri])}
+			bind:app={app}
+			on:ctx={(e) => context(e.detail.x, e.detail.y, ri, guess)}
 		/>
 	{/each}
 	{#if icon}

@@ -1,14 +1,12 @@
 <script lang="ts">
 	import { createEventDispatcher } from "svelte";
-	import { COLS, game, countOfAinB } from "../../utils";
+	import { COLS, countOfAinB, GameState } from "../../utils";
 	import Tile from "./Tile.svelte";
 	import { showRowHints } from "../../stores";
 
-	export let nGuesses: number;
 	/** Row Index.*/
 	export let ri: number;
-	export let value = "";
-	export let state: LetterState[];
+	export let app: GameState;
 	export function shake() {
 		animation = "shake";
 	}
@@ -44,20 +42,20 @@
 	on:touchstart={onTouch}
 	on:animationend={() => (animation = "")}
 	data-animation={animation}
-	class:complete={nGuesses > ri}
+	class:complete={app.nGuesses > ri}
 >
 	{#each Array(COLS) as _, ci}
-		<Tile bind:this={tiles[ci]} state={state[ci]} value={value.charAt(ci)} 
+		<Tile bind:this={tiles[ci]} bind:app={app} bind:state={app.board.state[ri][ci]} value={app.board.guesses[ri].charAt(ci)} 
 			ri={ri} ci={ci} />
 	{/each}
 	<section>
-		{#await game.guessProcessed === true}
+		{#await app.guessProcessed === true}
 			x
 		{:then}
-			{#if ri < nGuesses && $showRowHints}
-				{@const nBefore = game.nAnswers[ri]}
-				{@const nAfter = countOfAinB(" ", game.guessGroups[ri]) + 1}
-				{@const nGroups = game.groups[ri].size + 1}	
+			{#if ri < app.nGuesses && $showRowHints}
+				{@const nBefore = app.nAnswers[ri]}
+				{@const nAfter = countOfAinB(" ", app.guessGroups[ri]) + 1}
+				{@const nGroups = app.groups[ri].size + 1}	
 				{nBefore}<br />&divide; {nGroups}<br />&rArr; {nAfter}
 			{/if}
 		{/await}

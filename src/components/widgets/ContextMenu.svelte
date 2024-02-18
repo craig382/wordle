@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Definition from "./Definition.svelte";
-	import {ROWS, game, countOfAinB} from "../../utils";
+	import {ROWS, app, countOfAinB} from "../../utils";
 
 	export let x = 0;
 	export let y = 0;
@@ -15,25 +15,25 @@
 	<div>
 		Before guessing "{word}" there were
 		<br />
-		{game.nAnswers[ri]} possible answers.
+		{app.nAnswers[ri]} possible answers.
 		<!-- <br /> -->
-		Guess "{word}" left {game.nAnswers[ri+1]} 
-		possible answers and scored {game.scores[ri]} 
+		Guess "{word}" left {app.nAnswers[ri+1]} 
+		possible answers and scored {app.scores[ri]} 
 		penalty points.
 		<br /><br />
 		Instead of "{word}", the bot in hard (easy) mode
-		chose "{game.guessesHard[ri]}" ("{game.guessesEasy[ri]}"),
-		leaving {countOfAinB(" ", game.guessGroupsHard[ri]) + 1} 
-		({countOfAinB(" ", game.guessGroupsEasy[ri]) + 1}) possible
-		answers and scoring {game.scoresHard[ri]} ({game.scoresEasy[ri]})
+		chose "{app.guessesHard[ri]}" ("{app.guessesEasy[ri]}"),
+		leaving {countOfAinB(" ", app.guessGroupsHard[ri]) + 1} 
+		({countOfAinB(" ", app.guessGroupsEasy[ri]) + 1}) possible
+		answers and scoring {app.scoresHard[ri]} ({app.scoresEasy[ri]})
 		penalty points.
 		<br /><br />
-		{#if word != game.solution}
+		{#if word != app.solution}
 			For the guess after "{word}", the bot in hard (easy) mode
-			chose "{game.guessesHard[ri+1]}" ("{game.guessesEasy[ri+1]}"),
-			leaving {countOfAinB(" ", game.guessGroupsHard[ri+1]) + 1} 
-			({countOfAinB(" ", game.guessGroupsEasy[ri+1]) + 1}) possible
-			answers and scoring {game.scoresHard[ri+1]} ({game.scoresEasy[ri+1]})
+			chose "{app.guessesHard[ri+1]}" ("{app.guessesEasy[ri+1]}"),
+			leaving {countOfAinB(" ", app.guessGroupsHard[ri+1]) + 1} 
+			({countOfAinB(" ", app.guessGroupsEasy[ri+1]) + 1}) possible
+			answers and scoring {app.scoresHard[ri+1]} ({app.scoresEasy[ri+1]})
 			penalty points.
 			<br /><br />
 		{/if}

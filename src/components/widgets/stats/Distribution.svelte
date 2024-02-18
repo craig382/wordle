@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { failed, GameState } from "../../../utils";
 
-	export let game: GameState;
+	export let app: GameState;
 	export let distribution: Guesses;
 
 	$: max = Object.entries(distribution).reduce((p, c) => {
@@ -12,8 +12,8 @@
 
 <h3>guess distribution</h3>
 <div class="guess">
-	{#if game.nGuesses && !game.active && !failed(game)}
-		<h4>{game.nGuesses} Guesses in last game.</h4>
+	{#if app.nGuesses && !app.active && !failed(app)}
+		<h4>{app.nGuesses} Guesses in last game.</h4>
 		<br />
 	{/if}
 </div>
@@ -25,7 +25,7 @@
 				<span class="guess">{guess[0]}</span>
 				<div
 					class="bar"
-					class:this={g === game.nGuesses && !game.active && !failed(game)}
+					class:this={g === app.nGuesses && !app.active && !failed(app)}
 					style="width: {(guess[1] / max) * 100}%;"
 				>
 					{guess[1]}

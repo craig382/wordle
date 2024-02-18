@@ -8,7 +8,7 @@ export const COLS: number = 5;
  * bot will search for the best possible guess.
  */
 const botWords = 500;
-export let game: GameState;
+export let app: GameState;
 
 export const words = {
 	...wordList,
@@ -179,10 +179,10 @@ abstract class Storable {
 	toString() { return JSON.stringify(this); }
 }
 
-/** groupsIdFromState(rowIndex) returns [ groupId, errorIndex ]. */
+/** groupsIdFromState( rowIndex ) returns [ groupId, errorIndex ]. */
 export function groupIdFromRow(ri: number): 
 	[ string, number ] {
-	const state = game.board.state[ri];
+	const state = app.board.state[ri];
 	const id = Array<string>(COLS).fill(" ");
 	let errorIndex = -1; // -1 means no failure.
 	for (let c =0; c < COLS; c++) {
@@ -228,58 +228,58 @@ function processGroups(guessString: string, ri: number): boolean {
 
 	// Initialize answers[ri].
 	if (ri === 0) answers = words.answers;
-	else answers = game.guessGroups[ri-1].split(" ");	
-	game.nAnswers[ri]= answers.length;
+	else answers = app.guessGroups[ri-1].split(" ");	
+	app.nAnswers[ri]= answers.length;
 
 	/** guess is the guessString as an array of letters. */
 	let guess = guessString.split("");
 
 	// Initialize guessGroupId and guessGroupIds[ri].
 	let guessGroupId = "";
-	if ( game.mode === GameMode.solver ) {
-		if (ri < game.nGuesses) {
+	if ( app.mode === GameMode.solver ) {
+		if (ri < app.nGuesses) {
 			// In Solver mode, the user already entered
 			// guessGroupIds[ri] right after entering guesses[ri].
-			 guessGroupId = game.guessGroupIds[ri];	
+			 guessGroupId = app.guessGroupIds[ri];	
 		} else {
 			// Calculate a fake guessGroupId so that later
 			// a new Map can be created for game.groups[ri]
 			guessGroupId = calculateGroupId(answers[0], guess);
 		}
 	} else {
-		guessGroupId = calculateGroupId(game.solution, guess);
-		game.guessGroupIds[ri] = guessGroupId;	
+		guessGroupId = calculateGroupId(app.solution, guess);
+		app.guessGroupIds[ri] = guessGroupId;	
 	}
 
 	// Create the groups map.
-	game.groups[ri] = new Map([[guessGroupId, undefined]]);
+	app.groups[ri] = new Map([[guessGroupId, undefined]]);
 	for (let a = 0; a < answers.length; a++) {
 		let gid = calculateGroupId(answers[a], guess);
-		let gList = game.groups[ri].get(gid);
-		if (gList === undefined) game.groups[ri].set(gid, answers[a]);
-		else game.groups[ri].set(gid, (gList + " " + answers[a]));
+		let gList = app.groups[ri].get(gid);
+		if (gList === undefined) app.groups[ri].set(gid, answers[a]);
+		else app.groups[ri].set(gid, (gList + " " + answers[a]));
 	}
 
 	// Calculate group part of score as long as this is not guess 6.
 	if (ri < (ROWS-1)) {
-		game.scores[ri] = game.nAnswers[ri] - game.groups[ri].size;
+		app.scores[ri] = app.nAnswers[ri] - app.groups[ri].size;
 	}
 
 	// Add 0.5 penalty points to rowScore if the guess is not a remaining answer.
 	if (answers.filter((tw) => countOfAinB(guessString, tw)).length === 0) {
-		game.scores[ri] += 0.5;
+		app.scores[ri] += 0.5;
 	};
 
-	if ( ri < game.nGuesses || game.mode != GameMode.solver ) {
+	if ( ri < app.nGuesses || app.mode != GameMode.solver ) {
 		// Find guessGroup and remove it from groups.
-		game.guessGroups[ri]  = game.groups[ri].get(game.guessGroupIds[ri]);
-		game.groups[ri].delete(game.guessGroupIds[ri]);
+		app.guessGroups[ri]  = app.groups[ri].get(app.guessGroupIds[ri]);
+		app.groups[ri].delete(app.guessGroupIds[ri]);
 	}
 
 	// If this score is the best found so far, save it.
-	if (game.scores[ri] < game.scoresEasy[ri]) copyHumanToEasy(ri, guessString);
+	if (app.scores[ri] < app.scoresEasy[ri]) copyHumanToEasy(ri, guessString);
 
-	return (game.scores[ri] < 1);
+	return (app.scores[ri] < 1);
 }
 
 export function randomSample(anArray: Array<any>) {
@@ -290,19 +290,19 @@ export function randomSample(anArray: Array<any>) {
 }
 
 function copyHumanToEasy(ri: number, guess: string) {
-	game.scoresEasy[ri] = game.scores[ri];
-	game.guessesEasy[ri] = guess;
-	game.guessGroupIdsEasy[ri] = game.guessGroupIds[ri];
-	game.guessGroupsEasy[ri] = game.guessGroups[ri];
-	game.groupsEasy[ri] = game.groups[ri];
+	app.scoresEasy[ri] = app.scores[ri];
+	app.guessesEasy[ri] = guess;
+	app.guessGroupIdsEasy[ri] = app.guessGroupIds[ri];
+	app.guessGroupsEasy[ri] = app.guessGroups[ri];
+	app.groupsEasy[ri] = app.groups[ri];
 }
 
 function copyEasyToHard(ri: number) {
-	game.scoresHard[ri] = game.scoresEasy[ri];
-	game.guessesHard[ri] = game.guessesEasy[ri];
-	game.guessGroupIdsHard[ri] = game.guessGroupIdsEasy[ri];
-	game.guessGroupsHard[ri] = game.guessGroupsEasy[ri];
-	game.groupsHard[ri] = game.groupsEasy[ri];
+	app.scoresHard[ri] = app.scoresEasy[ri];
+	app.guessesHard[ri] = app.guessesEasy[ri];
+	app.guessGroupIdsHard[ri] = app.guessGroupIdsEasy[ri];
+	app.guessGroupsHard[ri] = app.guessGroupsEasy[ri];
+	app.groupsHard[ri] = app.groupsEasy[ri];
 }
 
 export class GameState extends Storable {
@@ -379,8 +379,8 @@ export class GameState extends Storable {
 			this.guesses = this.board.guesses;
 			this.#valid = true;
 		}
-		game = this;
-		// console.log(this);
+		app = this;
+		console.log("app = new GameMode:", app);
 	}
 
 	get latestWord() {
@@ -431,7 +431,7 @@ export class GameState extends Storable {
 		this.guesses[ri] = this.board.guesses[ri];
 
 		// console.log(`GameState.update() completed for guess ${this.guesses}.`);
-		game = this;
+		app = this;
 		console.log(this);
 	}
 

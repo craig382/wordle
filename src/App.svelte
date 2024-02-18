@@ -1,13 +1,11 @@
 <script context="module" lang="ts">
 	import {
 		modeData,
-		seededRandomInt,
 		Stats,
 		GameState,
 		Settings,
 		LetterStates,
 		getWordNumber,
-		words,
 	} from "./utils";
 	import Game from "./components/Game.svelte";
 	import { letterStates, settings, mode } from "./stores";
@@ -20,10 +18,10 @@
 
 <script lang="ts">
 	export let version: string;
+	export let app: GameState;
 	setContext("version", version);
 	localStorage.setItem("version", version);
 	let stats: Stats;
-	let game: GameState;
 	let toaster: Toaster;
 
 	settings.set(new Settings(localStorage.getItem("settings")));
@@ -45,15 +43,15 @@
 		window.location.hash = GameMode[m];
 		stats = new Stats(localStorage.getItem(`stats-${m}`) || m);
 		if (modeData.modes[m].historical) {
-			game = new GameState(m, localStorage.getItem(`state-${m}-h`));
+			app = new GameState(m, localStorage.getItem(`state-${m}-h`));
 		} else {
-			game = new GameState(m, localStorage.getItem(`state-${m}`));
+			app = new GameState(m, localStorage.getItem(`state-${m}`));
 		}
 		// Set the letter states when data for a new game mode is loaded so the keyboard is correct
-		letterStates.set(new LetterStates(game.board));
+		letterStates.set(new LetterStates(app.board));
 	});
 
-	$: saveState(game);
+	$: saveState(app);
 	function saveState(game: GameState) {
 		if (modeData.modes[$mode].historical) {
 			localStorage.setItem(`state-${$mode}-h`, game.toString());
@@ -65,5 +63,5 @@
 
 <Toaster bind:this={toaster} />
 {#if toaster}
-	<Game {stats} {toaster} bind:game={game}/>
+	<Game {stats} bind:app={app} {toaster} />
 {/if}
