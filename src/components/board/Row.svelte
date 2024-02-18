@@ -3,6 +3,8 @@
 	import { COLS, countOfAinB, GameState } from "../../utils";
 	import Tile from "./Tile.svelte";
 	import { showRowHints } from "../../stores";
+	import { GameMode } from "../../enums";
+
 
 	/** Row Index.*/
 	export let ri: number;
@@ -15,6 +17,7 @@
 	}
 	const dispatch = createEventDispatcher();
 	let animation = "";
+	let complete = false;
 	let tiles: Tile[] = [];
 
 	const MAX_DOUBLE_CLICK_INTERVAL = 400;
@@ -33,6 +36,13 @@
 		}
 	}
 
+	$: {
+		let ng = app.nGuesses;
+		if( (ng > ri) || (ng === ri) && (app.mode === GameMode.solver) ) 
+			complete = true;
+		else complete = false;
+	}
+
 </script>
 
 <div
@@ -42,7 +52,7 @@
 	on:touchstart={onTouch}
 	on:animationend={() => (animation = "")}
 	data-animation={animation}
-	class:complete={app.nGuesses > ri}
+	class:complete={complete}
 >
 	{#each Array(COLS) as _, ci}
 		<Tile bind:this={tiles[ci]} bind:app={app} bind:state={app.board.state[ri][ci]} value={app.board.guesses[ri].charAt(ci)} 
