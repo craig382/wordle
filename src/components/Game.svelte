@@ -72,18 +72,24 @@
 				let gid = "";
 				[ gid, errorIndex ] = groupIdFromRow(app.nGuesses);
 				if (errorIndex > -1) {
-					toaster.pop(`Give letter ${errorIndex + 1} a color then resubmit your guess.`);
+					toaster.pop(`Give letter ${errorIndex + 1} a color then resubmit your guess.`, 10);
 					return;
 				}
 				app.guessGroupIds[app.nGuesses] = gid;
 				if (gid === "#####") app.solution = app.board.guesses[app.nGuesses];
+				else {
+					app.board.state[app.nGuesses + 1].fill("⬛");
+				}
 			} else app.board.state[app.nGuesses] = app.guess(app.solution);
 			++app.nGuesses;
 			app.update();
 			if (app.lastWord === app.solution) win();
 			else if (app.nGuesses === ROWS) lose();
-			app.guessProcessed = true;
-			// app = app;
+			else if ( ($mode === GameMode.solver) && (app.guessGroups[app.nGuesses - 1] === "") ) {
+				toaster.pop(`No possible solutions left. Did you enter some color(s) wrong? Or maybe the other Wordle's solution dictionary has some words not in this Wordle's dictionary.`, 10);
+				lose();
+			} 
+			// app.guessProcessed = true;
 			$showRowHints = $showRowHints;
 			$letterStates.update(app.lastState, app.lastWord);
 			$letterStates = $letterStates;

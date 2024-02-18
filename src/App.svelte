@@ -18,7 +18,7 @@
 
 <script lang="ts">
 	export let version: string;
-	export let app: GameState;
+	let app: GameState;
 	setContext("version", version);
 	localStorage.setItem("version", version);
 	let stats: Stats;

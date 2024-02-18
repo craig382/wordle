@@ -378,9 +378,14 @@ export class GameState extends Storable {
 
 			this.guesses = this.board.guesses;
 			this.#valid = true;
+
+			if (mode = GameMode.solver) {
+				this.board.state[0].fill("⬛");
+				this.solution = "";
+			}
 		}
 		app = this;
-		console.log("app = new GameMode:", app);
+		console.log("app = new GameState:", app);
 	}
 
 	get latestWord() {
