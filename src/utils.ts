@@ -238,8 +238,8 @@ function processGroups(guessString: string, ri: number): boolean {
 	let guessGroupId = "";
 	if ( app.mode === GameMode.solver ) {
 		if (ri < app.nGuesses) {
-			// In Solver mode, the user already entered
-			// guessGroupIds[ri] right after entering guesses[ri].
+			// In Solver mode, the user entered letter
+			// are used to calculate guessGroupIds[ri].
 			 guessGroupId = app.guessGroupIds[ri];	
 		} else {
 			// Calculate a fake guessGroupId so that later

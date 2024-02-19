@@ -60,21 +60,18 @@
 	{/each}
 	<section>
 		{#if ri < app.nGuesses && $showRowHints}
-			{@const nBefore = app.nAnswers[ri]}
 			{@const nAfter = countOfAinB(" ", app.guessGroups[ri]) + 1}
 			{@const nGroups = app.groups[ri].size + 1}	
-			{nBefore}<br />&divide; {nGroups}<br />&rArr; {nAfter}
+			{nGroups} g<br />{nAfter} w
 		{/if}
 	</section>
 </div>
 
 <style lang="scss">
 	section {
-		// align-items: normal;
 		text-align: center;
-		// align-content: center;
-		// overflow-wrap: break-word;
-		// vertical-align: bottom;
+		align-self: center;
+		line-height: 1.5em;		
 	}
 	.board-row {
 		display: grid;

@@ -70,10 +70,6 @@
 				let errorIndex = 0;
 				let gid = "";
 				[ gid, errorIndex ] = groupIdFromRow(app.nGuesses);
-				if (errorIndex > -1) {
-					toaster.pop(`Give letter ${errorIndex + 1} a color then resubmit your guess.`, 10);
-					return;
-				}
 				app.guessGroupIds[app.nGuesses] = gid;
 				if (gid === "#####") app.solution = app.board.guesses[app.nGuesses];
 				else {
@@ -221,16 +217,13 @@
 			randomly selected Wordle game each time you 
 			click the "Refresh" icon in the upper left corner.
 		{:else if $mode === GameMode.solver}
-			In Solver mode, you and the Bot 
-			work together to solve the Wordle. Each time 
-			you enter a guess you must also enter the 
-			color of each letter.
+			You and the Bot work together to solve the Wordle. 
+			Before hitting "Enter", click on each 
+			letter as needed to change its color.
 		{/if}
 		<br />
 		{#if $showRowHints}
-			<br />Row Hint. &lt;&nbsp;words before&nbsp;&gt; &divide; 
-			(&nbsp;divided by&nbsp;) &lt;&nbsp;n groups&nbsp;&gt; 
-			&rArr; (&nbsp;yields&nbsp;) &lt;&nbsp;words after&nbsp;&gt;.
+			<br />Row Hint. Guess &rArr; X g (groups) and Y w (words remaining).
 		{/if}
 	</p>
 	<Board

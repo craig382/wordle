@@ -35,8 +35,7 @@
 - Solver Mode is a new mode.
 - To enter Solver mode, click on "WORDLE+" in the header to switch modes until the temporary mode pop up displays "Solver Mode".
 - In Solver mode, you and the Bot work together to solve the Wordle. Each time you enter a guess you must also enter the color of each letter.
-- In Solver mode, after you enter a guess (with colors), the Bot, as always, can give you hints and stats on the current guess and all previous guesses, show you all possible remaining solutions, and the Bot can also make a hard mode and an easy mode recommendation for the next guess. But, in Solver mode, the Bot may not know the color of some letters of the next guess. You will have to help the Bot with those.
-
+- In Solver mode, after you enter a guess (with colors), the Bot can give you hints and stats on the current guess and all previous guesses, show you all possible remaining solutions, and the Bot can also make a hard mode and an easy mode recommendation for the next guess.
 
 ### Craig's Research and Modifications
 - Board.svelte\context calls utils.ts\getRowData to filter utils.ts\words.words to pAnsWords list of remaining solutions.
