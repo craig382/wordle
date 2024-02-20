@@ -4,10 +4,6 @@ import wordList from "./words_5";
 
 export const ROWS: number = 6;
 export const COLS: number = 5;
-/** botWords is the max number of words the
- * bot will search for the best possible guess.
- */
-const botWords = 500;
 export let app: GameState;
 
 export const words = {
@@ -318,6 +314,10 @@ export class GameState extends Storable {
 	public openers = "trace crane slate crate plate saint least stare stale snare plane place";
 	// Bot scores: trace 2165, crane 2173, slate 2168, crate 2167, plate 2184,
 	// saint 2186, least 2175, stare 2182, stale 2173, snare 2183, plane 2183, place 2187
+	/** botWords is the max number of words the
+	 * bot will search for the best possible guess.
+	 */
+	public botWords = 500;
 
 	#valid = false;
 	mode: GameMode;
@@ -427,7 +427,7 @@ export class GameState extends Storable {
 
 		// Search for the best possible easy mode guess.
 		if ((this.scoresHard[ri] !== 0) || (ri === 0)) {
-			words.answers.slice(0, botWords).some(aGuess => {processGroups(aGuess, ri);});
+			words.answers.slice(0, app.botWords).some(aGuess => {processGroups(aGuess, ri);});
 		}
 
 		// Revert ri 1 guess so human can take their turn.

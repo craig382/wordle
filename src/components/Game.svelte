@@ -213,9 +213,9 @@
 	<p>
 		{modeData.modes[$mode].name} Mode.
 		{#if $mode === GameMode.ai}
-			In AI mode, the Bot plays one 
-			randomly selected Wordle game each time you 
-			click the "Refresh" icon in the upper left corner.
+			Click the "Refresh" icon in the upper left 
+			corner to watch the Bot play one randomly 
+			generated Wordle game.
 		{:else if $mode === GameMode.solver}
 			Enter the guess letters, then before clicking "Enter", 
 			click on each letter as needed to change its color.
@@ -358,15 +358,25 @@
 			{/if}
 		{/each}
 		<div class="row">
-			Like golf, a lower score is better.<br />
-			Zero is the perfect score.<br />
-			For some moves, a score of zero is not possible.<br /><br />
-			Score (penalty point) formula...<br /><br />
-			For guess 6, start with Score = 0.<br />
-			For guesses 1 to 5, start with the Score in the formula below.<br /><br />
-			Score = nWordsLeftBeforeThisGuess - nGroupsEliminatedByThisGuess - 1.<br /><br />
-			Score = Score + 0.5 if guess was "easy" (guess was not one of 
-			the words left before this guess).
+			For guess 6, all remaining answers are equally likely
+			to win or lose, and the Bot selects the first remaining
+			answer as its recommended guess.<br /><br />
+			
+			For guesses 1 to 5, the Bot recommends the first
+			guess it finds that creates the maximum number of groups.<br /><br />
+			
+			A "perfect" guess is one that creates as many groups as there
+			were remaining answers before the guess.<br /><br />
+			
+			If the Bot finds a perfect guess, it immediately ends its 
+			searching.<br /><br />
+
+			The Bot starts by searching through the prior guess's remaining
+			answers for a Hard Mode recommended guess. If the Bot finds
+			a perfect Hard Mode recommended guess, it will use that same
+			guess as its Easy Mode recommended guess. Otherwise, the Bot
+			will search through the first {app.botWords} words of the Wordle 
+			solution dictionary for its Easy Mode recommended guess.
 		</div>
 	{/if}
 </Modal>
