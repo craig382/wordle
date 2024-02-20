@@ -189,7 +189,7 @@ export function groupIdFromRow(ri: number):
 		}
 	}
 	errorIndex = id.indexOf(" ");
-	console.log("groupIdFromRow:", id, errorIndex);
+	// console.log("groupIdFromRow:", id, errorIndex);
 	return [id.join(""), errorIndex];
 }
 
@@ -267,7 +267,12 @@ function processGroups(guessString: string, ri: number): boolean {
 	if ( ri < app.nGuesses || app.mode != GameMode.solver ) {
 		// Find guessGroup and remove it from groups.
 		app.guessGroups[ri]  = app.groups[ri].get(app.guessGroupIds[ri]);
-		app.groups[ri].delete(app.guessGroupIds[ri]);
+		if (app.guessGroups[ri] === undefined) {
+			console.error(`processGroups: No possible solutions left. Did you enter some color(s) wrong? Or maybe the other Wordle's solution dictionary has some words not in this Wordle's dictionary.`);
+			let e = new Error('processGroups: No possible solutions left.');
+			console.error(e);
+			throw e; 
+		} else app.groups[ri].delete(app.guessGroupIds[ri]);
 	}
 
 	// If this score is the best found so far, save it.
@@ -413,24 +418,29 @@ export class GameState extends Storable {
 			copyHumanToEasy(0, guess);
 		}
 
-		// Process this guess.
-		processGroups(this.lastWord, ri);
+		try {
+			// Process this guess.
+			processGroups(this.lastWord, ri);
 
-		// Advance ri 1 guess for bot to look for best possible guesses.
-		ri = this.nGuesses;
+			// Advance ri 1 guess for bot to look for best possible guesses.
+			ri = this.nGuesses;
 
-		// Search for the best posssible hard mode guess.
-		this.guessGroups[ri-1].split(" ").some(aGuess => {processGroups(aGuess, ri);});
-		copyEasyToHard(ri);
+			// Search for the best posssible hard mode guess.
+			this.guessGroups[ri-1].split(" ").some(aGuess => {processGroups(aGuess, ri);});
+			copyEasyToHard(ri);
 
-		// Search for the best possible easy mode guess.
-		if (this.nGroupsHard[ri] !== this.nAnswers[ri]) {
-			words.answers.slice(0, app.botWords).some(aGuess => {processGroups(aGuess, ri);});
-		}
+			// Search for the best possible easy mode guess.
+			if (this.nGroupsHard[ri] !== this.nAnswers[ri]) {
+				words.answers.slice(0, app.botWords).some(aGuess => {processGroups(aGuess, ri);});
+			}
 
-		// Revert ri 1 guess so human can take their turn.
-		ri = this.nGuesses - 1;
-		this.guesses[ri] = this.board.guesses[ri];
+			// Revert ri 1 guess so human can take their turn.
+			ri = this.nGuesses - 1;
+			this.guesses[ri] = this.board.guesses[ri];
+		} catch (e) {
+			console.error("GameState.update: ", e);
+			throw e; // throw the error up the chain
+		}; 
 
 		// console.log(`GameState.update() completed for guess ${this.guesses}.`);
 		app = this;
