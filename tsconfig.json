@@ -13,7 +13,9 @@
      */
     "allowJs": true,
     "checkJs": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "ignoreDeprecations": "5.0",
+    "verbatimModuleSyntax": true
   },
   "include": [
     "src/**/*.d.ts",
