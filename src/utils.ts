@@ -268,9 +268,12 @@ function processGroups(guessString: string, ri: number): boolean {
 		// Find guessGroup and remove it from groups.
 		app.guessGroups[ri]  = app.groups[ri].get(app.guessGroupIds[ri]);
 		if (app.guessGroups[ri] === undefined) {
-			console.error(`processGroups: No possible solutions left. Did you enter some color(s) wrong? Or maybe the other Wordle's solution dictionary has some words not in this Wordle's dictionary.`);
+			app.errorString =`No possible solutions left. Did you enter ` +
+			`some color(s) wrong? Or perhaps the other Wordle's solution ` + 
+			`dictionary is not the same as mine. Click the refresh icon ` +
+			`to try again.`;
 			let e = new Error('processGroups: No possible solutions left.');
-			console.error(e);
+			// console.log(e);
 			throw e; 
 		} else app.groups[ri].delete(app.guessGroupIds[ri]);
 	}
@@ -321,6 +324,7 @@ export class GameState extends Storable {
 	 * bot will search for the best possible guess.
 	 */
 	public botWords = 500;
+	public errorString :string = "";
 
 	#valid = false;
 	mode: GameMode;
@@ -386,6 +390,7 @@ export class GameState extends Storable {
 				this.solution = "";
 			}
 		}
+		this.errorString = "";
 		app = this;
 		console.log("app = new GameState:", app);
 	}
@@ -438,7 +443,7 @@ export class GameState extends Storable {
 			ri = this.nGuesses - 1;
 			this.guesses[ri] = this.board.guesses[ri];
 		} catch (e) {
-			console.error("GameState.update: ", e);
+			// console.log("GameState.update: ", e);
 			throw e; // throw the error up the chain
 		}; 
 

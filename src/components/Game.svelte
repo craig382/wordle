@@ -72,21 +72,21 @@
 				[ gid, errorIndex ] = groupIdFromRow(app.nGuesses);
 				app.guessGroupIds[app.nGuesses] = gid;
 				if (gid === "#####") app.solution = app.board.guesses[app.nGuesses];
-				else {
-					app.board.state[app.nGuesses + 1].fill("⬛");
-				}
+				else app.board.state[app.nGuesses + 1].fill("⬛");
 			} else app.board.state[app.nGuesses] = app.guess(app.solution);
 			++app.nGuesses;
-			app.update();
-			if (app.lastWord === app.solution) win();
-			else if (app.nGuesses === ROWS) lose();
-			else if ( ($mode === GameMode.solver) && (app.guessGroups[app.nGuesses - 1] === "") ) {
-				toaster.pop(`No possible solutions left. Did you enter some color(s) wrong? Or maybe the other Wordle's solution dictionary has some words not in this Wordle's dictionary.`, 10);
-				lose();
-			} 
-			$showRowHints = $showRowHints;
-			$letterStates.update(app.lastState, app.lastWord);
-			$letterStates = $letterStates;
+			try {
+				app.update();
+				if (app.lastWord === app.solution) win();
+				else if (app.nGuesses === ROWS) lose();
+				$showRowHints = $showRowHints;
+				$letterStates.update(app.lastState, app.lastWord);
+				$letterStates = $letterStates;
+			} catch (e) {
+				// console.log("processValidGuess: ", e);
+				app.nGuesses = app.nGuesses - 1; // Roll back the unsucessful guess.
+				app.active = false; // Abort the game.
+			}
 	}
 
 	function submitWord() {
@@ -137,7 +137,7 @@
 
 	function lose() {
 		app.active = false;
-		setTimeout(setShowStatsTrue, delay);
+		// setTimeout(setShowStatsTrue, delay);
 		if (!modeData.modes[$mode].historical) {
 			stats.addLoss(modeData.modes[$mode]);
 			stats = stats;
@@ -224,6 +224,9 @@
 		{#if $showRowHints}
 			<br />Each Row Hint shows g groups and w words.
 		{/if}
+		{#if app.errorString !== ""}
+			<br /><br />{app.errorString}
+		{/if}	
 	</p>
 	<Board
 		bind:this={board}

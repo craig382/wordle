@@ -11,7 +11,7 @@
 		"Hard mode is game mode specific. Turning it on in one game mode won't change it on the others.",
 		"Hard mode can be enabled during a game if you haven't violated the hard mode rules yet.",
 		"Because words are chosen from the list randomly it is possible to get the same word again.",
-		"When you see the refresh button in the top left corner it means a new word is ready.",
+		"When you see an explanation point to the right of the refresh button in the top left corner it means a new word is ready.",
 		"Everyone has the same wordle at the same time. Your word #73 is the same as everyone elses #73.",
 		"There are more valid guesses than possible solutions, ie. not all 5 letter words can be selected as an answer by the game.",
 		"Historical games don't count towards your stats. Historical games are when you follow a link to a specific game number.",
