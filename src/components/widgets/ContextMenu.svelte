@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Definition from "./Definition.svelte";
-	import {ROWS, app, countOfAinB} from "../../utils";
+	import {app, countOfAinB} from "../../utils";
+	import { GameMode } from "../../enums";
 
 	export let x = 0;
 	export let y = 0;
@@ -13,34 +14,36 @@
 
 <div class="ctx-menu" style="top: {y}px; left: {x}px;">
 	<div>
-		Before guessing "{word}" there were
-		<br />
-		{app.nAnswers[ri]} possible answers.
-		<!-- <br /> -->
-		Guess "{word}" left {app.nAnswers[ri+1]} 
-		possible answers and scored {app.nGroups[ri]} 
-		penalty points.
-		<br /><br />
-		Instead of "{word}", the bot in hard (easy) mode
-		chose "{app.guessesHard[ri]}" ("{app.guessesEasy[ri]}"),
-		leaving {countOfAinB(" ", app.guessGroupsHard[ri]) + 1} 
-		({countOfAinB(" ", app.guessGroupsEasy[ri]) + 1}) possible
-		answers and scoring {app.nGroupsHard[ri]} ({app.nGroupsEasy[ri]})
-		penalty points.
-		<br /><br />
+		Before guessing {word.toUpperCase()} there were
+		{app.nAnswers[ri]} possible answers.<br /><br />
+
 		{#if word != app.solution}
-			For the guess after "{word}", the bot in hard (easy) mode
-			chose "{app.guessesHard[ri+1]}" ("{app.guessesEasy[ri+1]}"),
-			leaving {countOfAinB(" ", app.guessGroupsHard[ri+1]) + 1} 
-			({countOfAinB(" ", app.guessGroupsEasy[ri+1]) + 1}) possible
-			answers and scoring {app.nGroupsHard[ri+1]} ({app.nGroupsEasy[ri+1]})
-			penalty points.
+			Guess {word.toLocaleUpperCase()} created 
+			{app.nGroups[ri]} groups and left 
+			{app.nAnswers[ri+1]} possible answers.
 			<br /><br />
+
+			Instead of {word.toLocaleUpperCase()}, 
+			the bot in hard (easy) mode chose 
+			{app.guessesHard[ri].toUpperCase()} 
+			({app.guessesEasy[ri].toUpperCase()}),
+			which created {app.nGroupsHard[ri]} ({app.nGroupsEasy[ri]})
+			groups{#if app.mode === GameMode.solver}.
+			{:else} &nbsp;and left {countOfAinB(" ", app.guessGroupsHard[ri]) + 1} 
+			({countOfAinB(" ", app.guessGroupsEasy[ri]) + 1}) possible
+			answers.{/if}
+
+			<br /><br />
+			For the guess after {word.toUpperCase()}, the bot in 
+			hard (easy) mode chose {app.guessesHard[ri+1].toUpperCase()} 
+			({app.guessesEasy[ri+1].toUpperCase()}),
+			which created {app.nGroupsHard[ri+1]} ({app.nGroupsEasy[ri+1]})
+			groups{#if app.mode === GameMode.solver}.{:else} &nbsp;and left {countOfAinB(" ", app.guessGroupsHard[ri+1]) + 1} 
+			({countOfAinB(" ", app.guessGroupsEasy[ri+1]) + 1}) possible
+			answers.{/if}
+			<br /><br />
+
 		{/if}
-		An "easy" guess earns 0.5 penalty points.
-		For each guess but guess {ROWS}, each word 
-		in a group (except the group's first word) 
-		earns 1 penalty point.
 	</div>
 	{#if word !== ""}
 		<Definition {word} alternates={1} />

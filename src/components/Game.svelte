@@ -214,7 +214,7 @@
 		{modeData.modes[$mode].name} Mode.
 		{#if $mode === GameMode.ai}
 			Click the "Refresh" icon in the upper left 
-			corner to watch the Bot play one randomly 
+			corner to watch the Bot play a randomly 
 			generated Wordle game.
 		{:else if $mode === GameMode.solver}
 			Enter the guess letters, then before clicking "Enter", 
@@ -340,8 +340,8 @@
 				</div>
 				{#if ri < app.nGuesses && app.guesses[ri] !== app.solution}
 					<div class="row">
-						{nLeft} words left after guess 
-						{app.guesses[ri].toUpperCase()}: {app.guessGroups[ri]}<br />
+						Guess {app.guesses[ri].toUpperCase()} left 
+						{nLeft} words: {app.guessGroups[ri]}<br />
 					</div>
 				{/if}
 			{/if}
