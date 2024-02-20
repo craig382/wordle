@@ -1,16 +1,22 @@
 <script context="module" lang="ts">
 	const tips = [
 		"You can change the gamemode by clicking WORDLE+ or swiping the board left or right.",
+		'In AI Mode, the Bot makes the "Human\'s" choices.',
+		'In AI mode, the Bot plays one randomly selected Wordle game by itself each time you click on the "Refresh" icon in the upper left corner.',
+		'In Solver mode, the Bot helps you solve an external Wordle (a Wordle you are playing somewhere else).',
+		'In Solver mode, enter the guess letters, then before clicking on "Enter", click on each letter as needed to change the letter\'s color.',
+		"Double tap or right click a guess on the board to see its definition and to see the Bot's hints and recommendations.",
+		'Click the "+/-" ("Show/Hide") icon in the upper left side to show or hide the row hints.',
+		'Each Row Hint shows g groups created by the row guess and w words remaining after the row guess.',
 		"Hard mode is game mode specific. Turning it on in one game mode won't change it on the others.",
-		"Double tap or right click a word on the board to learn its definition.",
 		"Hard mode can be enabled during a game if you haven't violated the hard mode rules yet.",
-		"Double tap or right click the next row to see how many possible words can be played there, if you use all the previous information.",
 		"Because words are chosen from the list randomly it is possible to get the same word again.",
 		"When you see the refresh button in the top left corner it means a new word is ready.",
 		"Everyone has the same wordle at the same time. Your word #73 is the same as everyone elses #73.",
-		"There are more valid guesses than possible words, ie. not all 5 letter words can be selected as an answer by the game.",
+		"There are more valid guesses than possible solutions, ie. not all 5 letter words can be selected as an answer by the game.",
 		"Historical games don't count towards your stats. Historical games are when you follow a link to a specific game number.",
 		"Only the data for latest historical game is saved for each game mode.",
+		'To run the hidden, dangerous "Reset Your Stats" function... After clicking on the "Settings" icon (the gear icon in the upper right corner), hover your mouse over the words "Infinite word #xyz" in the bottom right corner and the following message will pop up: "double click to reset your stats". After you double click, you will briefly see the "localStorage cleared" message and all your stats will be erased.',
 	];
 </script>
 

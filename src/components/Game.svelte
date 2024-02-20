@@ -217,13 +217,12 @@
 			randomly selected Wordle game each time you 
 			click the "Refresh" icon in the upper left corner.
 		{:else if $mode === GameMode.solver}
-			You and the Bot work together to solve the Wordle. 
-			Before hitting "Enter", click on each 
-			letter as needed to change its color.
+			Enter the guess letters, then before clicking "Enter", 
+			click on each letter as needed to change its color.
 		{/if}
 		<br />
 		{#if $showRowHints}
-			<br />Row Hint. Guess &rArr; X g (groups) and Y w (words remaining).
+			<br />Each Row Hint shows g groups and w words.
 		{/if}
 	</p>
 	<Board

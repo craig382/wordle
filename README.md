@@ -29,21 +29,17 @@
 - The original modes are Daily, Hourly, and Infinite.
 - To enter AI mode, click on "WORDLE+" in the header to switch modes until the temporary mode pop up displays "AI Mode".
 - In AI Mode, the Bot makes the "Human's" choices.
-- In AI mode, the Bot plays one randomly selected Wordle game each time you click on the "Refresh" icon in the upper left corner.
+- In AI mode, the Bot plays one randomly selected Wordle game by itself each time you click on the "Refresh" icon in the upper left corner.
 
 ### Solver Mode
 - Solver Mode is a new mode.
 - To enter Solver mode, click on "WORDLE+" in the header to switch modes until the temporary mode pop up displays "Solver Mode".
-- In Solver mode, you and the Bot work together to solve the Wordle. Each time you enter a guess you must also enter the color of each letter.
-- In Solver mode, after you enter a guess (with colors), the Bot can give you hints and stats on the current guess and all previous guesses, show you all possible remaining solutions, and the Bot can also make a hard mode and an easy mode recommendation for the next guess.
+- In Solver mode, the Bot helps you solve an external Wordle (a Wordle you are playing somewhere else).
+- In Solver mode, enter the guess letters, then before clicking on "Enter", click on each letter as needed to change the letter's color.
 
-### Craig's Research and Modifications
-- Board.svelte\context calls utils.ts\getRowData to filter utils.ts\words.words to pAnsWords list of remaining solutions.
-- utils.ts\getRowData has a "duplicate letters bug" that returns false remaining solution(s) for the case where the tiles have revealed duplicate letters. This is the same bug as Mikha Davids' Wordle repository Issue #69 titled "Potential answer / guess count displayed 0 for 'Dolly' ".
-- To replicate the "duplicate letters bug", revert the following code in the utils.ts\getRowData function from "if (occurrences < e[1][0]) {" to "if (!occurrences || (e[1][1] && occurrences !== e[1][0])) {". Then, play any of the games below with and without the reverted change, double click the row after the suggested guess and Board.svelt\context will log out pAnsWords (the list of remaining solutions) to the Console tab of the browser's Development tools panel.
-- http://localhost:5173/wordle/#infinite/43873602 dolly, try guess "lolly" or "lowly" after guesses "slate" and "broil". Reference Mikha Davids' Wordle repository Issue #69 titled "Potential answer / guess count displayed 0 for 'Dolly' ".
-- http://localhost:5173/wordle/#infinite/63769522 beefy, try guess "greed" after guess "slate".
-- http://localhost:5173/wordle/#infinite/63781582 gloom, try guess "boozy" after guess "trace".
+### Row Hints
+- Click the "+/-" ("Show/Hide") icon in the upper left side to show or hide the row hints.
+- Each Row Hint shows g groups created by the row guess and w words remaining after the row guess.
 
 ### Mikha Davids' original ReadMe.md continues below.
 
