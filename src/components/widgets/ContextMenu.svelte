@@ -18,14 +18,14 @@
 		{app.nAnswers[ri]} possible answers.
 		<!-- <br /> -->
 		Guess "{word}" left {app.nAnswers[ri+1]} 
-		possible answers and scored {app.scores[ri]} 
+		possible answers and scored {app.nGroups[ri]} 
 		penalty points.
 		<br /><br />
 		Instead of "{word}", the bot in hard (easy) mode
 		chose "{app.guessesHard[ri]}" ("{app.guessesEasy[ri]}"),
 		leaving {countOfAinB(" ", app.guessGroupsHard[ri]) + 1} 
 		({countOfAinB(" ", app.guessGroupsEasy[ri]) + 1}) possible
-		answers and scoring {app.scoresHard[ri]} ({app.scoresEasy[ri]})
+		answers and scoring {app.nGroupsHard[ri]} ({app.nGroupsEasy[ri]})
 		penalty points.
 		<br /><br />
 		{#if word != app.solution}
@@ -33,7 +33,7 @@
 			chose "{app.guessesHard[ri+1]}" ("{app.guessesEasy[ri+1]}"),
 			leaving {countOfAinB(" ", app.guessGroupsHard[ri+1]) + 1} 
 			({countOfAinB(" ", app.guessGroupsEasy[ri+1]) + 1}) possible
-			answers and scoring {app.scoresHard[ri+1]} ({app.scoresEasy[ri+1]})
+			answers and scoring {app.nGroupsHard[ri+1]} ({app.nGroupsEasy[ri+1]})
 			penalty points.
 			<br /><br />
 		{/if}

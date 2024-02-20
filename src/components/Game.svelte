@@ -310,51 +310,40 @@
 						<section>
 							Bot Hard Mode<br /><br />
 							{app.guessesHard[ri].toUpperCase()}<br />
-							{patternString(app.guessGroupIdsHard[ri])}<br />
-							{app.scoresHard[ri]} points<br /><br />
-							Eliminated {app.nAnswers[ri] - nLeftHard} words<br />
-							in {app.groupsHard[ri].size} groups:
-							{#if ri > 0}
-								<br />{Array.from(app.groupsHard[ri].values()).sort((a, b) => a.length - b.length).join(", ")}
-							{/if}
-							<br /><br />{nLeftHard} words left:
-							{#if ri > 0}
-								<br />{app.guessGroupsHard[ri]}
+							{app.nGroupsHard[ri]} groups<br /><br />
+							{#if app.mode !== GameMode.solver}
+								{patternString(app.guessGroupIdsHard[ri])}<br />
+								Eliminated {app.nAnswers[ri] - nLeftHard} words<br />
+								{nLeftHard} words left
 							{/if}
 						</section>
 						<section>
 							{#if ri < app.nGuesses}
 								Human<br /><br />
 								{app.guesses[ri].toUpperCase()}<br />
+								{app.nGroups[ri]} groups<br /><br />
 								{patternString(app.guessGroupIds[ri])}<br />
-								{app.scores[ri]} points<br /><br />
 								Eliminated {app.nAnswers[ri] - nLeft} words<br />
-								in {app.groups[ri].size} groups:
-								{#if ri > 0}
-									<br />{Array.from(app.groups[ri].values()).sort((a, b) => a.length - b.length).join(", ")}
-								{/if}
-								<br /><br />{nLeft}  words left:
-								{#if ri > 0}
-									<br />{app.guessGroups[ri]}
-								{/if}
+								{nLeft}  words left
 							{/if}
 						</section>
 						<section>
 							Bot Easy Mode<br /><br />
 							{app.guessesEasy[ri].toUpperCase()}<br />
-							{patternString(app.guessGroupIdsEasy[ri])}<br />
-							{app.scoresEasy[ri]} points<br /><br />
-							Eliminated {app.nAnswers[ri] - nLeftEasy} words<br />
-							in {app.groupsEasy[ri].size} groups:
-							{#if ri > 0}
-								<br />{Array.from(app.groupsEasy[ri].values()).sort((a, b) => a.length - b.length).join(", ")}
-							{/if}
-							<br /><br />{nLeftEasy} words left:
-							{#if ri > 0}
-							<br />{app.guessGroupsEasy[ri]}
+							{app.nGroupsEasy[ri]} groups<br /><br />
+							{#if app.mode !== GameMode.solver}
+								{patternString(app.guessGroupIdsEasy[ri])}<br />
+								Eliminated {app.nAnswers[ri] - nLeftEasy} words<br />
+								{nLeftEasy} words left
 							{/if}
 						</section>
 				</div>
+				{#if ri < app.nGuesses && app.guesses[ri] !== app.solution}
+					<div class="row">
+						{nLeft} words left after guess 
+						{app.guesses[ri].toUpperCase()}: {app.guessGroups[ri]}<br />
+					</div>
+				{/if}
 			{/if}
 		{/each}
 		<div class="row">
@@ -439,6 +428,8 @@
 		justify-content: center;
 		gap: 4px;
 		border: 1px solid;
+		border-radius: 4px;
+		padding: 8px;
 	}
 	section {
 		display: flex;

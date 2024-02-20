@@ -212,11 +212,13 @@ export function patternString(groupId: string): string {
 
 /** 
  * ProcessGroups(guess).
- * Creates and scores groups assuming guessString 
+ * Creates groups assuming guessString 
  * is the latest guess and ri is the row index.
- * Returns true for a score < 1.
+ * Returns true for a "perfect" guess.
  */
 function processGroups(guessString: string, ri: number): boolean {
+
+	let perfectGuess: boolean;
 
 	/** answers[answerIndex].
 	 * A list of remaining answers before the row's guess. */	
@@ -256,15 +258,11 @@ function processGroups(guessString: string, ri: number): boolean {
 		else app.groups[ri].set(gid, (gList + " " + answers[a]));
 	}
 
-	// Calculate group part of score as long as this is not guess 6.
-	if (ri < (ROWS-1)) {
-		app.scores[ri] = app.nAnswers[ri] - app.groups[ri].size;
-	}
-
-	// Add 0.5 penalty points to rowScore if the guess is not a remaining answer.
-	if (answers.filter((tw) => countOfAinB(guessString, tw)).length === 0) {
-		app.scores[ri] += 0.5;
-	};
+	// Calculate nGroups and perfectGuess.
+	app.nGroups[ri] = app.groups[ri].size;
+	if (app.nGroups[ri] === app.nAnswers[ri] || ri === (ROWS-1)) 
+		perfectGuess = true;
+	else perfectGuess = false;
 
 	if ( ri < app.nGuesses || app.mode != GameMode.solver ) {
 		// Find guessGroup and remove it from groups.
@@ -273,9 +271,9 @@ function processGroups(guessString: string, ri: number): boolean {
 	}
 
 	// If this score is the best found so far, save it.
-	if (app.scores[ri] < app.scoresEasy[ri]) copyHumanToEasy(ri, guessString);
+	if (app.nGroups[ri] > app.nGroupsEasy[ri]) copyHumanToEasy(ri, guessString);
 
-	return (app.scores[ri] < 1);
+	return perfectGuess;
 }
 
 export function randomSample(anArray: Array<any>) {
@@ -286,7 +284,7 @@ export function randomSample(anArray: Array<any>) {
 }
 
 function copyHumanToEasy(ri: number, guess: string) {
-	app.scoresEasy[ri] = app.scores[ri];
+	app.nGroupsEasy[ri] = app.nGroups[ri];
 	app.guessesEasy[ri] = guess;
 	app.guessGroupIdsEasy[ri] = app.guessGroupIds[ri];
 	app.guessGroupsEasy[ri] = app.guessGroups[ri];
@@ -294,7 +292,7 @@ function copyHumanToEasy(ri: number, guess: string) {
 }
 
 function copyEasyToHard(ri: number) {
-	app.scoresHard[ri] = app.scoresEasy[ri];
+	app.nGroupsHard[ri] = app.nGroupsEasy[ri];
 	app.guessesHard[ri] = app.guessesEasy[ri];
 	app.guessGroupIdsHard[ri] = app.guessGroupIdsEasy[ri];
 	app.guessGroupsHard[ri] = app.guessGroupsEasy[ri];
@@ -331,13 +329,13 @@ export class GameState extends Storable {
 	 * For each row, the number of remaining 
 	 * answers before the row's guess. */
 	public nAnswers = Array<number>(ROWS+1).fill(0);
-	/** rowScores[rowIndex]. 
-	 * Each row is given a score.
+	/** nGroups[rowIndex]. 
+	 * Number of groups created by the row guess.
 	 * "Easy" parameters are used to store
-	 * the best score found so far. */
-	public scores = Array<number>(ROWS+1).fill(0);
-	public scoresHard = Array<number>(ROWS+1).fill(0);
-	public scoresEasy = Array<number>(ROWS+1).fill(100000);
+	 * the best (maximum) nGroups found so far. */
+	public nGroups = Array<number>(ROWS+1).fill(0);
+	public nGroupsHard = Array<number>(ROWS+1).fill(0);
+	public nGroupsEasy = Array<number>(ROWS+1).fill(0);
 	/** guesses[rowIndex]. 
 	 * Array of each row's guess. 
 	 * guesses is an alias for board.words. */
@@ -426,7 +424,7 @@ export class GameState extends Storable {
 		copyEasyToHard(ri);
 
 		// Search for the best possible easy mode guess.
-		if ((this.scoresHard[ri] !== 0) || (ri === 0)) {
+		if (this.nGroupsHard[ri] !== this.nAnswers[ri]) {
 			words.answers.slice(0, app.botWords).some(aGuess => {processGroups(aGuess, ri);});
 		}
 
