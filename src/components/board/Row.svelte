@@ -18,6 +18,7 @@
 	const dispatch = createEventDispatcher();
 	let animation = "";
 	let complete = false;
+	let showRowHint = false;
 	let tiles: Tile[] = [];
 
 	const MAX_DOUBLE_CLICK_INTERVAL = 400;
@@ -38,9 +39,15 @@
 
 	$: {
 		let ng = app.nGuesses;
-		if( (ng > ri) || (ng === ri) && (app.mode === GameMode.solver) ) 
+		if (ng > ri) {
+			showRowHint = $showRowHints;
 			complete = true;
-		else complete = false;
+		} else {
+			showRowHint = false;
+			if( (ng === ri) && (app.mode === GameMode.solver) ) 
+				complete = true;
+			else complete = false;
+		}
 	}
 
 </script>
@@ -59,7 +66,7 @@
 			ri={ri} ci={ci} />
 	{/each}
 	<section>
-		{#if ri < app.nGuesses && $showRowHints}
+		{#if showRowHint }
 			{@const nAfter = countOfAinB(" ", app.guessGroups[ri]) + 1}
 			{@const nGroups = app.groups[ri].size + 1}	
 			{nGroups} g<br />{nAfter} w
