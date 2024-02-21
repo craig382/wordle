@@ -50,9 +50,16 @@
 	to infinite mode to play an unlimited number of times.
 	<br /><br />
 	Open the settings menu to see some of the additional features.
-	<br />
-	Written with Svelte, in Typescript by
+	<br /><br />
+	Originally written with Svelte, in Typescript by
 	<a href="https://github.com/MikhaD" target="_blank" rel="noreferrer">MikhaD</a>.
+	<br /><a href="https://github.com/MikhaD/wordle" 
+	target="_blank" rel="noreferrer">Original Source Code</a>.
+	<br /><br />
+	Forked by craig382 to add new features (e.g. row hints and a Bot) 
+	and new modes (AI Mode and Solver Mode).
+	<br /><a href="https://github.com/craig382/wordle" 
+	target="_blank" rel="noreferrer">craig382 Source Code</a>.
 </div>
 
 <style lang="scss">
