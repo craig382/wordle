@@ -15,7 +15,7 @@
 			}/${game.board.guesses.length}\n\n    ${game.board.state
 				.slice(0, game.nGuesses)
 				.map((r) => r.join(""))
-				.join("\n    ")}\nmikhad.github.io/wordle`
+				.join("\n    ")}\ncraig382.github.io/wordle`
 		);
 		toaster.pop("Copied");
 	}
