@@ -21,7 +21,13 @@
 - In Brave, select menu "More tools > Development tools Ctrl+Shift+I" to open the Development tools panel, which can be floating or docked to the right side. Use the "Console" tab to see "console.log(variable)".
 
 ### To publish a svelte app to github...
-- 
+- The original publish.yml .github workflow was not working.
+- Thus, I used the first method ("Vite.config.js outDir build option") from an article entitled "Two Easy Ways to Publish Your Svelte Project on GitHub Pages" at https://medium.com/mkdir-awesome/two-easy-ways-to-publish-your-svelte-project-on-github-pages-c8eaca2b6225
+- The steps were...
+- In vite.config.js, added the "outDir: './docs'," line and commented out the "dir: './dist'," line.
+- Within Code - OSS (open source vs code), in the wordle project, ran "npm run build" in the terminal.
+- In the GitHub wordle repro, open "Settings", select "Pages" from the side bar, in the "Build and deployment" section, ensure (change as needed) "Source" is "Deploy from Branch", "Branch" is "main" with folder "/docs" and click the "Save" button next to "/docs".
+- Everytime a change to the "main" branch is pushed to (synchronized with) the GitHub repro, the app is re-built and re-deployed. It takes a few minutes to build and deploy, and you watch the build and deploy progress in the GitHub "Actions" tab.
 
 ### To run the hidden "Reset your stats" function...
 - Click on the Wordle+ Settings icon (the gear icon).

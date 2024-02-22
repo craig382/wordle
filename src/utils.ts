@@ -449,7 +449,7 @@ export class GameState extends Storable {
 
 		// console.log(`GameState.update() completed for guess ${this.guesses}.`);
 		app = this;
-		console.log(this);
+		console.log("GameState:", this);
 	}
 
 	/**
