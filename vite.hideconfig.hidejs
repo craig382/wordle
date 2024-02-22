@@ -9,12 +9,11 @@ export default defineConfig({
     preprocess: vitePreprocess()
   })],
   build: {
-    outDir: './docs', // relative to index.html
     rollupOptions: {
       output: {
         assetFileNames: `[name]-v${version}.[ext]`,
         entryFileNames: `[name]-v${version}.js`,
-        // dir: "./dist",
+        dir: "./dist",
       }
     }
   }
