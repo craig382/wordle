@@ -20,6 +20,9 @@
 - npm run dev // gives link to run and debug app in html browser
 - In Brave, select menu "More tools > Development tools Ctrl+Shift+I" to open the Development tools panel, which can be floating or docked to the right side. Use the "Console" tab to see "console.log(variable)".
 
+### To publish a svelte app to github...
+- 
+
 ### To run the hidden "Reset your stats" function...
 - Click on the Wordle+ Settings icon (the gear icon).
 - Hover your mouse over the words "Infinite word #xyz" in the bottom right corner of the window and the following message will pop up: "double click to reset your stats".
