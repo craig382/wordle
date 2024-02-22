@@ -9,8 +9,7 @@
     "dev": "vite --host",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "svelte-check --tsconfig ./tsconfig.json",
-    "deploy": "npx gh-pages -d dist"
+    "check": "svelte-check --tsconfig ./tsconfig.json"
   },
   "repository": {
     "type": "git",
