@@ -60,6 +60,9 @@
 	and new modes (AI Mode and Solver Mode).
 	<br /><a href="https://github.com/craig382/wordle" 
 	target="_blank" rel="noreferrer">craig382 Source Code</a>.
+	<br /><br />Hosted on GitHub at <a href="https://craig382.github.io/wordle/#infinite">
+		craig382.github.io/wordle</a> .
+	Share the link with friends so they can play too! 
 </div>
 
 <style lang="scss">
