@@ -50,7 +50,7 @@
 - In Solver mode, enter the guess letters, then before clicking on "Enter", click on each letter as needed to change the letter's color.
 
 ### Row Hints
-- Click the "+/-" ("Show/Hide") icon in the upper left side to show or hide the row hints.
+- Click the "&plusmn;" ("Show/Hide") icon in the upper left side to show or hide the row hints.
 - Each Row Hint shows g groups created by the row guess and w words remaining after the row guess.
 
 ### Mikha Davids' original ReadMe.md continues below.
