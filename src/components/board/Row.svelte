@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from "svelte";
-	import { COLS, countOfAinB, GameState } from "../../utils";
+	import { COLS, countOfAinB, GameState, EasyOrHard } from "../../utils";
 	import Tile from "./Tile.svelte";
 	import { showRowHints } from "../../stores";
 	import { GameMode } from "../../enums";
@@ -67,9 +67,9 @@
 	{/each}
 	<section>
 		{#if showRowHint }
-			{@const nAfter = countOfAinB(" ", app.guessGroups[ri]) + 1}
-			{@const nGroups = app.groups[ri].size + 1}	
-			{nGroups} g<br />{nAfter} w
+			{app.nGroups[ri]}{EasyOrHard(app.guesses[ri], ri)[0]}/
+			<br />{app.nGroupsEasy[ri]}{EasyOrHard(app.guessesEasy[ri], ri)[0]}
+			<br />{countOfAinB(" ", app.guessGroups[ri]) + 1}W
 		{/if}
 	</section>
 </div>
@@ -78,7 +78,7 @@
 	section {
 		text-align: center;
 		align-self: center;
-		line-height: 1.5em;		
+		line-height: 1.2em;		
 	}
 	.board-row {
 		display: grid;

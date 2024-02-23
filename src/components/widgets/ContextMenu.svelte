@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Definition from "./Definition.svelte";
-	import {app, countOfAinB} from "../../utils";
+	import {EasyOrHard, app, countOfAinB} from "../../utils";
 	import { GameMode } from "../../enums";
 
 	export let x = 0;
@@ -14,33 +14,31 @@
 
 <div class="ctx-menu" style="top: {y}px; left: {x}px;">
 	<div>
-		Before guessing {word.toUpperCase()} there were
-		{app.nAnswers[ri]} possible answers.<br /><br />
+		{app.nAnswers[ri]} words left
+		before guessing {word.toUpperCase()}.<br /><br />
 
 		{#if word != app.solution}
-			Guess {word.toLocaleUpperCase()} created 
+			{EasyOrHard(word, ri)} guess {word.toUpperCase()} created 
 			{app.nGroups[ri]} groups and left 
-			{app.nAnswers[ri+1]} possible answers.
+			{app.nAnswers[ri+1]} words.
 			<br /><br />
 
-			Instead of {word.toLocaleUpperCase()}, 
-			the bot in hard (easy) mode chose 
-			{app.guessesHard[ri].toUpperCase()} 
-			({app.guessesEasy[ri].toUpperCase()}),
-			which created {app.nGroupsHard[ri]} ({app.nGroupsEasy[ri]})
+			Instead of {word.toUpperCase()}, 
+			the bot chose {EasyOrHard(app.guessesEasy[ri], ri)} 
+			guess {app.guessesEasy[ri].toUpperCase()} 
+			which created {app.nGroupsEasy[ri]}
 			groups{#if app.mode === GameMode.solver}.
-			{:else} &nbsp;and left {countOfAinB(" ", app.guessGroupsHard[ri]) + 1} 
-			({countOfAinB(" ", app.guessGroupsEasy[ri]) + 1}) possible
-			answers.{/if}
+			{:else} &nbsp;and left {countOfAinB(" ", app.guessGroupsEasy[ri]) + 1} 
+			words.{/if}
 
 			<br /><br />
-			For the guess after {word.toUpperCase()}, the bot in 
-			hard (easy) mode chose {app.guessesHard[ri+1].toUpperCase()} 
-			({app.guessesEasy[ri+1].toUpperCase()}),
-			which created {app.nGroupsHard[ri+1]} ({app.nGroupsEasy[ri+1]})
-			groups{#if app.mode === GameMode.solver}.{:else} &nbsp;and left {countOfAinB(" ", app.guessGroupsHard[ri+1]) + 1} 
-			({countOfAinB(" ", app.guessGroupsEasy[ri+1]) + 1}) possible
-			answers.{/if}
+			For the guess after {word.toUpperCase()}, the bot 
+			chose {EasyOrHard(app.guessesEasy[ri+1], ri+1)} guess 
+			{app.guessesEasy[ri+1].toUpperCase()} 
+			which created {app.nGroupsEasy[ri+1]}
+			groups{#if app.mode === GameMode.solver}.{:else} &nbsp;and left 
+			{countOfAinB(" ", app.guessGroupsEasy[ri+1]) + 1} 
+			words.{/if}
 			<br /><br />
 
 		{/if}

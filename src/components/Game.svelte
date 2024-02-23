@@ -22,7 +22,8 @@
 	import {
 		contractNum,
 		countOfAinB,
-		patternString,
+		colorString,
+		EasyOrHard,
 		randomSample,
 		DELAY_INCREMENT,
 		PRAISE,
@@ -34,7 +35,7 @@
 		LetterStates,
 		words,
 		Stats,
-        groupIdFromRow,
+        groupIdFromColors,
 	} from "../utils";
 	import { letterStates, settings, mode, showRowHints } from "../stores";
     import { GameMode } from "../enums";
@@ -69,7 +70,7 @@
 			if ($mode === GameMode.solver) {
 				let errorIndex = 0;
 				let gid = "";
-				[ gid, errorIndex ] = groupIdFromRow(app.nGuesses);
+				[ gid, errorIndex ] = groupIdFromColors(app.nGuesses);
 				app.guessGroupIds[app.nGuesses] = gid;
 				if (gid === "#####") app.solution = app.board.guesses[app.nGuesses];
 				else app.board.state[app.nGuesses + 1].fill("⬛");
@@ -222,7 +223,8 @@
 		{/if}
 		<br />
 		{#if $showRowHints}
-			<br />Each Row Hint shows g groups and w words.
+			<br />Row Hint shows human/bot groups
+			for H or E (hard or easy) guess and W words.
 		{/if}
 		{#if app.errorString !== ""}
 			<br /><br />{app.errorString}
@@ -293,49 +295,30 @@
 	{/if}
 	{#if (app.nGuesses > 0)}
 		<br /><h3>Bot Results {#if !app.active}For Solution "{app.solution}"{/if}</h3>
-		<div class="row">
-			The Wordle dictionary has {words.answers.length} possible 
-			solutions and {words.otherGuesses.length} additional other
-			words you may use as guesses. All words counted and listed
-			below are from the possible solutions dictionary.
-		</div>
-		<div class="row">
-			Top New York Times WordleBot openers (each 
-			with 97+ NYT WordleBot score): {app.openers}.
-		</div>
 		{#each Array(app.nGuesses + 1) as _, ri}
 			{#if app.active || ri < app.nGuesses}
-				{@const nLeftHard = countOfAinB(" ", app.guessGroupsHard[ri]) + 1}
 				{@const nLeft = countOfAinB(" ", app.guessGroups[ri]) + 1}
 				{@const nLeftEasy = countOfAinB(" ", app.guessGroupsEasy[ri]) + 1}
 				<h1>Guess # {(ri + 1)}</h1>
 				<div class="row">
 						<section>
-							Bot Hard Mode<br /><br />
-							{app.guessesHard[ri].toUpperCase()}<br />
-							{app.nGroupsHard[ri]} groups<br /><br />
-							{#if app.mode !== GameMode.solver}
-								{patternString(app.guessGroupIdsHard[ri])}<br />
-								Eliminated {app.nAnswers[ri] - nLeftHard} words<br />
-								{nLeftHard} words left
-							{/if}
-						</section>
-						<section>
 							{#if ri < app.nGuesses}
 								Human<br /><br />
 								{app.guesses[ri].toUpperCase()}<br />
+								{EasyOrHard(app.guesses[ri], ri)} Guess<br />
 								{app.nGroups[ri]} groups<br /><br />
-								{patternString(app.guessGroupIds[ri])}<br />
+								{colorString(app.guessGroupIds[ri])}<br />
 								Eliminated {app.nAnswers[ri] - nLeft} words<br />
 								{nLeft}  words left
 							{/if}
 						</section>
 						<section>
-							Bot Easy Mode<br /><br />
+							Bot<br /><br />
 							{app.guessesEasy[ri].toUpperCase()}<br />
+							{EasyOrHard(app.guessesEasy[ri], ri)} Guess<br />
 							{app.nGroupsEasy[ri]} groups<br /><br />
 							{#if app.mode !== GameMode.solver}
-								{patternString(app.guessGroupIdsEasy[ri])}<br />
+								{colorString(app.guessGroupIdsEasy[ri])}<br />
 								Eliminated {app.nAnswers[ri] - nLeftEasy} words<br />
 								{nLeftEasy} words left
 							{/if}
@@ -350,6 +333,18 @@
 			{/if}
 		{/each}
 		<div class="row">
+			The Wordle dictionary has {words.answers.length} possible 
+			solutions and {words.otherGuesses.length} additional other
+			words you may use as guesses. All words counted and listed
+			below are from the possible solutions dictionary.
+		</div>
+		<div class="row">
+			Top New York Times WordleBot openers (each 
+			with 97+ NYT WordleBot score): {app.openers}.
+		</div>
+		<div class="row">
+			The Bot Algorithm.<br /><br />
+			
 			For guess 6, all remaining answers are equally likely
 			to win or lose, and the Bot selects the first remaining
 			answer as its recommended guess.<br /><br />
@@ -365,16 +360,16 @@
 
 			The Bot starts by searching through the prior guess's remaining
 			answers for a Hard Mode recommended guess. If the Bot finds
-			a perfect Hard Mode recommended guess, it will use that same
-			guess as its Easy Mode recommended guess. Otherwise, the Bot
-			will search through the first {app.botWords} words of the Wordle 
-			solution dictionary for its Easy Mode recommended guess.
+			a perfect Hard Mode recommended guess, its search is finished. 
+			Otherwise, the Bot will continue searching through the first 
+			{app.botWords} words of the Wordle solution dictionary for a 
+			possible Easy Mode recommended guess.
 		</div>
 	{/if}
 </Modal>
 
 <Modal fullscreen={true} bind:visible={showSettings}>
-	<Settings game={app} on:historical={() => (showHistorical = true)} />
+	<Settings app={app} on:historical={() => (showHistorical = true)} />
 	{#if app.active}
 		<div class="button concede" on:click={concede} on:keydown={concede}>give up</div>
 	{/if}
@@ -446,6 +441,9 @@
 	p {
 		text-align: center;
 		max-width: 330px;
+	}
+	h1 {
+		text-align: center;
 	}
 
 

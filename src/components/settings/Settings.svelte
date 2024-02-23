@@ -6,7 +6,7 @@
 	import type { Toaster } from "../widgets";
 	import Setting from "./Setting.svelte";
 
-	export let game: GameState;
+	export let app: GameState;
 
 	const toaster = getContext<Toaster>("toaster");
 	const dispatch = createEventDispatcher();
@@ -34,12 +34,12 @@
 		<!-- svelte-ignore a11y-click-events-have-key-events -->
 		<div
 			on:click={() => {
-				if (!game.validHard) {
+				if (!app.validHard) {
 					toaster.pop("Game has already violated hard mode");
 				}
 			}}
 		>
-			<Setting type="switch" bind:value={$settings.hard[$mode]} disabled={!game.validHard}>
+			<Setting type="switch" bind:value={$settings.hard[$mode]} disabled={!app.validHard}>
 				<svelte:fragment slot="title">Hard Mode</svelte:fragment>
 				<svelte:fragment slot="desc">
 					Any revealed hints must be used in subsequent guesses

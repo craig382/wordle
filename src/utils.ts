@@ -175,8 +175,8 @@ abstract class Storable {
 	toString() { return JSON.stringify(this); }
 }
 
-/** groupsIdFromState( rowIndex ) returns [ groupId, errorIndex ]. */
-export function groupIdFromRow(ri: number): 
+/** groupsIdFromColors( rowIndex ) returns [ groupId, errorIndex ]. */
+export function groupIdFromColors(ri: number): 
 	[ string, number ] {
 	const state = app.board.state[ri];
 	const id = Array<string>(COLS).fill(" ");
@@ -194,7 +194,7 @@ export function groupIdFromRow(ri: number):
 }
 
 /** patternArray returns the color pattern of a groupId. */
-export function patternArray(groupId: string): LetterState[] {
+export function colorArray(groupId: string): LetterState[] {
 	const p = Array<LetterState>(COLS).fill("⬛");
 	for (let c =0; c < COLS; c++) {
 		switch (groupId[c]) {
@@ -206,8 +206,19 @@ export function patternArray(groupId: string): LetterState[] {
 }
 
 /** patternString returns the color pattern of a groupId. */
-export function patternString(groupId: string): string {
-	return patternArray(groupId).join("");
+export function colorString(groupId: string): string {
+	return colorArray(groupId).join("");
+}
+
+/** EasyOrHard(guess, ri) returns "Easy" or "Hard" for
+ * the guess of the row with row index ri. */
+export function EasyOrHard(guess: string, ri: number) {
+	if (ri === 0) return "Hard";
+	if (calculateGroupId(guess, app.guesses[ri-1].split("")) === app.guessGroupIds[ri-1] ) {
+		return "Hard";
+	} else {
+		return "Easy";
+	}
 }
 
 /** 
@@ -474,7 +485,7 @@ export class GameState extends Storable {
 	}
 
 	guess(solution: string): LetterState[] {
-		return patternArray(calculateGroupId(solution, this.latestWord.split("")));
+		return colorArray(calculateGroupId(solution, this.latestWord.split("")));
 	}
 
 	private parse(str: string) {

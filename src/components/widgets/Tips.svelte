@@ -7,7 +7,7 @@
 		'In Solver mode, enter the guess letters, then before clicking on "Enter", click on each letter as needed to change the letter\'s color.',
 		"Double tap or right click a guess on the board to see its definition and to see the Bot's hints and recommendations.",
 		'Click the "&plusmn;" ("Show/Hide") icon in the upper left side to show or hide the row hints.',
-		'Each Row Hint shows g groups created by the row guess and w words remaining after the row guess.',
+		'Each Row Hint shows the number of groups created by the human H or E (hard or easy) guess over the number of groups created by the bot, and W words remaining after the human guess.',
 		"Hard mode is game mode specific. Turning it on in one game mode won't change it on the others.",
 		"Hard mode can be enabled during a game if you haven't violated the hard mode rules yet.",
 		"Because words are chosen from the list randomly it is possible to get the same word again.",

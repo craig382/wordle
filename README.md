@@ -51,7 +51,7 @@
 
 ### Row Hints
 - Click the "&plusmn;" ("Show/Hide") icon in the upper left side to show or hide the row hints.
-- Each Row Hint shows g groups created by the row guess and w words remaining after the row guess.
+- Each Row Hint shows the number of groups created by the human H or E (hard or easy) guess over the number of groups created by the bot, and W words remaining after the human guess.
 
 ### Mikha Davids' original ReadMe.md continues below.
 
