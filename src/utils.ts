@@ -6,6 +6,8 @@ export const ROWS: number = 6;
 export const COLS: number = 5;
 export let app: GameState;
 
+let appSettings: Settings;
+
 export const words = {
 	...wordList,
 	contains: (word: string) => {
@@ -222,17 +224,20 @@ export function EasyOrHard(guess: string, ri: number) {
 }
 
 /** 
- * ProcessGroups(guess).
- * Creates groups assuming guessString 
- * is the latest guess and ri is the row index.
+ * ProcessGuess(guess).
+ * Processes the guess assuming guessString 
+ * is the latest guess and ri is its row index.
  * Returns true for a "perfect" guess.
  */
-function processGroups(guessString: string, ri: number): boolean {
+function processGuess(guessString: string, ri: number): boolean {
 
 	let perfectGuess: boolean;
 
+	// Initialize guesses[ri]
+	app.guesses[ri] = guessString;
+
 	/** answers[answerIndex].
-	 * A list of remaining answers before the row's guess. */	
+	 * An array of remaining answers before the row's guess. */	
 	let answers: string[] = [];
 
 	// Initialize answers[ri].
@@ -290,7 +295,7 @@ function processGroups(guessString: string, ri: number): boolean {
 	}
 
 	// If this score is the best found so far, save it.
-	if (app.nGroups[ri] > app.nGroupsEasy[ri]) copyHumanToEasy(ri, guessString);
+	if (app.nGroups[ri] > app.nGroupsBot[ri] && ri > 0) copyHumanToBot(ri);
 
 	return perfectGuess;
 }
@@ -302,20 +307,12 @@ export function randomSample(anArray: Array<any>) {
 	return rs;
 }
 
-function copyHumanToEasy(ri: number, guess: string) {
-	app.nGroupsEasy[ri] = app.nGroups[ri];
-	app.guessesEasy[ri] = guess;
-	app.guessGroupIdsEasy[ri] = app.guessGroupIds[ri];
-	app.guessGroupsEasy[ri] = app.guessGroups[ri];
-	app.groupsEasy[ri] = app.groups[ri];
-}
-
-function copyEasyToHard(ri: number) {
-	app.nGroupsHard[ri] = app.nGroupsEasy[ri];
-	app.guessesHard[ri] = app.guessesEasy[ri];
-	app.guessGroupIdsHard[ri] = app.guessGroupIdsEasy[ri];
-	app.guessGroupsHard[ri] = app.guessGroupsEasy[ri];
-	app.groupsHard[ri] = app.groupsEasy[ri];
+function copyHumanToBot(ri: number) {
+	app.nGroupsBot[ri] = app.nGroups[ri];
+	app.guessesBot[ri] = app.guesses[ri];
+	app.guessGroupIdsBot[ri] = app.guessGroupIds[ri];
+	app.guessGroupsBot[ri] = app.guessGroups[ri];
+	app.groupsBot[ri] = app.groups[ri];
 }
 
 export class GameState extends Storable {
@@ -343,36 +340,31 @@ export class GameState extends Storable {
 	/** For each row, a map of 
 	 * space separated eliminated answers keyed to groupId. */	
 	public groups: Array<Map<string, string>> = [];
-	public groupsHard: Array<Map<string, string>> = [];
-	public groupsEasy: Array<Map<string, string>> = [];
+	public groupsBot: Array<Map<string, string>> = [];
 	/** nAnswers[rowIndex]. 
 	 * For each row, the number of remaining 
 	 * answers before the row's guess. */
 	public nAnswers = Array<number>(ROWS+1).fill(0);
 	/** nGroups[rowIndex]. 
 	 * Number of groups created by the row guess.
-	 * "Easy" parameters are used to store
+	 * "Bot" parameters are used to store
 	 * the best (maximum) nGroups found so far. */
 	public nGroups = Array<number>(ROWS+1).fill(0);
-	public nGroupsHard = Array<number>(ROWS+1).fill(0);
-	public nGroupsEasy = Array<number>(ROWS+1).fill(0);
+	public nGroupsBot = Array<number>(ROWS+1).fill(0);
 	/** guesses[rowIndex]. 
 	 * Array of each row's guess. 
 	 * guesses is an alias for board.words. */
 	public guesses = Array<string>(ROWS+1).fill("");
-	public guessesHard = Array<string>(ROWS+1).fill("");
-	public guessesEasy = Array<string>(ROWS+1).fill("");
+	public guessesBot = Array<string>(ROWS+1).fill("");
 	/** guessGroupIds[rowIndex]. 
 	 * GroupId of the row's guess. */
 	public guessGroupIds = Array<string>(ROWS+1).fill("");
-	public guessGroupIdsHard = Array<string>(ROWS+1).fill("");
-	public guessGroupIdsEasy = Array<string>(ROWS+1).fill("");
+	public guessGroupIdsBot = Array<string>(ROWS+1).fill("");
 	/** guessGroups[rowIndex]. 
 	 * For each row, a space separated list of 
 	 * answers remaining after the guess. */
 	public guessGroups = Array<string>(ROWS+1).fill("");
-	public guessGroupsHard = Array<string>(ROWS+1).fill("");
-	public guessGroupsEasy = Array<string>(ROWS+1).fill("");
+	public guessGroupsBot = Array<string>(ROWS+1).fill("");
 
 	constructor(mode: GameMode, data?: string) {
 		super();
@@ -418,41 +410,43 @@ export class GameState extends Storable {
 		return this.board.guesses[this.nGuesses - 1];
 	}
 
-	update() {
+	/** The Bot processes the latest human guess
+	 *  and searches for its next guess. */
+	updateBot() {
 		// Set ri for this guess.
 		let ri = this.nGuesses - 1;
+		let humanGuess = app.guesses[ri];
 
-		// Randomly pick a hard and easy mode opener for the first guess.
-		// Search for the best possible easy mode guess for the first guess only.
-		if (this.nGuesses === 1) {
+		// Randomly pick a hard mode opener for the first guess.
+		if (ri === 0) {
 			let openersArray = this.openers.split(" ");
-			let guess = "";
-			processGroups(randomSample(openersArray), ri); // hard mode opener
-			// copyHumanToEasy(0);
-			copyEasyToHard(0);
-			processGroups(guess = randomSample(openersArray), ri); // easy mode opener
-			copyHumanToEasy(0, guess);
+			let botGuess = randomSample(openersArray);
+			// Force the bot opener to be different than the human opener.
+			if (botGuess === humanGuess) botGuess = randomSample(openersArray);;
+			processGuess(botGuess, ri);
+			copyHumanToBot(ri);
 		}
 
 		try {
 			// Process this guess.
-			processGroups(this.lastWord, ri);
+			processGuess(humanGuess, ri);
 
-			// Advance ri 1 guess for bot to look for best possible guesses.
-			ri = this.nGuesses;
+			if (this.guessGroupIds[ri] !== "#####") {
+				// Advance ri 1 guess for bot to look for best possible guesses.
+				ri = this.nGuesses;
 
-			// Search for the best posssible hard mode guess.
-			this.guessGroups[ri-1].split(" ").some(aGuess => {processGroups(aGuess, ri);});
-			copyEasyToHard(ri);
+				// Search for the best posssible hard mode guess.
+				this.guessGroups[ri-1].split(" ").some(aGuess => {processGuess(aGuess, ri);});
 
-			// Search for the best possible easy mode guess.
-			if (this.nGroupsHard[ri] !== this.nAnswers[ri]) {
-				words.answers.slice(0, app.botWords).some(aGuess => {processGroups(aGuess, ri);});
+				// Search for the best possible easy mode guess.
+				if (!appSettings.hard[this.mode] && this.nGroupsBot[ri] !== this.nAnswers[ri]) {
+					words.answers.slice(0, app.botWords).some(aGuess => {processGuess(aGuess, ri);});
+				}
+
+				// Revert ri 1 guess so human can take their turn.
+				ri = this.nGuesses - 1;
 			}
 
-			// Revert ri 1 guess so human can take their turn.
-			ri = this.nGuesses - 1;
-			this.guesses[ri] = this.board.guesses[ri];
 		} catch (e) {
 			// console.log("GameState.update: ", e);
 			throw e; // throw the error up the chain
@@ -520,6 +514,7 @@ export class Settings extends Storable {
 			this.colorblind = parsed.colorblind;
 			this.tutorial = parsed.tutorial;
 		}
+		appSettings = this;
 	}
 }
 

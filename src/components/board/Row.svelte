@@ -68,7 +68,7 @@
 	<section>
 		{#if showRowHint }
 			{app.nGroups[ri]}{EasyOrHard(app.guesses[ri], ri)[0]}/
-			<br />{app.nGroupsEasy[ri]}{EasyOrHard(app.guessesEasy[ri], ri)[0]}
+			<br />{app.nGroupsBot[ri]}{EasyOrHard(app.guessesBot[ri], ri)[0]}
 			<br />{countOfAinB(" ", app.guessGroups[ri]) + 1}W
 		{/if}
 	</section>

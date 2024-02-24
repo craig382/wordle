@@ -24,20 +24,20 @@
 			<br /><br />
 
 			Instead of {word.toUpperCase()}, 
-			the bot chose {EasyOrHard(app.guessesEasy[ri], ri)} 
-			guess {app.guessesEasy[ri].toUpperCase()} 
-			which created {app.nGroupsEasy[ri]}
+			the bot chose {EasyOrHard(app.guessesBot[ri], ri)} 
+			guess {app.guessesBot[ri].toUpperCase()} 
+			which created {app.nGroupsBot[ri]}
 			groups{#if app.mode === GameMode.solver}.
-			{:else} &nbsp;and left {countOfAinB(" ", app.guessGroupsEasy[ri]) + 1} 
+			{:else} &nbsp;and left {countOfAinB(" ", app.guessGroupsBot[ri]) + 1} 
 			words.{/if}
 
 			<br /><br />
 			For the guess after {word.toUpperCase()}, the bot 
-			chose {EasyOrHard(app.guessesEasy[ri+1], ri+1)} guess 
-			{app.guessesEasy[ri+1].toUpperCase()} 
-			which created {app.nGroupsEasy[ri+1]}
+			chose {EasyOrHard(app.guessesBot[ri+1], ri+1)} guess 
+			{app.guessesBot[ri+1].toUpperCase()} 
+			which created {app.nGroupsBot[ri+1]}
 			groups{#if app.mode === GameMode.solver}.{:else} &nbsp;and left 
-			{countOfAinB(" ", app.guessGroupsEasy[ri+1]) + 1} 
+			{countOfAinB(" ", app.guessGroupsBot[ri+1]) + 1} 
 			words.{/if}
 			<br /><br />
 

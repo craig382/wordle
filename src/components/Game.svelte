@@ -77,7 +77,7 @@
 			} else app.board.state[app.nGuesses] = app.guess(app.solution);
 			++app.nGuesses;
 			try {
-				app.update();
+				app.updateBot();
 				if (app.lastWord === app.solution) win();
 				else if (app.nGuesses === ROWS) lose();
 				$showRowHints = $showRowHints;
@@ -166,11 +166,7 @@
 			do {
 				processValidGuess();
 				if (!app.active) break;
-				if ($settings.hard[$mode]) {
-					app.board.guesses[app.nGuesses] = app.guessesHard[app.nGuesses];
-				} else {
-					app.board.guesses[app.nGuesses] = app.guessesEasy[app.nGuesses];
-				}
+				app.board.guesses[app.nGuesses] = app.guessesBot[app.nGuesses];
 			} while (true);
 		}
 	}
@@ -298,7 +294,7 @@
 		{#each Array(app.nGuesses + 1) as _, ri}
 			{#if app.active || ri < app.nGuesses}
 				{@const nLeft = countOfAinB(" ", app.guessGroups[ri]) + 1}
-				{@const nLeftEasy = countOfAinB(" ", app.guessGroupsEasy[ri]) + 1}
+				{@const nLeftEasy = countOfAinB(" ", app.guessGroupsBot[ri]) + 1}
 				<h1>Guess # {(ri + 1)}</h1>
 				<div class="row">
 						<section>
@@ -314,11 +310,11 @@
 						</section>
 						<section>
 							Bot<br /><br />
-							{app.guessesEasy[ri].toUpperCase()}<br />
-							{EasyOrHard(app.guessesEasy[ri], ri)} Guess<br />
-							{app.nGroupsEasy[ri]} groups<br /><br />
+							{app.guessesBot[ri].toUpperCase()}<br />
+							{EasyOrHard(app.guessesBot[ri], ri)} Guess<br />
+							{app.nGroupsBot[ri]} groups<br /><br />
 							{#if app.mode !== GameMode.solver}
-								{colorString(app.guessGroupIdsEasy[ri])}<br />
+								{colorString(app.guessGroupIdsBot[ri])}<br />
 								Eliminated {app.nAnswers[ri] - nLeftEasy} words<br />
 								{nLeftEasy} words left
 							{/if}
