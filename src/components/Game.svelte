@@ -128,7 +128,7 @@
 			() => toaster.pop(PRAISE[app.nGuesses - 1]),
 			DELAY_INCREMENT * COLS + DELAY_INCREMENT
 		);
-		// setTimeout(setShowStatsTrue, delay * 1.4);
+		setTimeout(setShowStatsTrue, delay * 1.4);
 		if (!modeData.modes[$mode].historical) {
 			stats.addWin(app.nGuesses, modeData.modes[$mode]);
 			stats = stats;
@@ -138,7 +138,7 @@
 
 	function lose() {
 		app.active = false;
-		// setTimeout(setShowStatsTrue, delay);
+		setTimeout(setShowStatsTrue, delay);
 		if (!modeData.modes[$mode].historical) {
 			stats.addLoss(modeData.modes[$mode]);
 			stats = stats;

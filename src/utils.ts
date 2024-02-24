@@ -443,7 +443,8 @@ export class GameState extends Storable {
 					words.answers.slice(0, app.botWords).some(aGuess => {processGuess(aGuess, ri);});
 				}
 
-				// Revert ri 1 guess so human can take their turn.
+				// Revert 1 guess so human can take their turn.
+				this.guesses[ri] = "";
 				ri = this.nGuesses - 1;
 			}
 
