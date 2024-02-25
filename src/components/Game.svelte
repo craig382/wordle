@@ -218,10 +218,6 @@
 			click on each letter as needed to change its color.
 		{/if}
 		<br />
-		{#if $showRowHints}
-			<br />Row Hint shows human/bot groups
-			for H or E (hard or easy) guess and W words.
-		{/if}
 		{#if app.errorString !== ""}
 			<br /><br />{app.errorString}
 		{/if}	

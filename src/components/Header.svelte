@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { createEventDispatcher, getContext } from "svelte";
-	import { scale, fade } from "svelte/transition";
+	import { scale } from "svelte/transition";
 	import { mode, showRowHints } from "../stores";
 	import { modeData, timeRemaining } from "../utils";
-	import GameIcon from "./GameIcon.svelte";
 	import type { Toaster } from "./widgets";
 
 	export let showStats: boolean;
@@ -21,7 +20,6 @@
 
 	export function toggleShowRowHints() { 
 		$showRowHints = !$showRowHints;
-		// console.log("Toggled Show Row Hints, new value is:", showRowHints);
 		return showRowHints;
 	}
 
@@ -83,10 +81,8 @@
 		--height: 51px;
 		position: relative;
 		font-weight: 500;
-		// text-transform: uppercase;
 		letter-spacing: 0.1rem;
 		display: flex;
-		// justify-content: space-between;
 		justify-content: left;
 		align-items: center;
 		border-bottom: 1px solid var(--border-primary);
@@ -94,7 +90,6 @@
 		height: var(--height);
 		position: relative;
 		font-size: var(--fs-large);
-		// cursor: pointer;
 	}
 	p {
 		cursor: pointer;

@@ -65,11 +65,15 @@
 		<Tile bind:this={tiles[ci]} bind:app={app} bind:state={app.board.state[ri][ci]} value={app.board.guesses[ri].charAt(ci)} 
 			ri={ri} ci={ci} />
 	{/each}
-	<section>
+	<!-- svelte-ignore a11y-click-events-have-key-events -->
+	<section on:click|self={() => {$showRowHints = !$showRowHints;}}>
 		{#if showRowHint }
 			{app.nGroups[ri]}{EasyOrHard(app.guesses[ri], ri)[0]}/
 			<br />{app.nGroupsBot[ri]}{EasyOrHard(app.guessesBot[ri], ri)[0]}
 			<br />{countOfAinB(" ", app.guessGroups[ri]) + 1}W
+		{:else if ri === 0}
+			Row<br />Hints<br />
+			{#if $showRowHints}ON{:else}OFF{/if}
 		{/if}
 	</section>
 </div>
@@ -78,7 +82,8 @@
 	section {
 		text-align: center;
 		align-self: center;
-		line-height: 1.2em;		
+		line-height: 1.2em;
+		cursor: pointer;	
 	}
 	.board-row {
 		display: grid;
