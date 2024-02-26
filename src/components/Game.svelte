@@ -161,7 +161,8 @@
 
 	function playAiGame() {
 		reload();
-		if (words.answers.includes(aiSolution)) app.solution = aiSolution;
+		let ais = aiSolution.toLowerCase();
+		if (words.answers.includes(ais)) app.solution = ais;
 		else aiSolution = app.solution;
 		let openersArray = app.openers.split(" ");
 			app.board.guesses[app.nGuesses] = randomSample(openersArray);
