@@ -2,7 +2,7 @@
 	const tips = [
 		"You can change the gamemode by clicking WORDLE+ or swiping the board left or right.",
 		'In AI Mode, the Bot makes the "Human\'s" choices.',
-		'In AI mode, click the "Refresh" icon in the upper left corner to watch the Bot play a randomly generated Wordle game.',
+		'In AI mode, click "New Word" for a new random word or type in the word yourself, then click "Solve" to see the Bot solve the Wordle game.',
 		'In Solver mode, the Bot helps you solve an external Wordle (a Wordle you are playing somewhere else).',
 		'In Solver mode, enter the guess letters, then before clicking on "Enter", click on each letter as needed to change the letter\'s color.',
 		"Double tap or right click a guess on the board to see its definition and to see the Bot's hints and recommendations.",

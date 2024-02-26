@@ -45,6 +45,7 @@
 	export let toaster: Toaster;
 
 	setContext("toaster", toaster);
+
 	const version = getContext<string>("version");
 
 	// implement transition delay on keys
@@ -55,6 +56,7 @@
 	let showStats = false;
 	let showHistorical = false;
 	let showRefresh = false;
+	let aiSolution = "";
 
 	let board: Board;
 	let timer: Timer;
@@ -68,7 +70,7 @@
 	 */
 	 export function processValidGuess() {
 			if ($mode === GameMode.solver) {
-				let errorIndex = 0;
+				let errorIndex: number = 0;
 				let gid = "";
 				[ gid, errorIndex ] = groupIdFromColors(app.nGuesses);
 				app.guessGroupIds[app.nGuesses] = gid;
@@ -152,6 +154,24 @@
 		lose();
 	}
 
+	function newRandomAiSoltion() {
+		reload();
+		aiSolution = app.solution;
+	}
+
+	function playAiGame() {
+		reload();
+		if (words.answers.includes(aiSolution)) app.solution = aiSolution;
+		else aiSolution = app.solution;
+		let openersArray = app.openers.split(" ");
+			app.board.guesses[app.nGuesses] = randomSample(openersArray);
+			do {
+				processValidGuess();
+				if (!app.active) break;
+				app.board.guesses[app.nGuesses] = app.guessesBot[app.nGuesses];
+			} while (true);
+	}
+
 	function reload() {
 		modeData.modes[$mode].historical = false;
 		modeData.modes[$mode].seed = newSeed($mode);
@@ -160,15 +180,6 @@
 		showStats = false;
 		showRefresh = false;
 		timer.reset($mode);
-		if ($mode === GameMode.ai) {
-			let openersArray = app.openers.split(" ");
-			app.board.guesses[app.nGuesses] = randomSample(openersArray);
-			do {
-				processValidGuess();
-				if (!app.active) break;
-				app.board.guesses[app.nGuesses] = app.guessesBot[app.nGuesses];
-			} while (true);
-		}
 	}
 
 	function setShowStatsTrue() {
@@ -179,18 +190,17 @@
 		switch (e.detail.direction) {
 			case "left":
 				$mode = ($mode + 1) % modeData.modes.length;
-				// toaster.pop(modeData.modes[$mode].name);
 				break;
 			case "right":
 				$mode = ($mode - 1 + modeData.modes.length) % modeData.modes.length;
-				// toaster.pop(modeData.modes[$mode].name);
 				break;
 		}
 	}
 
 	onMount(() => {
 		if (!app.active) setTimeout(setShowStatsTrue, delay);
-		// console.log("Wordle restarted");
+		console.log("Wordle restarted");
+		
 	});
 </script>
 
@@ -210,9 +220,13 @@
 	<p>
 		{modeData.modes[$mode].name} Mode.
 		{#if $mode === GameMode.ai}
-			Click the "Refresh" icon in the upper left 
+			<!-- Click the "Refresh" icon in the upper left 
 			corner to watch the Bot play a randomly 
-			generated Wordle game.
+			generated Wordle game. -->
+			<br />
+			<button on:click={newRandomAiSoltion}>New Word</button>
+			<input bind:value={aiSolution} />
+			<button on:click={playAiGame} >Solve</button>
 		{:else if $mode === GameMode.solver}
 			Enter the guess letters, then before clicking "Enter", 
 			click on each letter as needed to change its color.
@@ -436,6 +450,37 @@
 	}
 	h1 {
 		text-align: center;
+	}
+	button {
+		text-align: center;
+		font-weight: bold;
+		font-size: 1.2em;
+		cursor: pointer;
+		padding-top: 2px;
+		padding-bottom: 2px;
+		padding-right: 4px;
+		padding-left: 4px;
+		border-radius: 4px;
+		border: solid 3px var(--border-secondary);
+		background: var(--bg-secondary);
+		color: var(--fg-primary);
+	}
+	input {
+		text-align: center;
+		font-weight: bold;
+		font-size: 1.2em;
+		padding-top: 2px;
+		padding-bottom: 2px;
+		padding-right: 4px;
+		padding-left: 4px;
+		border-radius: 4px;
+		border: solid 3px var(--border-secondary);
+		background: var(--bg-secondary);
+		color: var(--fg-primary);
+		width: 5em;
+		margin: 4px;
+		text-transform: uppercase;
+
 	}
 
 

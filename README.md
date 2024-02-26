@@ -40,8 +40,8 @@
 - AI Mode is a new mode.
 - The original modes are Daily, Hourly, and Infinite.
 - To enter AI mode, click on "WORDLE+" in the header to switch modes until the temporary mode pop up displays "AI Mode".
-- In AI Mode, the Bot makes the "Human's" choices.
-- In AI mode, click the "Refresh" icon in the upper left corner to watch the Bot play a randomly generated Wordle game.
+- In AI mode, click "New Word" for a new random word or type in the word yourself, then click "Solve" to see the Bot solve the Wordle game.
+
 
 ### Solver Mode
 - Solver Mode is a new mode.
