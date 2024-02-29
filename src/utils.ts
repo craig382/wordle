@@ -646,3 +646,21 @@ export function timeRemaining(m: Mode) {
 export function failed(s: GameState) {
 	return !(s.active || (s.nGuesses > 0 && s.board.state[s.nGuesses - 1].join("") === "🟩".repeat(COLS)));
 }
+
+export class TreeNode implements TreeNodeInterface 
+{ 
+  public parent: TreeNodeInterface | null; 
+  public children: TreeNodeInterface[] = [];
+
+  constructor(parent: TreeNodeInterface | null)
+  { 
+    this.parent = parent; 
+    if (this.parent) this.parent.children.push(this); 
+  } 
+}
+
+export interface TreeNodeInterface 
+{ 
+  parent: TreeNodeInterface | null; 
+  children: TreeNodeInterface[]; 
+}
