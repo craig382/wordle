@@ -669,63 +669,35 @@ export function calculateBotTree(rootGuess: string, rootGuessId: string) {
 	const riMax = 3;
 	let leaves = 0;
 	let nodes = 0;
+	let map: BotMap;
 
 	function createHardModeKids(pNode: BotNode) {
 		if (nodes > maxNodes) return;
-		// if (pNode.isLeaf()) { leaves++; return; }
 
-		for (let [groupId, pTuple] of pNode.map) {
-			let pGroup = pTuple[0];
-			let pMaxGroupsKid = pTuple[2];
+		pNode.map.forEach(([ pGroup, pPerfectKid, pMaxGroupsKid, pSumOfSquaresKid ], groupId) => {
 			for (let gi = 0; gi < pGroup.length; gi++) {
-				let map = calculateGroups(pGroup[gi], pGroup);
-				let kid = new BotNode(null, pNode.ri + 1, pGroup[gi], map);
-				console.log("kid:", kid);
+				map = calculateGroups(pGroup[gi], pGroup);
 				if ( map.size === pGroup.length) {
-					let pPerfectKid = pTuple[1];
-					pPerfectKid = kid;
-					pPerfectKid.parent = pNode;
+					pPerfectKid = new BotNode(pNode, pNode.ri + 1, pGroup[gi], map);
+					pNode.map.set(groupId, [ pGroup, pPerfectKid, pMaxGroupsKid, pSumOfSquaresKid ]);
 					nodes++;
+					console.log("pPerfectKid:", pPerfectKid);
 					return;
 				}
-				if (pMaxGroupsKid === null || kid.nGroups > pMaxGroupsKid.nGroups) {
-					pMaxGroupsKid = kid;
-					pMaxGroupsKid.parent = pNode;
+				if (pMaxGroupsKid === null || map.size > pMaxGroupsKid.nGroups) {
+					pMaxGroupsKid = new BotNode(pNode, pNode.ri + 1, pGroup[gi], map);
+					pNode.map.set(groupId, [ pGroup, pPerfectKid, pMaxGroupsKid, pSumOfSquaresKid ]);
 					nodes++;
-					console.log("pMaxGroupsKid:", pMaxGroupsKid);
 				} 
 			}
-			// if (pMaxGroupsKid !== null) createHardModeKids(pMaxGroupsKid);
-		}
-
-
-		// let nGroupsMax = 0;
-		// for (let gi = 0; gi < pNode.group.length; gi++) {
-		// 	skipGrandKids = false;
-		// 	let map = calculateGroups(pNode.group[gi], pNode.group);
-		// 	if ( map.size === pNode.group.length) {
-		// 		pNode.perfectNextGuess = pNode.group[gi];
-		// 		skipGrandKids = true;
-		// 	}
-		// 	if (map.size < nGroupsMax) continue; 
-		// 	nGroupsMax = map.size;
-		// 	for (let [groupId, group] of map) {
-		// 		if (group.length === 1) skipGrandKids = true;
-		// 		if (!skipKid) { 
-		// 			kid = new BotNode(pNode, pNode.ri + 1, 
-		// 			pNode.group[gi], map.size, groupId, group);
-		// 			nodes++;
-		// 		}
-		// 		if (nodes > maxNodes) return;
-		// 		if (pNode.ri > riMax) { console.log("deep parent node ri:", pNode.ri); return; }
-		// 		if (group.length === 1) continue;
-		// 		if (!skipGrandKids) createHardModeKids(kid);
-		// 	}			
-		// }
-
+			// if (pMaxGroupsKid !== null) {
+				console.log("pMaxGroupsKid:", pMaxGroupsKid);
+				createHardModeKids(pMaxGroupsKid);
+			// }
+		});
 	}
 
-	let map = calculateGroups(rootGuess, words.answers);
+	map = calculateGroups(rootGuess, words.answers);
 	let map2: BotMap = new Map<string, BotMapTuple >;
 	map2.set(rootGuessId, map.get(rootGuessId));
 	botRoot = new BotNode(null, 0, rootGuess, map2);
@@ -755,19 +727,19 @@ export function calculateGroups(guess: string, pg: Array<string>) {
 		}
 		else group.push(pg[a]);
 	}
-	// console.log("calculateGroups returns:", map);
 	return map;
 }
 
-export type BotMapTuple = [Array<string>, BotNode, BotNode, BotNode];
+export type BotMapTuple = [Array<string>, BotNode | null, BotNode | null, BotNode | null];
 
 //** Map<groupId, [group, perfectKid, maxGroupsKid, minSumOfSquaresKid] > */
 export type BotMap = Map< string, BotMapTuple>;
 
 /** A BotNode represents
  * a guess before it gets its colors. */	
-export class BotNode extends TreeNode 
+export class BotNode // extends TreeNode 
 { 
+	public parent: BotNode | null;
 	public ri: number;
 	public guess: string;
 	/** guess divides the parent group  
@@ -776,16 +748,12 @@ export class BotNode extends TreeNode
 	/** sum of each group.length^2 */
 	public sumOfSquares: number; 
 
-	// public perfectKid: BotNode ;
-	// public maxGroupsKid: BotNode;
-	// public minSumOfSquaresKid: BotNode;
-
 	//** map<groupId, [group, perfectKid, maxGroupsKid, minSumOfSquaresKid] > */
 	public map: BotMap;
  
 	constructor(parent: BotNode, ri: number, guess: string, map: BotMap )
 	{ 
-		super(parent);
+		this.parent = parent;
 		this.ri = ri;
 		this.guess = guess;
 		this.map = map;
