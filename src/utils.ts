@@ -667,7 +667,6 @@ export function calculateBotTree(rootGuess: string, rootGuessId: string) {
 					pNode.map.set(pGroupId, [ pGroup, pPerfectKid, pMaxGroupsKid, pSumOfSquaresKid ]);
 					nodes++;
 					if ( kid.nGroups > 1 ) createHardModeKids(kid);
-					// console.log("pPerfectKid:", pPerfectKid);
 					return;
 				}
 				if (pMaxGroupsKid === null || kid.nGroups > pMaxGroupsKid.nGroups) {
@@ -676,7 +675,6 @@ export function calculateBotTree(rootGuess: string, rootGuessId: string) {
 				} 
 			}
 			nodes++;
-			console.log("isLeaf, kid:", pMaxGroupsKid.isLeaf(), pMaxGroupsKid);
 			if ( !pMaxGroupsKid.isLeaf() ) createHardModeKids(pMaxGroupsKid);
 		});
 	}
