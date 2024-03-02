@@ -645,24 +645,6 @@ export function failed(s: GameState) {
 	return !(s.active || (s.nGuesses > 0 && s.board.state[s.nGuesses - 1].join("") === "🟩".repeat(COLS)));
 }
 
-export class TreeNode implements TreeNodeInterface 
-{ 
-  public parent: TreeNodeInterface | null; 
-  public kids: TreeNodeInterface[] = [];
-
-  constructor(parent: TreeNodeInterface | null)
-  { 
-    this.parent = parent; 
-    if (this.parent) this.parent.kids.push(this); 
-  } 
-}
-
-export interface TreeNodeInterface 
-{ 
-  parent: TreeNodeInterface | null; 
-  kids: TreeNodeInterface[]; 
-}
-
 export function calculateBotTree(rootGuess: string, rootGuessId: string) {
 	const maxNodes = 10000;
 	 /** max allowed parent node ri */
