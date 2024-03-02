@@ -668,11 +668,12 @@ export function calculateBotTree(rootGuess: string, rootGuessId: string) {
 				}
 				if (pMaxGroupsKid === null || map.size > pMaxGroupsKid.nGroups) {
 					pMaxGroupsKid = new BotNode(pNode, pNode.ri + 1, pGroup[gi], map);
-					pNode.map.set(groupId, [ pGroup, kid, pMaxGroupsKid, pSumOfSquaresKid ]);
+					pNode.map.set(groupId, [ pGroup, pPerfectKid, kid, pSumOfSquaresKid ]);
 				} 
 			}
 			nodes++;
-			if ( !kid.isLeaf ) createHardModeKids(kid);
+			console.log("isLeaf, kid:", kid.isLeaf(), kid);
+			if ( !kid.isLeaf() ) createHardModeKids(kid);
 		});
 	}
 
