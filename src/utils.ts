@@ -656,26 +656,27 @@ export function calculateBotTree(rootGuess: string, rootGuessId: string) {
 	function createHardModeKids(pNode: BotNode) {
 		if (nodes > maxNodes) return;
 
-		pNode.map.forEach(([ pGroup, pPerfectKid, pMaxGroupsKid, pSumOfSquaresKid ], groupId) => {
+		pNode.map.forEach((pTuple, groupId) => {
+			let [ pGroup, pPerfectKid, pMaxGroupsKid, pSumOfSquaresKid ] = pTuple; 
 			for (let gi = 0; gi < pGroup.length; gi++) {
 				map = calculateGroups(pGroup[gi], pGroup);
 				if ( map.size === pGroup.length) {
 					pPerfectKid = new BotNode(pNode, pNode.ri + 1, pGroup[gi], map);
+					pMaxGroupsKid = pPerfectKid;
+					pSumOfSquaresKid = pPerfectKid;
 					pNode.map.set(groupId, [ pGroup, pPerfectKid, pMaxGroupsKid, pSumOfSquaresKid ]);
 					nodes++;
-					console.log("pPerfectKid:", pPerfectKid);
+					if ( map.size > 1 ) createHardModeKids(pMaxGroupsKid);
+					// console.log("pPerfectKid:", pPerfectKid);
 					return;
 				}
 				if (pMaxGroupsKid === null || map.size > pMaxGroupsKid.nGroups) {
 					pMaxGroupsKid = new BotNode(pNode, pNode.ri + 1, pGroup[gi], map);
 					pNode.map.set(groupId, [ pGroup, pPerfectKid, pMaxGroupsKid, pSumOfSquaresKid ]);
-					nodes++;
 				} 
 			}
-			// if (pMaxGroupsKid !== null) {
-				console.log("pMaxGroupsKid:", pMaxGroupsKid);
-				createHardModeKids(pMaxGroupsKid);
-			// }
+			nodes++;
+			if ( !pMaxGroupsKid.isLeaf ) createHardModeKids(pMaxGroupsKid);
 		});
 	}
 
