@@ -5,6 +5,7 @@ import wordList from "./words_5";
 export const ROWS: number = 6;
 export const COLS: number = 5;
 export let app: GameState;
+export let botRoot: BotNode;
 
 let appSettings: Settings;
 
@@ -20,7 +21,7 @@ export function countOfAinB(a: string, b: string): number {
 }
 
 /** Returns groupId string with # = green, $ = yellow, and - = blank. */
-function calculateGroupId(key: string, test: string[]): string {
+export function calculateGroupId(key: string, test: string): string {
 	let yi: number;
 	/** Array of possible yellow test leters. */
 	let yKey: Array<string> = [...key]; 
@@ -212,7 +213,7 @@ export function colorString(groupId: string): string {
  * the guess of the row with row index ri. */
 export function EasyOrHard(guess: string, ri: number) {
 	if (ri === 0) return "Hard";
-	if (calculateGroupId(guess, app.guesses[ri-1].split("")) === app.guessGroupIds[ri-1] ) {
+	if (calculateGroupId(guess, app.guesses[ri-1]) === app.guessGroupIds[ri-1] ) {
 		return "Hard";
 	} else {
 		return "Easy";
@@ -225,12 +226,12 @@ export function EasyOrHard(guess: string, ri: number) {
  * is the latest guess and ri is its row index.
  * Returns true for a "perfect" guess.
  */
-function processGuess(guessString: string, ri: number): boolean {
+function processGuess(guess: string, ri: number): boolean {
 
 	let perfectGuess: boolean;
 
 	// Initialize guesses[ri]
-	app.guesses[ri] = guessString;
+	app.guesses[ri] = guess;
 
 	/** answers[answerIndex].
 	 * An array of remaining answers before the row's guess. */	
@@ -240,9 +241,6 @@ function processGuess(guessString: string, ri: number): boolean {
 	if (ri === 0) answers = words.answers;
 	else answers = app.guessGroups[ri-1].split(" ");	
 	app.nAnswers[ri]= answers.length;
-
-	/** guess is the guessString as an array of letters. */
-	let guess = guessString.split("");
 
 	// Initialize guessGroupId and guessGroupIds[ri].
 	let guessGroupId = "";
@@ -477,7 +475,7 @@ export class GameState extends Storable {
 	}
 
 	guess(solution: string): LetterState[] {
-		return colorArray(calculateGroupId(solution, this.latestWord.split("")));
+		return colorArray(calculateGroupId(solution, this.latestWord));
 	}
 
 	private parse(str: string) {
@@ -650,17 +648,153 @@ export function failed(s: GameState) {
 export class TreeNode implements TreeNodeInterface 
 { 
   public parent: TreeNodeInterface | null; 
-  public children: TreeNodeInterface[] = [];
+  public kids: TreeNodeInterface[] = [];
 
   constructor(parent: TreeNodeInterface | null)
   { 
     this.parent = parent; 
-    if (this.parent) this.parent.children.push(this); 
+    if (this.parent) this.parent.kids.push(this); 
   } 
 }
 
 export interface TreeNodeInterface 
 { 
   parent: TreeNodeInterface | null; 
-  children: TreeNodeInterface[]; 
+  kids: TreeNodeInterface[]; 
+}
+
+export function calculateBotTree(rootGuess: string, rootGuessId: string) {
+	const maxNodes = 10000;
+	 /** max allowed parent node ri */
+	const riMax = 3;
+	let leaves = 0;
+	let nodes = 0;
+
+	function createHardModeKids(pNode: BotNode) {
+		if (nodes > maxNodes) return;
+		// if (pNode.isLeaf()) { leaves++; return; }
+
+		for (let [groupId, pTuple] of pNode.map) {
+			let pGroup = pTuple[0];
+			let pMaxGroupsKid = pTuple[2];
+			for (let gi = 0; gi < pGroup.length; gi++) {
+				let map = calculateGroups(pGroup[gi], pGroup);
+				let kid = new BotNode(null, pNode.ri + 1, pGroup[gi], map);
+				console.log("kid:", kid);
+				if ( map.size === pGroup.length) {
+					let pPerfectKid = pTuple[1];
+					pPerfectKid = kid;
+					pPerfectKid.parent = pNode;
+					nodes++;
+					return;
+				}
+				if (pMaxGroupsKid === null || kid.nGroups > pMaxGroupsKid.nGroups) {
+					pMaxGroupsKid = kid;
+					pMaxGroupsKid.parent = pNode;
+					nodes++;
+					console.log("pMaxGroupsKid:", pMaxGroupsKid);
+				} 
+			}
+			// if (pMaxGroupsKid !== null) createHardModeKids(pMaxGroupsKid);
+		}
+
+
+		// let nGroupsMax = 0;
+		// for (let gi = 0; gi < pNode.group.length; gi++) {
+		// 	skipGrandKids = false;
+		// 	let map = calculateGroups(pNode.group[gi], pNode.group);
+		// 	if ( map.size === pNode.group.length) {
+		// 		pNode.perfectNextGuess = pNode.group[gi];
+		// 		skipGrandKids = true;
+		// 	}
+		// 	if (map.size < nGroupsMax) continue; 
+		// 	nGroupsMax = map.size;
+		// 	for (let [groupId, group] of map) {
+		// 		if (group.length === 1) skipGrandKids = true;
+		// 		if (!skipKid) { 
+		// 			kid = new BotNode(pNode, pNode.ri + 1, 
+		// 			pNode.group[gi], map.size, groupId, group);
+		// 			nodes++;
+		// 		}
+		// 		if (nodes > maxNodes) return;
+		// 		if (pNode.ri > riMax) { console.log("deep parent node ri:", pNode.ri); return; }
+		// 		if (group.length === 1) continue;
+		// 		if (!skipGrandKids) createHardModeKids(kid);
+		// 	}			
+		// }
+
+	}
+
+	let map = calculateGroups(rootGuess, words.answers);
+	let map2: BotMap = new Map<string, BotMapTuple >;
+	map2.set(rootGuessId, map.get(rootGuessId));
+	botRoot = new BotNode(null, 0, rootGuess, map2);
+
+	createHardModeKids(botRoot);
+
+	console.log("leaves, nodes, botRoot:", leaves, nodes, botRoot);
+}
+
+/** calculateGroups returns a map<groupId key, group array>
+ * of the groups given the guess and the pg (parent group) of
+ * words remaining before the guess.
+ */
+export function calculateGroups(guess: string, pg: Array<string>) {
+	let group: Array<string>;
+	let tuple: BotMapTuple;
+	let map: BotMap = new Map<string, BotMapTuple>;
+	let gid: string;
+	for (let a = 0; a < pg.length; a++) {
+		gid = calculateGroupId(pg[a], guess);
+		tuple = map.get(gid);
+		(tuple === undefined) ? group = undefined : group = tuple[0];
+		if (group === undefined) {
+			group = new Array<string>;
+			group.push(pg[a]);
+			map.set(gid, [group, null, null, null]);
+		}
+		else group.push(pg[a]);
+	}
+	// console.log("calculateGroups returns:", map);
+	return map;
+}
+
+export type BotMapTuple = [Array<string>, BotNode, BotNode, BotNode];
+
+//** Map<groupId, [group, perfectKid, maxGroupsKid, minSumOfSquaresKid] > */
+export type BotMap = Map< string, BotMapTuple>;
+
+/** A BotNode represents
+ * a guess before it gets its colors. */	
+export class BotNode extends TreeNode 
+{ 
+	public ri: number;
+	public guess: string;
+	/** guess divides the parent group  
+	 * remaining words into nGroups = map.size. */
+	public nGroups: number;
+	/** sum of each group.length^2 */
+	public sumOfSquares: number; 
+
+	// public perfectKid: BotNode ;
+	// public maxGroupsKid: BotNode;
+	// public minSumOfSquaresKid: BotNode;
+
+	//** map<groupId, [group, perfectKid, maxGroupsKid, minSumOfSquaresKid] > */
+	public map: BotMap;
+ 
+	constructor(parent: BotNode, ri: number, guess: string, map: BotMap )
+	{ 
+		super(parent);
+		this.ri = ri;
+		this.guess = guess;
+		this.map = map;
+		this.nGroups = map.size;
+		this.sumOfSquares = map.size;
+	}
+
+  	isLeaf() { 
+		return (this.nGroups === 1 && [this.map.values()].length === 1); 
+	}
+
 }

@@ -20,6 +20,7 @@
 		Historical,
 	} from "./widgets";
 	import {
+		calculateGroupId,
 		contractNum,
 		countOfAinB,
 		colorString,
@@ -36,6 +37,7 @@
 		words,
 		Stats,
         groupIdFromColors,
+        calculateBotTree,
 	} from "../utils";
 	import { letterStates, settings, mode, showRowHints } from "../stores";
     import { GameMode } from "../enums";
@@ -165,12 +167,13 @@
 		if (words.answers.includes(ais)) app.solution = ais;
 		else aiSolution = app.solution;
 		let openersArray = app.openers.split(" ");
-			app.board.guesses[app.nGuesses] = randomSample(openersArray);
-			do {
-				processValidGuess();
-				if (!app.active) break;
-				app.board.guesses[app.nGuesses] = app.guessesBot[app.nGuesses];
-			} while (true);
+		app.board.guesses[0] = randomSample(openersArray);
+		do {
+			processValidGuess();
+			if (!app.active) break;
+			app.board.guesses[app.nGuesses] = app.guessesBot[app.nGuesses];
+		} while (true);
+		calculateBotTree(app.board.guesses[0], calculateGroupId(app.solution, app.board.guesses[0]));
 	}
 
 	function reload() {
