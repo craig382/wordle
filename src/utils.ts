@@ -667,15 +667,21 @@ export function calculateBotTree(rootGuess: string, rootGuessId: string) {
 					pNode.map.set(pGroupId, [ pGroup, pPerfectKid, pMaxGroupsKid, pSumOfSquaresKid ]);
 					nodes++;
 					if ( kid.nGroups > 1 ) createHardModeKids(kid);
-					return;
+					return; // skip to next map pair (next group)
 				}
 				if (pMaxGroupsKid === null || kid.nGroups > pMaxGroupsKid.nGroups) {
 					pMaxGroupsKid = kid;
 					pNode.map.set(pGroupId, [ pGroup, pPerfectKid, pMaxGroupsKid, pSumOfSquaresKid ]);
 				} 
+				if (pSumOfSquaresKid === null || kid.sumOfSquares < pSumOfSquaresKid.sumOfSquares) {
+					pSumOfSquaresKid = kid;
+					pNode.map.set(pGroupId, [ pGroup, pPerfectKid, pMaxGroupsKid, pSumOfSquaresKid ]);
+				} 
 			}
-			nodes++;
+			if ( pPerfectKid === null ) nodes += 2;
+			else console.log("WARNING. Unexpectedly creating maxGroups and sumOfSquare kids", pPerfectKid, pMaxGroupsKid, pSumOfSquaresKid);
 			if ( !pMaxGroupsKid.isLeaf() ) createHardModeKids(pMaxGroupsKid);
+			if ( !pSumOfSquaresKid.isLeaf() ) createHardModeKids(pSumOfSquaresKid);
 		});
 	}
 
@@ -740,7 +746,8 @@ export class BotNode // extends TreeNode
 		this.guess = guess;
 		this.map = map;
 		this.nGroups = map.size;
-		this.sumOfSquares = map.size;
+		this.sumOfSquares = 0;
+		map.forEach(([group], _) => { this.sumOfSquares += group.length ** 2; });
 	}
 
   	isLeaf() { 
