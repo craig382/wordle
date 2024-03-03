@@ -394,6 +394,8 @@ export class GameState extends Storable {
 			}
 		}
 		this.errorString = "";
+		this.botLeftMode = BotMode.Human;
+		this.botRightMode = BotMode["Bot Max Groups"];
 		app = this;
 		console.log("app = new GameState:", app);
 		// console.log(new Error().stack); 
