@@ -86,3 +86,13 @@ type Subscriber<T> = [(val: T) => void, (val?: T) => void];
 type Direction = "top" | "right" | "bottom" | "left";
 
 type Swipe = CustomEvent<{ direction: Direction; }>;
+
+type BotMapTuple = [
+	group: Array<string>, 
+	perfectKid: BotNode, 
+	maxGroupsKid: BotNode, 
+	minSumOfSquaresKid: BotNode
+];
+
+//** Map< groupId, BotMapTuple > */
+type BotMap = Map< string, BotMapTuple >;

@@ -248,7 +248,7 @@ function processGuess(guess: string, ri: number): boolean {
 		if (ri < app.nGuesses) {
 			// In Solver mode, the user entered letter
 			// are used to calculate guessGroupIds[ri].
-			 guessGroupId = app.guessGroupIds[ri];	
+			guessGroupId = app.guessGroupIds[ri];	
 		} else {
 			// Calculate a fake guessGroupId so that later
 			// a new Map can be created for game.groups[ri]
@@ -331,6 +331,12 @@ export class GameState extends Storable {
 	#valid = false;
 	mode: GameMode;
 
+	human: Array<BotNode>;
+	botLeft: Array<BotNode>;
+	botLeftMode: BotMode;
+	botRight: Array<BotNode>;
+	botRightMode: BotMode;
+	
 	/** For each row, a map of 
 	 * space separated eliminated answers keyed to groupId. */	
 	public groups: Array<Map<string, string>> = [];
@@ -412,7 +418,7 @@ export class GameState extends Storable {
 		let ri = this.nGuesses - 1;
 		let humanGuess = app.guesses[ri];
 
-		// Randomly pick a hard mode opener for the first guess.
+		// Randomly pick a hard mode opener for the bot first guess.
 		if (ri === 0) {
 			let openersArray = this.openers.split(" ");
 			let botGuess = randomSample(openersArray);
@@ -425,6 +431,27 @@ export class GameState extends Storable {
 		try {
 			// Process this guess.
 			processGuess(humanGuess, ri);
+
+			/** Calculate Bot Tree and initialize the human BotNode array. */
+			if (ri === 0) {
+				calculateBotTree(app.board.guesses[0], app.guessGroupIds[0]);
+				this.human = [];
+				this.human.push(botRoot);
+			} else {
+				// Find or create this human guess in the bot tree.
+				let guess = this.guesses[ri];
+				let pTuple = this.human[ri-1].map.get(this.guessGroupIds[ri-1]);
+				let [ pGroup, pPerfectKid, pMaxGroupsKid, pSumOfSquaresKid ] = pTuple;
+				if (guess === pMaxGroupsKid.guess) this.human.push(pMaxGroupsKid);
+				else if (guess === pSumOfSquaresKid.guess) this.human.push(pSumOfSquaresKid);
+				else {
+					// Guess BotNode not found.
+					// Thus create new BotNode for the guess 
+					// and create hard mode children for the new BotNode.
+					this.human.push(new BotNode(this.human[ri-1], ri, guess, calculateGroups(guess, pGroup)));
+					createHardModeKids(this.human[ri]);
+				}
+			}
 
 			if (this.guessGroupIds[ri] !== "#####") {
 				// Advance ri 1 guess for bot to look for best possible guesses.
@@ -645,45 +672,41 @@ export function failed(s: GameState) {
 	return !(s.active || (s.nGuesses > 0 && s.board.state[s.nGuesses - 1].join("") === "🟩".repeat(COLS)));
 }
 
-export function calculateBotTree(rootGuess: string, rootGuessId: string) {
-	const maxNodes = 10000;
-	let nodes = 0;
-	let map: BotMap;
+export function createHardModeKids(pNode: BotNode) {
+	let kid: BotNode;
 
-	function createHardModeKids(pNode: BotNode) {
-		if (nodes > maxNodes) return;
-		let kid: BotNode;
-
-		pNode.map.forEach((pTuple, pGroupId) => {
-			if (pGroupId === "#####") return; // skip to next map pair
-			let [ pGroup, pPerfectKid, pMaxGroupsKid, pSumOfSquaresKid ] = pTuple; 
-			for (let gi = 0; gi < pGroup.length; gi++) {
-				map = calculateGroups(pGroup[gi], pGroup);
-				kid = new BotNode(pNode, pNode.ri + 1, pGroup[gi], map);
-				if ( kid.nGroups === pGroup.length) {
-					pPerfectKid = kid;
-					pMaxGroupsKid = kid;
-					pSumOfSquaresKid = kid;
-					pNode.map.set(pGroupId, [ pGroup, pPerfectKid, pMaxGroupsKid, pSumOfSquaresKid ]);
-					nodes++;
-					if ( kid.nGroups > 1 ) createHardModeKids(kid);
-					return; // skip to next map pair (next group)
-				}
-				if (pMaxGroupsKid === null || kid.nGroups > pMaxGroupsKid.nGroups) {
-					pMaxGroupsKid = kid;
-					pNode.map.set(pGroupId, [ pGroup, pPerfectKid, pMaxGroupsKid, pSumOfSquaresKid ]);
-				} 
-				if (pSumOfSquaresKid === null || kid.sumOfSquares < pSumOfSquaresKid.sumOfSquares) {
-					pSumOfSquaresKid = kid;
-					pNode.map.set(pGroupId, [ pGroup, pPerfectKid, pMaxGroupsKid, pSumOfSquaresKid ]);
-				} 
+	pNode.map.forEach((pTuple, pGroupId) => {
+		if (pGroupId === "#####") return; // skip to next map pair
+		let [ pGroup, pPerfectKid, pMaxGroupsKid, pSumOfSquaresKid ] = pTuple; 
+		for (let gi = 0; gi < pGroup.length; gi++) {
+			let map = calculateGroups(pGroup[gi], pGroup);
+			kid = new BotNode(pNode, pNode.ri + 1, pGroup[gi], map);
+			if ( kid.nGroups === pGroup.length) {
+				pPerfectKid = kid;
+				pMaxGroupsKid = kid;
+				pSumOfSquaresKid = kid;
+				pNode.map.set(pGroupId, [ pGroup, pPerfectKid, pMaxGroupsKid, pSumOfSquaresKid ]);
+				if ( kid.nGroups > 1 ) createHardModeKids(kid);
+				return; // skip to next map pair (next group)
 			}
-			if ( pPerfectKid === null ) nodes += 2;
-			else console.log("WARNING. Unexpectedly creating maxGroups and sumOfSquare kids", pPerfectKid, pMaxGroupsKid, pSumOfSquaresKid);
-			if ( !pMaxGroupsKid.isLeaf() ) createHardModeKids(pMaxGroupsKid);
-			if ( !pSumOfSquaresKid.isLeaf() ) createHardModeKids(pSumOfSquaresKid);
-		});
-	}
+			if (pMaxGroupsKid === null || kid.nGroups > pMaxGroupsKid.nGroups) {
+				pMaxGroupsKid = kid;
+				pNode.map.set(pGroupId, [ pGroup, pPerfectKid, pMaxGroupsKid, pSumOfSquaresKid ]);
+			} 
+			if (pSumOfSquaresKid === null || kid.sumOfSquares < pSumOfSquaresKid.sumOfSquares) {
+				pSumOfSquaresKid = kid;
+				pNode.map.set(pGroupId, [ pGroup, pPerfectKid, pMaxGroupsKid, pSumOfSquaresKid ]);
+			} 
+		}
+		if ( pPerfectKid !== null ) 
+			console.log("WARNING. Unexpectedly creating maxGroups and sumOfSquare kids", pPerfectKid, pMaxGroupsKid, pSumOfSquaresKid);
+		if ( !pMaxGroupsKid.isLeaf() ) createHardModeKids(pMaxGroupsKid);
+		if ( !pSumOfSquaresKid.isLeaf() ) createHardModeKids(pSumOfSquaresKid);
+	});
+}
+
+export function calculateBotTree(rootGuess: string, rootGuessId: string) {
+	let map: BotMap;
 
 	map = calculateGroups(rootGuess, words.answers);
 	let map2: BotMap = new Map<string, BotMapTuple >;
@@ -692,10 +715,10 @@ export function calculateBotTree(rootGuess: string, rootGuessId: string) {
 
 	createHardModeKids(botRoot);
 
-	console.log("nodes, botRoot:", nodes, botRoot);
+	console.log("botRoot:", botRoot);
 }
 
-/** calculateGroups returns a map<groupId key, group array>
+/** calculateGroups returns a map<groupId key, BotMapTuple>
  * of the groups given the guess and the pg (parent group) of
  * words remaining before the guess.
  */
@@ -717,11 +740,6 @@ export function calculateGroups(guess: string, pg: Array<string>) {
 	}
 	return map;
 }
-
-export type BotMapTuple = [Array<string>, BotNode | null, BotNode | null, BotNode | null];
-
-//** Map<groupId, [group, perfectKid, maxGroupsKid, minSumOfSquaresKid] > */
-export type BotMap = Map< string, BotMapTuple>;
 
 /** A BotNode represents
  * a guess before it gets its colors. */	
@@ -755,3 +773,11 @@ export class BotNode // extends TreeNode
 	}
 
 }
+
+export enum BotMode {
+	"Human",
+	"Bot Max Groups",
+	"Bot Min Sum of Squares",
+	"AI Max Groups",
+	"AI Min Sum of Squares",
+};

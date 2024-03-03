@@ -20,7 +20,6 @@
 		Historical,
 	} from "./widgets";
 	import {
-		calculateGroupId,
 		contractNum,
 		countOfAinB,
 		colorString,
@@ -173,7 +172,6 @@
 			if (!app.active) break;
 			app.board.guesses[app.nGuesses] = app.guessesBot[app.nGuesses];
 		} while (true);
-		calculateBotTree(app.board.guesses[0], calculateGroupId(app.solution, app.board.guesses[0]));
 	}
 
 	function reload() {
