@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from "svelte";
-	import { COLS, countOfAinB, GameState, EasyOrHard } from "../../utils";
+	import { COLS, countOfAinB, GameState, easyOrHard } from "../../utils";
 	import Tile from "./Tile.svelte";
 	import { showRowHints } from "../../stores";
 	import { GameMode } from "../../enums";
@@ -68,8 +68,8 @@
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<section on:click|self={() => {$showRowHints = !$showRowHints;}}>
 		{#if showRowHint }
-			{app.nGroups[ri]}{EasyOrHard(app.guesses[ri], ri)[0]}/
-			<br />{app.nGroupsBot[ri]}{EasyOrHard(app.guessesBot[ri], ri)[0]}
+			{app.nGroups[ri]}{easyOrHard(app.guesses[ri], ri)[0]}/
+			<br />{app.nGroupsBot[ri]}{easyOrHard(app.guessesBot[ri], ri)[0]}
 			<br />{countOfAinB(" ", app.guessGroups[ri]) + 1}W
 		{:else if ri === 0}
 			Row<br />Hints<br />

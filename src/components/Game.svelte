@@ -23,7 +23,7 @@
 		contractNum,
 		countOfAinB,
 		colorString,
-		EasyOrHard,
+		easyOrHard,
 		randomSample,
 		DELAY_INCREMENT,
 		PRAISE,
@@ -36,7 +36,6 @@
 		words,
 		Stats,
         groupIdFromColors,
-        calculateBotTree,
 	} from "../utils";
 	import { letterStates, settings, mode, showRowHints } from "../stores";
     import { GameMode } from "../enums";
@@ -306,14 +305,14 @@
 		{#each Array(app.nGuesses + 1) as _, ri}
 			{#if app.active || ri < app.nGuesses}
 				{@const nLeft = countOfAinB(" ", app.guessGroups[ri]) + 1}
-				{@const nLeftEasy = countOfAinB(" ", app.guessGroupsBot[ri]) + 1}
+				{@const nLeftBot = countOfAinB(" ", app.guessGroupsBot[ri]) + 1}
 				<h1>Guess # {(ri + 1)}</h1>
 				<div class="row">
 						<section>
 							{#if ri < app.nGuesses}
 								Human<br /><br />
 								{app.guesses[ri].toUpperCase()}<br />
-								{EasyOrHard(app.guesses[ri], ri)} Guess<br />
+								{easyOrHard(app.guesses[ri], ri)} Guess<br />
 								{app.nGroups[ri]} groups<br /><br />
 								{colorString(app.guessGroupIds[ri])}<br />
 								Eliminated {app.nAnswers[ri] - nLeft} words<br />
@@ -323,12 +322,12 @@
 						<section>
 							Bot<br /><br />
 							{app.guessesBot[ri].toUpperCase()}<br />
-							{EasyOrHard(app.guessesBot[ri], ri)} Guess<br />
+							{easyOrHard(app.guessesBot[ri], ri)} Guess<br />
 							{app.nGroupsBot[ri]} groups<br /><br />
 							{#if app.mode !== GameMode.solver}
 								{colorString(app.guessGroupIdsBot[ri])}<br />
-								Eliminated {app.nAnswers[ri] - nLeftEasy} words<br />
-								{nLeftEasy} words left
+								Eliminated {app.nAnswers[ri] - nLeftBot} words<br />
+								{nLeftBot} words left
 							{/if}
 						</section>
 				</div>

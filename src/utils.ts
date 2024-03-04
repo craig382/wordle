@@ -192,7 +192,7 @@ export function groupIdFromColors(ri: number):
 	return [id.join(""), errorIndex];
 }
 
-/** patternArray returns the color pattern of a groupId. */
+/** colorArray returns the color pattern of a groupId. */
 export function colorArray(groupId: string): LetterState[] {
 	const p = Array<LetterState>(COLS).fill("⬛");
 	for (let c =0; c < COLS; c++) {
@@ -204,14 +204,14 @@ export function colorArray(groupId: string): LetterState[] {
 	return p;
 }
 
-/** patternString returns the color pattern of a groupId. */
+/** colorString returns the color pattern of a groupId. */
 export function colorString(groupId: string): string {
 	return colorArray(groupId).join("");
 }
 
-/** EasyOrHard(guess, ri) returns "Easy" or "Hard" for
+/** easyOrHard(guess, ri) returns "Easy" or "Hard" for
  * the guess of the row with row index ri. */
-export function EasyOrHard(guess: string, ri: number) {
+export function easyOrHard(guess: string, ri: number) {
 	if (ri === 0) return "Hard";
 	if (calculateGroupId(guess, app.guesses[ri-1]) === app.guessGroupIds[ri-1] ) {
 		return "Hard";
@@ -331,11 +331,12 @@ export class GameState extends Storable {
 	#valid = false;
 	mode: GameMode;
 
-	human: Array<BotNode>;
-	botLeft: Array<BotNode>;
-	botLeftMode: BotMode;
-	botRight: Array<BotNode>;
-	botRightMode: BotMode;
+	/** These are the Bot Row Arrays and their modes. */
+	public human: BotRowArray;
+	public botLeft: BotRowArray;
+	public botLeftMode: BotMode;
+	public botRight: BotRowArray;
+	public botRightMode: BotMode;
 	
 	/** For each row, a map of 
 	 * space separated eliminated answers keyed to groupId. */	
@@ -394,7 +395,9 @@ export class GameState extends Storable {
 			}
 		}
 		this.errorString = "";
+		this.botLeft = [];
 		this.botLeftMode = BotMode.Human;
+		this.botRight = [];
 		this.botRightMode = BotMode["Bot Max Groups"];
 		app = this;
 		console.log("app = new GameState:", app);
@@ -436,8 +439,8 @@ export class GameState extends Storable {
 
 			/** Calculate Bot Tree and initialize the human BotNode array. */
 			if (ri === 0) {
-				calculateBotTree(app.board.guesses[0], app.guessGroupIds[0]);
 				this.human = [];
+				calculateBotTree(app.board.guesses[0], app.guessGroupIds[0]);
 				this.human.push(botRoot);
 			} else {
 				// Find or create this human guess in the bot tree.
@@ -477,7 +480,12 @@ export class GameState extends Storable {
 			throw e; // throw the error up the chain
 		}; 
 
-		// console.log(`GameState.update() completed for guess ${this.guesses}.`);
+		// Remove this block when done troubleshooting.
+		this.botLeft = calculateBotRowArray(this.botLeft, this.botLeftMode);
+		console.log("botLeft:", this.botLeft);
+		this.botRight = calculateBotRowArray( this.botRight, this.botRightMode );
+		console.log("botRight:", this.botRight);
+
 		app = this;
 		console.log("GameState:", this);
 	}
@@ -710,10 +718,16 @@ export function createHardModeKids(pNode: BotNode) {
 export function calculateBotTree(rootGuess: string, rootGuessId: string) {
 	let map: BotMap;
 
+	// First create the botRoot with the full map so that
+	// it contains the correct nGroups and sumOfSquares values.
 	map = calculateGroups(rootGuess, words.answers);
-	let map2: BotMap = new Map<string, BotMapTuple >;
+	botRoot = new BotNode(null, 0, rootGuess, map);
+
+	// To reduce the BotTree size and calculation time,
+	// reduce the botRoot map down to 1 group. 
+	let map2: BotMap = new Map< string, BotMapTuple >;
 	map2.set(rootGuessId, map.get(rootGuessId));
-	botRoot = new BotNode(null, 0, rootGuess, map2);
+	botRoot.map = map2;
 
 	createHardModeKids(botRoot);
 
@@ -783,3 +797,76 @@ export enum BotMode {
 	"AI Max Groups",
 	"AI Min Sum of Squares",
 };
+
+export function botNodeInfo (botNode: BotNode, guessId = "") {
+	let info: BotNodeTuple = [,,,,,,,,,,,,,,]; // Initialize a 14 element empty tuple.
+	info["guess"] = botNode.guess;
+	info["ri"] = botNode.ri;
+	info["nGroups"] = botNode.nGroups;
+	info["sumOfSquares"] = botNode.sumOfSquares;
+	info["guessId"] = guessId;
+
+	let wordsBefore: Array<string> = [];
+	info["wordsLeftBefore"] = 0;
+	botNode.map.forEach((myTuple, myGroupId) => {
+		let [ myGroup, myPerfectKid, myMaxGroupsKid, mySumOfSquaresKid ] = myTuple;
+		wordsBefore.push(myGroup.join(" ")); 
+		info["wordsLeftBefore"] += myGroup.length;
+		if (guessId === myGroupId) {
+			info["colorString"] = colorString(guessId);
+			info["wordsLeftAfter"] = myGroup.length;
+			info["wordListAfter"] = myGroup.join(" ");
+			info["maxGroupsKid"] = myMaxGroupsKid;
+			info["minSumOfSquaresKid"] = mySumOfSquaresKid;	
+		}	
+	});
+
+	if (botNode.ri === 0) {
+		info["wordsLeftBefore"] = words.answers.length;
+		info["wordListBefore"] = "";
+	} else info["wordListBefore"] = wordsBefore.join(", ");
+	info["easyOrHard"] = easyOrHard(botNode.guess, botNode.ri);
+
+	if (guessId === "") {
+		info["guessId"] = "";
+		info["colorString"] = "";
+		info["wordsEliminated"] = 0;
+		info["wordListAfter"] = "";
+		info["wordsLeftAfter"] = 0;
+		info["maxGroupsKid"] = null;
+		info["minSumOfSquaresKid"] = null;	
+	} else {
+		info["wordsEliminated"] = info["wordsLeftBefore"] - info["wordsLeftAfter"];
+	}
+
+	console.log("info out:", info);
+
+	return info;
+}
+
+export function calculateBotRowArray( botRowArray: BotRowArray, botMode: BotMode ) {
+	botRowArray = [];
+	botRowArray.push(botRoot);
+	let info: BotNodeTuple;
+	switch (botMode) {
+		case BotMode.Human:
+			botRowArray = app.human;
+		break;
+		case BotMode["Bot Max Groups"]:
+			for (let ri = 0; ri < (app.nGuesses - (app.active ? 0 : 1)); ri++) {
+				info = botNodeInfo(app.human[ri], app.guessGroupIds[ri]);
+				botRowArray.push(info["maxGroupsKid"]);
+			}
+		break;
+		case BotMode["Bot Min Sum of Squares"]:
+		break;
+		case BotMode["AI Max Groups"]:
+		break;
+		case BotMode["AI Min Sum of Squares"]:
+		break;
+	}
+
+
+	// console.log("botRowArray out:", botRowArray);
+	return botRowArray;
+}

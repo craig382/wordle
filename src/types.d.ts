@@ -96,3 +96,23 @@ type BotMapTuple = [
 
 //** Map< groupId, BotMapTuple > */
 type BotMap = Map< string, BotMapTuple >;
+
+type BotRowArray = Array<BotNode>;
+
+type BotNodeTuple = [
+	guess: string,
+	ri: number,
+	nGroups: number,
+	sumOfSquares: number,
+	wordListBefore: string,
+	wordsLeftBefore: number,
+	easyOrHard: string,
+
+	guessId: string,
+	colorString: string,
+	wordsEliminated: number,
+	wordListAfter: string,
+	wordsLeftAfter: number,
+	maxGroupsKid: BotNode,
+	minSumOfSquaresKid: BotNode	
+]

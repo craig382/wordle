@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Definition from "./Definition.svelte";
-	import {EasyOrHard, app, countOfAinB} from "../../utils";
+	import {easyOrHard, app, countOfAinB} from "../../utils";
 	import { GameMode } from "../../enums";
 
 	export let x = 0;
@@ -18,13 +18,13 @@
 		before guessing {word.toUpperCase()}.<br /><br />
 
 		{#if word != app.solution}
-			{EasyOrHard(word, ri)} guess {word.toUpperCase()} created 
+			{easyOrHard(word, ri)} guess {word.toUpperCase()} created 
 			{app.nGroups[ri]} groups and left 
 			{app.nAnswers[ri+1]} words.
 			<br /><br />
 
 			Instead of {word.toUpperCase()}, 
-			the bot chose {EasyOrHard(app.guessesBot[ri], ri)} 
+			the bot chose {easyOrHard(app.guessesBot[ri], ri)} 
 			guess {app.guessesBot[ri].toUpperCase()} 
 			which created {app.nGroupsBot[ri]}
 			groups{#if app.mode === GameMode.solver}.
@@ -33,7 +33,7 @@
 
 			<br /><br />
 			For the guess after {word.toUpperCase()}, the bot 
-			chose {EasyOrHard(app.guessesBot[ri+1], ri+1)} guess 
+			chose {easyOrHard(app.guessesBot[ri+1], ri+1)} guess 
 			{app.guessesBot[ri+1].toUpperCase()} 
 			which created {app.nGroupsBot[ri+1]}
 			groups{#if app.mode === GameMode.solver}.{:else} &nbsp;and left 
