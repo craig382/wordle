@@ -210,7 +210,9 @@ export function colorString(groupId: string): string {
 }
 
 /** easyOrHard(guess, ri) returns "Easy" or "Hard" for
- * the guess of the row with row index ri. */
+ * the guess of the row with row index ri. 
+ * Note. This easyOrHard function does not work for any 
+ * BotNode whose parent is not on the human tree.*/
 export function easyOrHard(guess: string, ri: number) {
 	if (ri === 0) return "Hard";
 	if (calculateGroupId(guess, app.guesses[ri-1]) === app.guessGroupIds[ri-1] ) {
@@ -862,8 +864,13 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 	if (botNode.ri === 0) {
 		info["wordsLeftBefore"] = words.answers.length;
 		info["wordListBefore"] = "";
-	} else info["wordListBefore"] = wordsBefore.join(", ");
-	info["easyOrHard"] = easyOrHard(botNode.guess, botNode.ri);
+		info["easyOrHard"] = "Hard";
+	} else {
+		info["wordListBefore"] = wordsBefore.join(", ");
+		if (countOfAinB(botNode.guess, info["wordListBefore"]) > 0) 
+			info["easyOrHard"] = "Hard";
+		else info["easyOrHard"] = "Easy";
+	}
 
 	if (guessId === "") {
 		info["guessId"] = "";
