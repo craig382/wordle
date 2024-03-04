@@ -481,9 +481,11 @@ export class GameState extends Storable {
 		}; 
 
 		// Remove this block when done troubleshooting.
-		this.botLeft = calculateBotRowArray(this.botLeft, this.botLeftMode);
+		this.botLeftMode = BotMode["Bot Max Groups"];
+		calculateBotRowArray("left");
 		console.log("botLeft:", this.botLeft);
-		this.botRight = calculateBotRowArray( this.botRight, this.botRightMode );
+		this.botRightMode = BotMode["Bot Min Sum of Squares"];
+		calculateBotRowArray("right");
 		console.log("botRight:", this.botRight);
 
 		app = this;
@@ -843,9 +845,18 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 
 	return info;
 }
-
-export function calculateBotRowArray( botRowArray: BotRowArray, botMode: BotMode ) {
-	botRowArray = [];
+/** Calculates app.botLeft or app.botRight based on app.botLeft/RightMode.  */
+export function calculateBotRowArray(botSide : "left" | "right" ) {
+	let botMode: BotMode;
+	switch (botSide) {
+		case "left": botMode = app.botLeftMode; break;
+		case "right": botMode = app.botRightMode; break;
+		default: 
+			let e = new Error('calculateBotRowArray: statSide must be "left" or "right".');
+			console.log(e);
+			throw e; 
+	}
+	let botRowArray: BotRowArray = [];
 	botRowArray.push(botRoot);
 	let info: BotNodeTuple;
 	switch (botMode) {
@@ -859,6 +870,10 @@ export function calculateBotRowArray( botRowArray: BotRowArray, botMode: BotMode
 			}
 		break;
 		case BotMode["Bot Min Sum of Squares"]:
+			for (let ri = 0; ri < (app.nGuesses - (app.active ? 0 : 1)); ri++) {
+				info = botNodeInfo(app.human[ri], app.guessGroupIds[ri]);
+				botRowArray.push(info["minSumOfSquaresKid"]);
+			}
 		break;
 		case BotMode["AI Max Groups"]:
 		break;
@@ -866,7 +881,6 @@ export function calculateBotRowArray( botRowArray: BotRowArray, botMode: BotMode
 		break;
 	}
 
+	(botSide === "left") ? app.botLeft = botRowArray : app.botRight = botRowArray;
 
-	// console.log("botRowArray out:", botRowArray);
-	return botRowArray;
 }
