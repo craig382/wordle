@@ -333,6 +333,8 @@ export class GameState extends Storable {
 
 	/** These are the Bot Row Arrays and their modes. */
 	public human: BotRowArray;
+	public aiMaxGroups: BotRowArray;
+	public aiMinSumOfSquares: BotRowArray;
 	public botLeft: BotRowArray;
 	public botLeftMode: BotMode;
 	public botRight: BotRowArray;
@@ -399,6 +401,9 @@ export class GameState extends Storable {
 		this.botLeftMode = BotMode.Human;
 		this.botRight = [];
 		this.botRightMode = BotMode["Bot Max Groups"];
+		this.aiMaxGroups = [];
+		this.aiMinSumOfSquares = [];
+	
 		app = this;
 		console.log("app = new GameState:", app);
 		// console.log(new Error().stack); 
@@ -437,11 +442,41 @@ export class GameState extends Storable {
 			// Process this guess.
 			processGuess(humanGuess, ri);
 
-			/** Calculate Bot Tree and initialize the human BotNode array. */
 			if (ri === 0) {
+				/** Calculate Bot Tree and initialize the human and ai BotNode arrays. */
 				this.human = [];
+				this.aiMaxGroups = [];
+				this.aiMinSumOfSquares = [];
 				calculateBotTree(app.board.guesses[0], app.guessGroupIds[0]);
 				this.human.push(botRoot);
+				this.aiMaxGroups.push(botRoot);
+				this.aiMinSumOfSquares.push(botRoot);
+				if (this.guessGroupIds[0] !== "#####") {
+					if ( app.mode === GameMode.solver ) {
+						let info = botNodeInfo(app.human[0], app.guessGroupIds[0]);
+						this.aiMaxGroups.push(info["maxGroupsKid"]);
+						this.aiMinSumOfSquares.push(info["minSumOfSquaresKid"]);	
+					} else {
+						let i = 0;
+						let info: BotNodeTuple;
+						let kid: BotNode;
+						while (true) {
+							info = botNodeInfo(this.aiMaxGroups[i], calculateGroupId(this.solution, this.aiMaxGroups[i].guess));
+							kid = info["maxGroupsKid"];
+							if (kid === null) break;
+							else this.aiMaxGroups.push(kid);
+							i++;
+						}
+						i = 0;
+						while (true) {
+							info = botNodeInfo(this.aiMinSumOfSquares[i], calculateGroupId(this.solution, this.aiMinSumOfSquares[i].guess));
+							kid = info["minSumOfSquaresKid"];
+							if (kid === null) break;
+							else this.aiMinSumOfSquares.push(kid);
+							i++;
+						}
+					}	
+				}
 			} else {
 				// Find or create this human guess in the bot tree.
 				let guess = this.guesses[ri];
@@ -802,6 +837,7 @@ export enum BotMode {
 
 export function botNodeInfo (botNode: BotNode, guessId = "") {
 	let info: BotNodeTuple = [,,,,,,,,,,,,,,]; // Initialize a 14 element empty tuple.
+	if (botNode === null || botNode === undefined) return;
 	info["guess"] = botNode.guess;
 	info["ri"] = botNode.ri;
 	info["nGroups"] = botNode.nGroups;
@@ -876,8 +912,10 @@ export function calculateBotRowArray(botSide : "left" | "right" ) {
 			}
 		break;
 		case BotMode["AI Max Groups"]:
+			botRowArray = app.aiMaxGroups;
 		break;
 		case BotMode["AI Min Sum of Squares"]:
+			botRowArray = app.aiMinSumOfSquares;
 		break;
 	}
 
