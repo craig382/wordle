@@ -2,7 +2,7 @@
 	import { createEventDispatcher, getContext, onMount } from "svelte";
 
 	import { mode, settings } from "../../stores";
-	import { modeData, GameState } from "../../utils";
+	import { modeData, GameState, aiModes } from "../../utils";
 	import type { Toaster } from "../widgets";
 	import Setting from "./Setting.svelte";
 
@@ -46,6 +46,13 @@
 				</svelte:fragment>
 			</Setting>
 		</div>
+		<!-- <Setting type="dropdown" bind:value={$settings.aiMode} options={Object.values(aiModes).map(e => e.valueOf)}> -->
+		<Setting type="dropdown" bind:value={$settings.aiMode} options={Object.values(aiModes).slice(0, 2)}>
+			<svelte:fragment slot="title">AI Mode</svelte:fragment>
+			<svelte:fragment slot="desc">
+				Max Groups or Min Sum of Squares algorithm?
+			</svelte:fragment>
+		</Setting>
 		<Setting type="switch" bind:value={$settings.dark}>
 			<svelte:fragment slot="title">Dark Theme</svelte:fragment>
 		</Setting>

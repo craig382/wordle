@@ -27,6 +27,7 @@
 		randomSample,
 		DELAY_INCREMENT,
 		PRAISE,
+		aiModes,
 		modeData,
 		ROWS,
 		COLS,
@@ -162,15 +163,26 @@
 	function playAiGame() {
 		reload();
 		let ais = aiSolution.toLowerCase();
+		let aiBot: BotRowArray;
 		if (words.answers.includes(ais)) app.solution = ais;
 		else aiSolution = app.solution;
 		let openersArray = app.openers.split(" ");
+
+		// Processing the first guess calculates the bot tree and ai row arrays.
 		app.board.guesses[0] = randomSample(openersArray);
-		do {
+		processValidGuess(); 
+
+		switch ($settings.aiMode) {
+			case aiModes["Max Groups"]: aiBot = app.aiMaxGroups; break;
+			case aiModes["Min Sum of Squares"]: aiBot = app.aiMinSumOfSquares; break;
+		}
+
+		for (let ri = 1; ri < aiBot.length; ri++) {
+			app.board.guesses[ri] = aiBot[ri].guess;
 			processValidGuess();
-			if (!app.active) break;
-			app.board.guesses[app.nGuesses] = app.guessesBot[app.nGuesses];
-		} while (true);
+		}
+
+		// console.log("playAiGame:", aiModes[$settings.aiMode], aiBot);
 	}
 
 	function reload() {
@@ -219,6 +231,7 @@
 		on:reload={reload}
 	/>
 	<p>
+		{#if $mode === GameMode.ai}{aiModes[$settings.aiMode]}{/if}
 		{modeData.modes[$mode].name} Mode.
 		{#if $mode === GameMode.ai}
 			<!-- Click the "Refresh" icon in the upper left 

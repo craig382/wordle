@@ -518,12 +518,12 @@ export class GameState extends Storable {
 		}; 
 
 		// Remove this block when done troubleshooting.
-		this.botLeftMode = BotMode["Bot Max Groups"];
-		calculateBotRowArray("left");
-		console.log("botLeft:", this.botLeft);
-		this.botRightMode = BotMode["Bot Min Sum of Squares"];
-		calculateBotRowArray("right");
-		console.log("botRight:", this.botRight);
+		// this.botLeftMode = BotMode["Bot Max Groups"];
+		// calculateBotRowArray("left");
+		// console.log("botLeft:", this.botLeft);
+		// this.botRightMode = BotMode["Bot Min Sum of Squares"];
+		// calculateBotRowArray("right");
+		// console.log("botRight:", this.botRight);
 
 		app = this;
 		console.log("GameState:", this);
@@ -573,6 +573,7 @@ export class GameState extends Storable {
 
 export class Settings extends Storable {
 	public hard = new Array(modeData.modes.length).fill(false);
+	public aiMode: aiModes = aiModes["AI Max Groups"];
 	public dark = true;
 	public colorblind = false;
 	public tutorial: 0 | 1 | 2 | 3 = 3;
@@ -582,6 +583,7 @@ export class Settings extends Storable {
 		if (settings) {
 			const parsed = JSON.parse(settings) as Settings;
 			this.hard = parsed.hard;
+			this.aiMode = parsed.aiMode;
 			this.dark = parsed.dark;
 			this.colorblind = parsed.colorblind;
 			this.tutorial = parsed.tutorial;
@@ -836,6 +838,11 @@ export enum BotMode {
 	"AI Max Groups",
 	"AI Min Sum of Squares",
 };
+
+export enum aiModes {
+	"Max Groups",
+	"Min Sum of Squares",
+}
 
 export function botNodeInfo (botNode: BotNode, guessId = "") {
 	let info: BotNodeTuple = [,,,,,,,,,,,,,,]; // Initialize a 14 element empty tuple.
