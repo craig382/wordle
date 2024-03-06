@@ -2,7 +2,7 @@
 	import type Toaster from "./Toaster.svelte";
 
 	import { mode } from "../../stores";
-	import { failed, modeData, GameState } from "../../utils";
+	import { modeData, GameState, GameStatus } from "../../utils";
 	import { getContext } from "svelte";
 
 	export let game: GameState;
@@ -11,7 +11,7 @@
 	function copyStats() {
 		navigator.clipboard.writeText(
 			`${modeData.modes[$mode].name} Wordle+ #${game.solutionNumber} ${
-				failed(game) ? "X" : game.nGuesses
+				(game.status !== GameStatus.won) ? "X" : game.nGuesses
 			}/${game.board.guesses.length}\n\n    ${game.board.state
 				.slice(0, game.nGuesses)
 				.map((r) => r.join(""))

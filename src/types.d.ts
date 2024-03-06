@@ -89,9 +89,11 @@ type Swipe = CustomEvent<{ direction: Direction; }>;
 
 type BotMapTuple = [
 	group: Array<string>, 
-	perfectKid: BotNode, 
-	maxGroupsKid: BotNode, 
-	minSumOfSquaresKid: BotNode
+	perfectKid: boolean,
+	maxGroupsKidHard: BotNode, 
+	maxGroupsKidEasy: BotNode,
+	minSumOfSquaresKidHard: BotNode,
+	minSumOfSquaresKidEasy: BotNode
 ];
 
 //** Map< groupId, BotMapTuple > */
@@ -113,6 +115,4 @@ type BotNodeTuple = [
 	wordsEliminated: number,
 	wordListAfter: string,
 	wordsLeftAfter: number,
-	maxGroupsKid: BotNode,
-	minSumOfSquaresKid: BotNode	
 ]

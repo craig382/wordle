@@ -29,6 +29,7 @@
 		PRAISE,
 		aiModes,
 		modeData,
+		GameStatus,
 		ROWS,
 		COLS,
 		newSeed,
@@ -81,15 +82,15 @@
 			++app.nGuesses;
 			try {
 				app.updateBot();
-				if (app.lastWord === app.solution) win();
-				else if (app.nGuesses === ROWS) lose();
+				if (app.status === GameStatus.won) win();
+				else if (app.status === GameStatus.lost) lose();
 				$showRowHints = $showRowHints;
 				$letterStates.update(app.lastState, app.lastWord);
 				$letterStates = $letterStates;
 			} catch (e) {
 				// console.log("processValidGuess: ", e);
 				app.nGuesses = app.nGuesses - 1; // Roll back the unsucessful guess.
-				app.active = false; // Abort the game.
+				app.status = GameStatus.lost; // Abort the game.
 			}
 	}
 
@@ -126,7 +127,7 @@
 
 	function win() {
 		board.bounce(app.nGuesses - 1);
-		app.active = false;
+		app.status = GameStatus.won;
 		setTimeout(
 			() => toaster.pop(PRAISE[app.nGuesses - 1]),
 			DELAY_INCREMENT * COLS + DELAY_INCREMENT
@@ -134,17 +135,17 @@
 		setTimeout(setShowStatsTrue, delay * 1.4);
 		if (!modeData.modes[$mode].historical) {
 			stats.addWin(app.nGuesses, modeData.modes[$mode]);
-			stats = stats;
+			stats = stats; // tell svelte to react to change in stats
 			localStorage.setItem(`stats-${$mode}`, stats.toString());
 		}
 	}
 
 	function lose() {
-		app.active = false;
+		app.status = GameStatus.lost;
 		setTimeout(setShowStatsTrue, delay);
 		if (!modeData.modes[$mode].historical) {
 			stats.addLoss(modeData.modes[$mode]);
-			stats = stats;
+			stats = stats; // tell svelte to react to change in stats
 			localStorage.setItem(`stats-${$mode}`, stats.toString());
 		}
 	}

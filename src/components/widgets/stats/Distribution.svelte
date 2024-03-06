@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { failed, GameState } from "../../../utils";
+	import { GameState, GameStatus } from "../../../utils";
 
 	export let app: GameState;
 	export let distribution: Guesses;
@@ -19,7 +19,7 @@
 				<span class="guess">{guess[0]}</span>
 				<div
 					class="bar"
-					class:this={g === app.nGuesses && !app.active && !failed(app)}
+					class:this={g === app.nGuesses && app.status === GameStatus.won}
 					style="width: {(guess[1] / max) * 100}%;"
 				>
 					{guess[1]}
