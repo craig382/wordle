@@ -87,7 +87,7 @@ type Direction = "top" | "right" | "bottom" | "left";
 
 type Swipe = CustomEvent<{ direction: Direction; }>;
 
-type BotMapTuple = [
+type GangTuple = [
 	group: Array<string>, 
 	perfectKid: boolean,
 	maxGroupsKidHard: BotNode, 
@@ -97,9 +97,9 @@ type BotMapTuple = [
 ];
 
 //** Map< groupId, BotMapTuple > */
-type BotMap = Map< string, BotMapTuple >;
+type Gangs = Map< string, GangTuple >;
 
-type BotRowArray = Array<BotNode>;
+// type BotRowArray = Array<BotNode>;
 
 type BotNodeTuple = [
 	guess: string,

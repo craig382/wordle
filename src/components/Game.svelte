@@ -33,6 +33,7 @@
 		ROWS,
 		COLS,
 		newSeed,
+		BotNode,
 		GameState,
 		LetterStates,
 		words,
@@ -164,7 +165,7 @@
 	function playAiGame() {
 		reload();
 		let ais = aiSolution.toLowerCase();
-		let aiBot: BotRowArray;
+		let aiBot: Array<BotNode>;
 		if (words.answers.includes(ais)) app.solution = ais;
 		else aiSolution = app.solution;
 		let openersArray = app.openers.split(" ");
