@@ -175,8 +175,10 @@
 		processValidGuess(); 
 
 		switch ($settings.aiMode) {
-			case aiModes["Max Groups"]: aiBot = app.aiMaxGroups; break;
-			case aiModes["Min Sum of Squares"]: aiBot = app.aiMinSumOfSquares; break;
+			case aiModes["Max Groups Hard"]: aiBot = app.aiMaxGroupsHard; break;
+			case aiModes["Max Groups Easy"]: aiBot = app.aiMaxGroupsEasy; break;
+			case aiModes["Min Sum of Squares Hard"]: aiBot = app.aiMinSumOfSquaresHard; break;
+			case aiModes["Min Sum of Squares Easy"]: aiBot = app.aiMinSumOfSquaresEasy; break;
 		}
 
 		for (let ri = 1; ri < aiBot.length; ri++) {

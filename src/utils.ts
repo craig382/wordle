@@ -341,8 +341,10 @@ export class GameState extends Storable {
 
 	/** These are the Bot Row Arrays and their modes. */
 	public human: Array<BotNode>;
-	public aiMaxGroups: Array<BotNode>;
-	public aiMinSumOfSquares: Array<BotNode>;
+	public aiMaxGroupsHard: Array<BotNode>;
+	public aiMaxGroupsEasy: Array<BotNode>;
+	public aiMinSumOfSquaresHard: Array<BotNode>;
+	public aiMinSumOfSquaresEasy: Array<BotNode>;
 	public botLeft: Array<BotNode>;
 	public botLeftMode: BotMode;
 	public botRight: Array<BotNode>;
@@ -409,8 +411,10 @@ export class GameState extends Storable {
 		this.botLeftMode = BotMode.Human;
 		this.botRight = [];
 		this.botRightMode = BotMode["Bot Max Groups Hard"];
-		this.aiMaxGroups = [];
-		this.aiMinSumOfSquares = [];
+		this.aiMaxGroupsHard = [];
+		this.aiMaxGroupsEasy = [];
+		this.aiMinSumOfSquaresHard = [];
+		this.aiMinSumOfSquaresEasy = [];
 	
 		app = this;
 		console.log("app = new GameState:", app);
@@ -450,31 +454,51 @@ export class GameState extends Storable {
 			if (ri === 0) {
 				/** Calculate Bot Tree and initialize the human and ai BotNode arrays. */
 				this.human = [];
-				this.aiMaxGroups = [];
-				this.aiMinSumOfSquares = [];
+				this.aiMaxGroupsHard = [];
+				this.aiMaxGroupsEasy = [];
+				this.aiMinSumOfSquaresHard = [];
+				this.aiMinSumOfSquaresEasy = [];
 				calculateBotTree(app.board.guesses[0], app.guessGroupIds[0]);
 				this.human.push(botRoot);
-				this.aiMaxGroups.push(botRoot);
-				this.aiMinSumOfSquares.push(botRoot);
+				this.aiMaxGroupsHard.push(botRoot);
+				this.aiMaxGroupsEasy.push(botRoot);
+				this.aiMinSumOfSquaresHard.push(botRoot);
+				this.aiMinSumOfSquaresEasy.push(botRoot);
 				if (this.guessGroupIds[0] !== "#####") {
 					let tuple: GangTuple;
 					if ( app.mode === GameMode.solver ) {
 						tuple = this.human[0].gangs.get(app.guessGroupIds[0]);
-						this.aiMaxGroups.push(tuple[2]);
-						this.aiMinSumOfSquares.push(tuple[4]);
+						this.aiMaxGroupsHard.push(tuple[2]);
+						this.aiMaxGroupsEasy.push(tuple[3]);
+						this.aiMinSumOfSquaresHard.push(tuple[4]);
+						this.aiMinSumOfSquaresEasy.push(tuple[5]);
 					} else {
 						let i = 0;
 						while (true) {
-							tuple = this.aiMaxGroups[i].gangs.get(calculateGroupId(this.solution, this.aiMaxGroups[i].guess));
+							tuple = this.aiMaxGroupsHard[i].gangs.get(calculateGroupId(this.solution, this.aiMaxGroupsHard[i].guess));
 							if (tuple[2] === null) break;
-							else this.aiMaxGroups.push(tuple[2]);
+							else this.aiMaxGroupsHard.push(tuple[2]);
 							i++;
 						}
 						i = 0;
 						while (true) {
-							tuple = this.aiMinSumOfSquares[i].gangs.get(calculateGroupId(this.solution, this.aiMinSumOfSquares[i].guess));
+							tuple = this.aiMaxGroupsEasy[i].gangs.get(calculateGroupId(this.solution, this.aiMaxGroupsEasy[i].guess));
+							if (tuple[3] === null) break;
+							else this.aiMaxGroupsEasy.push(tuple[3]);
+							i++;
+						}
+						i = 0;
+						while (true) {
+							tuple = this.aiMinSumOfSquaresHard[i].gangs.get(calculateGroupId(this.solution, this.aiMinSumOfSquaresHard[i].guess));
 							if (tuple[4] === null) break;
-							else this.aiMinSumOfSquares.push(tuple[4]);
+							else this.aiMinSumOfSquaresHard.push(tuple[4]);
+							i++;
+						}
+						i = 0;
+						while (true) {
+							tuple = this.aiMinSumOfSquaresEasy[i].gangs.get(calculateGroupId(this.solution, this.aiMinSumOfSquaresEasy[i].guess));
+							if (tuple[5] === null) break;
+							else this.aiMinSumOfSquaresEasy.push(tuple[5]);
 							i++;
 						}
 					}	
@@ -492,7 +516,7 @@ export class GameState extends Storable {
 					// Thus create new BotNode for the guess 
 					// and create hard mode children for the new BotNode.
 					this.human.push(new BotNode(this.human[ri-1], ri, guess, calculateGroups(guess, pGroup)));
-					createHardModeKids(this.human[ri]);
+					createKids(this.human[ri]);
 				}
 			}
 
@@ -580,7 +604,7 @@ export class GameState extends Storable {
 
 export class Settings extends Storable {
 	public hard = new Array(modeData.modes.length).fill(false);
-	public aiMode: aiModes = aiModes["AI Max Groups"];
+	public aiMode: aiModes = aiModes["AI Max Groups Easy"];
 	public dark = true;
 	public colorblind = false;
 	public tutorial: 0 | 1 | 2 | 3 = 3;
@@ -726,36 +750,78 @@ export function timeRemaining(m: Mode) {
 	return m.unit - (Date.now() - m.seed);
 }
 
-export function createHardModeKids(pNode: BotNode) {
+export function createKids(pNode: BotNode) {
 	let kid: BotNode;
 
-	pNode.gangs.forEach((pTuple, pGroupId) => {
-		if (pGroupId === "#####") return; // skip to next gang
-		let [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy] = pTuple; 
+	// Find the gang pair wihose groupId has the most dashes.
+	let maxDashes = -1;
+	let dashes: number;
+	pNode.gangs.forEach((pGang, pGroupId) => {
+		dashes = countOfAinB("-", pGroupId);
+		if (dashes > maxDashes) {
+			maxDashes = dashes;
+			pNode.easyPool = [pGang[0], pGroupId];
+		}
+	});
+
+	pNode.gangs.forEach((pGang, pGroupId) => {
+		if (pGroupId === "#####") return; // skip to next pGang
+		let [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy] = pGang;
+
+		// Create hard mode kids.
 		for (let gi = 0; gi < pGroup.length; gi++) {
-			let gang = calculateGroups(pGroup[gi], pGroup);
-			kid = new BotNode(pNode, pNode.ri + 1, pGroup[gi], gang);
+			let gangs = calculateGroups(pGroup[gi], pGroup);
+			kid = new BotNode(pNode, pNode.ri + 1, pGroup[gi], gangs);
 			if ( kid.nGroups === pGroup.length) {
-				pPerfectKid = true;
+				pPerfectKid = true; // hard mode perfect kid
 				pMgKidHard = kid;
+				pMgKidEasy = kid;
 				pSosKidHard = kid;
+				pSosKidEasy = kid;
 				pNode.gangs.set(pGroupId, [ pGroup, pPerfectKid, kid, kid, kid, kid ]);
-				if ( kid.nGroups > 1 ) createHardModeKids(kid);
-				return; // skip to next gang
+				if ( kid.nGroups > 1 ) createKids(kid);
+				return; // skip to next pGang
 			}
 			if (pMgKidHard === null || kid.nGroups > pMgKidHard.nGroups) {
 				pMgKidHard = kid;
+				pMgKidEasy = kid;
 				pNode.gangs.set(pGroupId, [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ]);
 			} 
 			if (pSosKidHard === null || kid.sumOfSquares < pSosKidHard.sumOfSquares) {
 				pSosKidHard = kid;
+				pSosKidEasy = kid;
 				pNode.gangs.set(pGroupId, [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ]);
 			} 
 		}
 		if ( pPerfectKid ) 
-			console.log("WARNING. Unexpectedly creating maxGroups and sumOfSquare kids", pPerfectKid, pMgKidHard, pSosKidHard);
-		if ( !pMgKidHard.isLeaf() ) createHardModeKids(pMgKidHard);
-		if ( !pSosKidHard.isLeaf() ) createHardModeKids(pSosKidHard);
+			console.log("WARNING. Unexpectedly creating kids", pPerfectKid, pMgKidHard, pSosKidHard);
+		if ( !pMgKidHard.isLeaf() ) createKids(pMgKidHard);
+		if ( pSosKidHard !== pMgKidHard && !pSosKidHard.isLeaf() ) createKids(pSosKidHard);
+
+		// Create easy mode kids.
+		if (pNode.easyPool[1] === pGroupId ) return; // skip to next pGang
+		for (let gi = 0; gi < pNode.easyPool[0].length; gi++) {
+			let gangs = calculateGroups(pNode.easyPool[0][gi], pGroup);
+			kid = new BotNode(pNode, pNode.ri + 1, pNode.easyPool[0][gi], gangs);
+			if ( kid.nGroups === pGroup.length) {
+				pPerfectKid = true; // easy mode perfect kid
+				pMgKidEasy = kid;
+				pSosKidEasy = kid;
+				pNode.gangs.set(pGroupId, [ pGroup, pPerfectKid, pMgKidHard, kid, pSosKidHard, kid ]);
+				if ( kid.nGroups > 1 ) createKids(kid);
+				return; // skip to next pGang
+			}
+			if (pMgKidEasy === null || kid.nGroups > pMgKidEasy.nGroups) {
+				pMgKidEasy = kid;
+				pNode.gangs.set(pGroupId, [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ]);
+			} 
+			if (pSosKidEasy === null || kid.sumOfSquares < pSosKidEasy.sumOfSquares) {
+				pSosKidEasy = kid;
+				pNode.gangs.set(pGroupId, [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ]);
+			} 
+		}
+		if ( !pMgKidEasy.isLeaf() ) createKids(pMgKidEasy);
+		if ( pSosKidEasy !== pMgKidEasy && !pSosKidEasy.isLeaf() ) createKids(pSosKidEasy);
 	});
 }
 
@@ -776,7 +842,7 @@ export function calculateBotTree(rootGuess: string, rootGuessId: string) {
 	if (rootGuessId !== "-----") gangs2.set("-----", gangs.get("-----"));
 	botRoot.gangs = gangs2;
 
-	createHardModeKids(botRoot);
+	createKids(botRoot);
 
 	console.log("botRoot:", botRoot);
 }
@@ -814,7 +880,9 @@ export class BotNode // extends TreeNode
 	 * remaining words into nGroups = map.size. */
 	public nGroups: number;
 	/** sum of each group.length^2 */
-	public sumOfSquares: number; 
+	public sumOfSquares: number;
+	/** Tuple [groupWordListArray, groupId] */
+	public easyPool: [Array<string>, string];
 
 	//** gang<groupId, GangTuple > */
 	public gangs: Gangs;
@@ -824,6 +892,7 @@ export class BotNode // extends TreeNode
 		this.parent = parent;
 		this.ri = ri;
 		this.guess = guess;
+		// this.easyPool = [ [], "" ];
 		this.gangs = gangs;
 		this.nGroups = gangs.size;
 		this.sumOfSquares = 0;
@@ -852,8 +921,10 @@ export enum BotMode {
 };
 
 export enum aiModes {
-	"Max Groups",
-	"Min Sum of Squares",
+	"Max Groups Hard",
+	"Max Groups Easy",
+	"Min Sum of Squares Hard",
+	"Min Sum of Squares Easy",
 }
 
 export function botNodeInfo (botNode: BotNode, guessId = "") {
@@ -928,17 +999,35 @@ export function calculateBotRowArray(botSide : "left" | "right" ) {
 				botRowArray.push(tuple[2]);
 			}
 		break;
+		case BotMode["Bot Max Groups Easy"]:
+			for (let ri = 0; ri < (app.nGuesses - (app.active ? 0 : 1)); ri++) {
+				tuple = app.human[ri].gangs.get(app.guessGroupIds[ri]);
+				botRowArray.push(tuple[3]);
+			}
+		break;
 		case BotMode["Bot Min Sum of Squares Hard"]:
 			for (let ri = 0; ri < (app.nGuesses - (app.active ? 0 : 1)); ri++) {
 				let tuple = app.human[ri].gangs.get(app.guessGroupIds[ri]);
 				botRowArray.push(tuple[4]);
 			}
 		break;
+		case BotMode["Bot Min Sum of Squares Easy"]:
+			for (let ri = 0; ri < (app.nGuesses - (app.active ? 0 : 1)); ri++) {
+				let tuple = app.human[ri].gangs.get(app.guessGroupIds[ri]);
+				botRowArray.push(tuple[5]);
+			}
+		break;
 		case BotMode["AI Max Groups Hard"]:
-			botRowArray = app.aiMaxGroups;
+			botRowArray = app.aiMaxGroupsHard;
+		break;
+		case BotMode["AI Max Groups Easy"]:
+			botRowArray = app.aiMaxGroupsEasy;
 		break;
 		case BotMode["AI Min Sum of Squares Hard"]:
-			botRowArray = app.aiMinSumOfSquares;
+			botRowArray = app.aiMinSumOfSquaresHard;
+		break;
+		case BotMode["AI Min Sum of Squares Easy"]:
+			botRowArray = app.aiMinSumOfSquaresEasy;
 		break;
 	}
 
