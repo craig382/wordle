@@ -96,10 +96,14 @@ type GangTuple = [
 	minSumOfSquaresKidEasy: BotNode
 ];
 
+type ParentTuple = [
+	node: BotNode,
+	gangId: string,
+	gang: GangTuple
+]
+
 //** Map< groupId, BotMapTuple > */
 type Gangs = Map< string, GangTuple >;
-
-// type BotRowArray = Array<BotNode>;
 
 type BotNodeTuple = [
 	guess: string,

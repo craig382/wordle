@@ -52,11 +52,20 @@
 	});
 
 	$: saveState(app);
+	// Can no longer save GameState. Because BotNodes
+	// are arranged in a circular tree.
 	function saveState(game: GameState) {
-		if (modeData.modes[$mode].historical) {
-			localStorage.setItem(`state-${$mode}-h`, game.toString());
-		} else {
-			localStorage.setItem(`state-${$mode}`, game.toString());
+		// if (modeData.modes[$mode].historical) {
+		// 	localStorage.setItem(`state-${$mode}-h`, game.toString());
+		// } else {
+		// 	localStorage.setItem(`state-${$mode}`, game.toString());
+		// }
+
+		let error: Error;
+		try {
+			error = new Error("App.svelte.saveState(GameState). GameState cannot be saved becasue BotNode is a circular tree.");
+		} catch (e) {
+			console.log(e.stack);
 		}
 	}
 </script>
