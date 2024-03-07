@@ -749,6 +749,7 @@ export function timeRemaining(m: Mode) {
 }
 
 export function createKids(pNode: BotNode) {
+	// console.log(pNode.ri, pNode.guess);
 	let kid: BotNode;
 
 	// Find the gang pair wihose groupId has the most dashes.
@@ -759,58 +760,54 @@ export function createKids(pNode: BotNode) {
 		if (dashes > maxDashes) {
 			maxDashes = dashes;
 			pNode.easyPool = [pGang[0], pGroupId];
+			pNode.easyPool2 = [pNode, pGroupId, pGang];
 		}
 	});
 
 	pNode.gangs.forEach((pGang, pGroupId) => {
 		if (pGroupId === "#####") return; // skip to next pGang
 		let [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy] = pGang;
-		let pGang2 = pGang;
 
 		// Create hard mode kids.
 		for (let gi = 0; gi < pGroup.length; gi++) {
 			let gangs = calculateGroups(pGroup[gi], pGroup);
-			kid = new BotNode([pNode, pGroupId, pGang ], pNode, pNode.ri + 1, pGroup[gi], gangs);
+			kid = new BotNode([null, "", null], pNode, pNode.ri + 1, pGroup[gi], gangs);
 			if ( kid.nGroups === pGroup.length) {
 				pPerfectKid = true; // hard mode perfect kid
 				pMgKidHard = kid;
 				pMgKidEasy = kid;
 				pSosKidHard = kid;
 				pSosKidEasy = kid;
-				pGang2 = [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ];
-				pNode.gangs.set(pGroupId, pGang2);
-				pNode.parent2[2] = pGang2;
+				pGang = [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ];
+				pNode.gangs.set(pGroupId, pGang);
+				kid.parent2 = [pNode, pGroupId, pGang];
 				if ( kid.nGroups > 1 ) createKids(kid);
-				// console.log("found perfect kid:"); 
-				// botNodeInfo(kid, pGroupId);
 				return; // skip to next pGang
 			}
 			if (pMgKidHard === null || kid.nGroups > pMgKidHard.nGroups) {
 				pMgKidHard = kid;
 				pMgKidEasy = kid;
-				pGang2 = [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ];
-				pNode.gangs.set(pGroupId, pGang2);
-				pNode.parent2[2] = pGang2;
-				// pNode.gangs.set(pGroupId, [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ]);
+				pGang = [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ];
+				pNode.gangs.set(pGroupId, pGang);
+				kid.parent2 = [pNode, pGroupId, pGang];
 			} 
 			if (pSosKidHard === null || kid.sumOfSquares < pSosKidHard.sumOfSquares) {
 				pSosKidHard = kid;
 				pSosKidEasy = kid;
-				pGang2 = [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ];
-				pNode.gangs.set(pGroupId, pGang2);
-				pNode.parent2[2] = pGang2;
-				// pNode.gangs.set(pGroupId, [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ]);
+				pGang = [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ];
+				pNode.gangs.set(pGroupId, pGang);
+				kid.parent2 = [pNode, pGroupId, pGang];
 			} 
 		}
 		if ( pPerfectKid ) {
 			console.log("WARNING. Unexpectedly creating kids", pPerfectKid, pMgKidHard);
 			let iNode = pMgKidHard;
-			let iGang = pGang;
-			// while (iNode !== null) {
-			// 	// botNodeInfo(iNode, iGang[0]);
-
-			// }
-			botNodeInfo(pMgKidHard, pGroupId);
+			let guessId = pGroupId;
+			while (iNode !== null) {
+				botNodeInfo(iNode, guessId);
+				guessId = iNode.parent2[1];
+				iNode = iNode.parent2[0];
+			}
 		}
 		if ( !pMgKidHard.isLeaf() ) createKids(pMgKidHard);
 		if ( pSosKidHard !== pMgKidHard && !pSosKidHard.isLeaf() ) createKids(pSosKidHard);
@@ -819,31 +816,28 @@ export function createKids(pNode: BotNode) {
 		if (pNode.easyPool[1] === pGroupId ) return; // skip to next pGang
 		for (let gi = 0; gi < pNode.easyPool[0].length; gi++) {
 			let gangs = calculateGroups(pNode.easyPool[0][gi], pGroup);
-			kid = new BotNode([pNode, pGroupId, pGang ], pNode, pNode.ri + 1, pNode.easyPool[0][gi], gangs);
+			kid = new BotNode([null, "", null], pNode, pNode.ri + 1, pNode.easyPool[0][gi], gangs);
 			if ( kid.nGroups === pGroup.length) {
 				pPerfectKid = true; // easy mode perfect kid
 				pMgKidEasy = kid;
 				pSosKidEasy = kid;
-				pGang2 = [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ];
-				pNode.gangs.set(pGroupId, pGang2);
-				pNode.parent2[2] = pGang2;
-				// pNode.gangs.set(pGroupId, [ pGroup, pPerfectKid, pMgKidHard, kid, pSosKidHard, kid ]);
+				pGang = [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ];
+				pNode.gangs.set(pGroupId, pGang);
+				kid.parent2 = [pNode, pGroupId, pGang];
 				if ( kid.nGroups > 1 ) createKids(kid);
 				return; // skip to next pGang
 			}
 			if (pMgKidEasy === null || kid.nGroups > pMgKidEasy.nGroups) {
 				pMgKidEasy = kid;
-				pGang2 = [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ];
-				pNode.gangs.set(pGroupId, pGang2);
-				pNode.parent2[2] = pGang2;
-				// pNode.gangs.set(pGroupId, [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ]);
+				pGang = [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ];
+				pNode.gangs.set(pGroupId, pGang);
+				kid.parent2 = [pNode, pGroupId, pGang];
 			} 
 			if (pSosKidEasy === null || kid.sumOfSquares < pSosKidEasy.sumOfSquares) {
 				pSosKidEasy = kid;
-				pGang2 = [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ];
-				pNode.gangs.set(pGroupId, pGang2);
-				pNode.parent2[2] = pGang2;
-				// pNode.gangs.set(pGroupId, [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ]);
+				pGang = [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ];
+				pNode.gangs.set(pGroupId, pGang);
+				kid.parent2 = [pNode, pGroupId, pGang];
 			} 
 		}
 		if ( !pMgKidEasy.isLeaf() ) createKids(pMgKidEasy);
@@ -858,7 +852,7 @@ export function calculateBotTree(rootGuess: string, rootGuessId: string) {
 	// it contains the correct nGroups and sumOfSquares values.
 	gangs = calculateGroups(rootGuess, words.answers);
 	let pGang = gangs.get(rootGuessId);
-	botRoot = new BotNode([null, rootGuessId, pGang], null, 0, rootGuess, gangs);
+	botRoot = new BotNode([null, "", null], null, 0, rootGuess, gangs);
 
 	// To reduce the BotTree size and calculation time,
 	// reduce the botRoot gangs map down to 1 or 2 groups. 
@@ -956,7 +950,23 @@ export enum aiModes {
 
 export function botNodeInfo (botNode: BotNode, guessId = "") {
 	let info: BotNodeTuple = [,,,,,,,,,,,,]; // Initialize a multi element empty tuple.
-	if (botNode === null || botNode === undefined) return;
+	info[0] = "";
+	info[1] = 0;
+	info[2] = 0;
+	info[3] = 0;
+	info[4] = "";
+	info[5] = 0;
+	info[6] = "";
+	info[7] = guessId;
+	info[8] = "";
+	info[9] = 0;
+	info[10] = "";
+	info[11] = 0;
+
+	if (botNode === null || botNode === undefined) {
+		console.log("wARNING. botNodeInfo(), botNode was null or undefined.", guessId, botNode);
+		return;
+	}
 	info[0] = botNode.guess;
 	info[1] = botNode.ri;
 	info[2] = botNode.nGroups;
@@ -967,8 +977,7 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 	info[5] = 0; // wordsLeftBefore
 	botNode.gangs.forEach((pGang, pGroupId) => {
 		let pGroup = pGang[0];
-		wordsBefore.push(pGroup.join(" ")); 
-		info[5] += pGroup.length; // wordsLeftBefore
+		wordsBefore.push(pGroup.join(" "));
 		if (guessId === pGroupId) {
 			info[8] = colorString(guessId);
 			info[11] = pGroup.length; // wordsLeftAfter
@@ -982,6 +991,7 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 		info[6] = "Hard"; // easyOrHard
 	} else {
 		info[4] = wordsBefore.join(", "); // wordListBefore
+		info[5] = botNode.parent2[2][0].length; // wordsLeftBefore
 		if (countOfAinB(botNode.guess, info[4]) > 0) info[6] = "Hard"; // easyOrHard
 		else info[6] = "Easy"; // easyOrHard
 	}
@@ -998,8 +1008,11 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 
 	console.log(`ri ${info[1]} ${info[6]} ${info[0].toUpperCase()} nGroups vs sumOfSquares: ${info[2]} vs ${info[3]}`);
 	console.log (`${info[7]} ${info[8]} eliminated ${info[9]} words`);
+	if (botNode.ri > 0) console.log(`${botNode.parent2[0].guess} parent (from parentTuple) with kids: ${botNode.parent2[2][2].guess}, ${botNode.parent2[2][3].guess}, ${botNode.parent2[2][4].guess}, ${botNode.parent2[2][5].guess}`);
 	console.log (`${info[11]} words after: ${info[10]}`);
 	console.log (`${info[5]} words before: ${info[4]}`);
+	if (botNode.ri > 0) console.log (`${botNode.parent2[2][0].length} words before (from parentTuple): ${botNode.parent2[2][0].join(" ")}`);
+	console.log(botNode.parent2);
 	console.log("");
 
 	return info;
