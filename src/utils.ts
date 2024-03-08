@@ -439,7 +439,6 @@ export class GameState extends Storable {
 		let humanGuess = app.guesses[ri];
 
 		// DELETE this block once the bot tree algorithm is fully implemented.
-		// Randomly pick a hard mode opener for the bot first guess.
 		if (ri === 0) {
 			processGuess(humanGuess, ri);
 			copyHumanToBot(ri);
