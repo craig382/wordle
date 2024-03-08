@@ -336,6 +336,7 @@ export class GameState extends Storable {
 	public botWords = 500;
 	public errorString: string = "";
 	public botTreeLeaves: string = "";
+	public easyGroup: Array<string>;
 
 	#valid = false;
 	mode: GameMode;
@@ -561,11 +562,14 @@ export class GameState extends Storable {
 			this.botRightMode = BotMode["Bot Min Sum of Squares Hard"];
 			calculateBotRowArray("right");
 
-			console.log("GameState:", this);
 			this.human.forEach ( (bn, bni) => {
-				console.log("human:", bni, this.guessGroupIds[bni], bn);
 				botNodeInfo(bn, this.guessGroupIds[bni]); // console.log()
 			});
+			console.log(`easyGroup.length: ${this.easyGroup.length}.`);
+			this.human.forEach ( (bn, bni) => {
+				console.log("human:", this.guessGroupIds[bni], bn);
+			});
+			console.log("GameState:", this);
 			console.log("botRoot:", botRoot);
 		}
 	}
@@ -760,17 +764,6 @@ export function createKids(pNode: BotNode) {
 
 	let kid: BotNode;
 
-	// Find the gang pair wihose groupId has the most dashes.
-	let maxDashes = -1;
-	let dashes: number;
-	pNode.gangs.forEach((pGang, pGroupId) => {
-		dashes = countOfAinB("-", pGroupId);
-		if (dashes > maxDashes) {
-			maxDashes = dashes;
-			pNode.easyPool = [pNode, pGroupId, pGang];
-		}
-	});
-
 	pNode.gangs.forEach((pGang, pGroupId) => {
 		if (pGroupId === "#####") return; // skip to next pGang
 		let [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy] = pGang;
@@ -820,11 +813,9 @@ export function createKids(pNode: BotNode) {
 		if ( pSosKidHard.sumOfSquares < pMgKidHard.sumOfSquares ) createKids(pSosKidHard);
 
 		// Create easy mode kids.
-		if (pNode.easyPool[1] === pGroupId ) return; // skip to next pGang
-		let easyGuesses: Array<string> = pNode.easyPool[2][0];
-		for (let gi = 0; gi < easyGuesses.length; gi++) {
-			let gangs = calculateGroups(easyGuesses[gi], pGroup);
-			kid = new BotNode([null, "", null], pNode.ri + 1, easyGuesses[gi], gangs);
+		for (let gi = 0; gi < app.easyGroup.length; gi++) {
+			let gangs = calculateGroups(app.easyGroup[gi], pGroup);
+			kid = new BotNode([null, "", null], pNode.ri + 1, app.easyGroup[gi], gangs);
 			if ( kid.nGroups === pGroup.length) {
 				pPerfectKid = true; // easy mode perfect kid
 				pMgKidEasy = kid;
@@ -868,9 +859,35 @@ export function calculateBotTree(rootGuess: string, rootGuessId: string) {
 	// reduce the botRoot gangs map down to 1 or 2 groups. 
 	let gangs2: Gangs = new Map< string, GangTuple >;
 	gangs2.set(rootGuessId, pGang);
-	// Add the "-----" group to map2 because that group
+
+
+	// Find a good easyGang with a good easyGroup.
+	// The best easyGroup is the one with groupId "-----".
+	// But if the first guess has groupId "-----"
+	// then use an alternate easyGroup.
+	// Also, add easyGroup to map2 because that group
 	// is a great pool of potential optimal easy mode guesses.
-	if (rootGuessId !== "-----") gangs2.set("-----", gangs.get("-----"));
+	let easyGang: GangTuple;
+	let easyGroupId: string;
+	if (rootGuessId !== "-----") easyGroupId = "-----";
+	else {
+		// Find a gang pair wihose groupId has the most 
+		// dashes (up to 4 dashes, 5dashes is not allowed).
+		let maxDashes = -1;
+		let dashes: number;
+		for (const pGroupId of gangs.keys()) {
+			dashes = countOfAinB("-", pGroupId);
+			if (dashes === 5) continue;
+			if (dashes > maxDashes) {
+				maxDashes = dashes;
+				easyGroupId = pGroupId;
+				if (dashes === 4) break;
+			}
+		}
+	}
+	easyGang = gangs.get(easyGroupId);
+	app.easyGroup = easyGang[0];
+	gangs2.set(easyGroupId, easyGang);
 	botRoot.gangs = gangs2;
 
 	createKids(botRoot);
@@ -911,7 +928,6 @@ export class BotNode // extends TreeNode
 	public sumOfSquares: number;
 	/** Tuple [groupWordListArray, groupId] */
 	public parent: ParentTuple;
-	public easyPool: ParentTuple;
 
 	//** gang<groupId, GangTuple > */
 	public gangs: Gangs;
