@@ -334,7 +334,8 @@ export class GameState extends Storable {
 	 * bot will search for the best possible guess.
 	 */
 	public botWords = 500;
-	public errorString :string = "";
+	public errorString: string = "";
+	public botTreeLeaves: string = "";
 
 	#valid = false;
 	mode: GameMode;
@@ -749,7 +750,14 @@ export function timeRemaining(m: Mode) {
 }
 
 export function createKids(pNode: BotNode) {
-	// console.log(pNode.ri, pNode.guess);
+
+	// Prevent a leaf node from creating kids.
+	if (pNode.isLeaf()) {
+		app.botTreeLeaves += `${pNode.parent2[2][1] ? "P" : ""}${pNode.ri}${pNode.guess} `;
+		console.log("botTreeLeaves:", app.botTreeLeaves);
+		return;		
+	}
+
 	let kid: BotNode;
 
 	// Find the gang pair wihose groupId has the most dashes.
@@ -781,7 +789,7 @@ export function createKids(pNode: BotNode) {
 				pGang = [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ];
 				pNode.gangs.set(pGroupId, pGang);
 				kid.parent2 = [pNode, pGroupId, pGang];
-				if ( kid.nGroups > 1 ) createKids(kid);
+				createKids(kid);
 				return; // skip to next pGang
 			}
 			if (pMgKidHard === null || kid.nGroups > pMgKidHard.nGroups) {
@@ -809,8 +817,8 @@ export function createKids(pNode: BotNode) {
 				iNode = iNode.parent2[0];
 			}
 		}
-		if ( !pMgKidHard.isLeaf() ) createKids(pMgKidHard);
-		if ( pSosKidHard !== pMgKidHard && !pSosKidHard.isLeaf() ) createKids(pSosKidHard);
+		createKids(pMgKidHard);
+		if ( pSosKidHard.sumOfSquares < pMgKidHard.sumOfSquares ) createKids(pSosKidHard);
 
 		// Create easy mode kids.
 		if (pNode.easyPool[1] === pGroupId ) return; // skip to next pGang
@@ -824,7 +832,7 @@ export function createKids(pNode: BotNode) {
 				pGang = [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ];
 				pNode.gangs.set(pGroupId, pGang);
 				kid.parent2 = [pNode, pGroupId, pGang];
-				if ( kid.nGroups > 1 ) createKids(kid);
+				createKids(kid);
 				return; // skip to next pGang
 			}
 			if (pMgKidEasy === null || kid.nGroups > pMgKidEasy.nGroups) {
@@ -840,8 +848,10 @@ export function createKids(pNode: BotNode) {
 				kid.parent2 = [pNode, pGroupId, pGang];
 			} 
 		}
-		if ( !pMgKidEasy.isLeaf() ) createKids(pMgKidEasy);
-		if ( pSosKidEasy !== pMgKidEasy && !pSosKidEasy.isLeaf() ) createKids(pSosKidEasy);
+		if ( pMgKidEasy.nGroups > pMgKidHard.nGroups) createKids(pMgKidEasy);
+		if ( pSosKidEasy.sumOfSquares < pMgKidEasy.sumOfSquares &&
+			pSosKidEasy.sumOfSquares < pSosKidHard.sumOfSquares ) 
+			createKids(pSosKidEasy);
 	});
 }
 
@@ -921,7 +931,8 @@ export class BotNode // extends TreeNode
 	}
 
   	isLeaf() { 
-		return (this.nGroups === 1 && [this.gangs.values()].length === 1); 
+		let gang: GangTuple = this.gangs.entries().next().value;
+		return ( (this.nGroups === 1) && (gang[0].length === 1) );
 	}
 
 }
@@ -967,7 +978,7 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 		console.log("wARNING. botNodeInfo(), botNode was null or undefined.", guessId, botNode);
 		return;
 	}
-	info[0] = botNode.guess;
+	info[0] = botNode.guess.toUpperCase();
 	info[1] = botNode.ri;
 	info[2] = botNode.nGroups;
 	info[3] = botNode.sumOfSquares;
@@ -1006,13 +1017,12 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 		info[9] = info[5] - info[11];
 	}
 
-	console.log(`ri ${info[1]} ${info[6]} ${info[0].toUpperCase()} nGroups vs sumOfSquares: ${info[2]} vs ${info[3]}`);
+	console.log(`ri ${info[1]} ${info[6]} ${info[0]} nGroups vs sumOfSquares: ${info[2]} vs ${info[3]}`);
 	console.log (`${info[7]} ${info[8]} eliminated ${info[9]} words`);
 	if (botNode.ri > 0) console.log(`${botNode.parent2[0].guess} parent (from parentTuple) with kids: ${botNode.parent2[2][2].guess}, ${botNode.parent2[2][3].guess}, ${botNode.parent2[2][4].guess}, ${botNode.parent2[2][5].guess}`);
 	console.log (`${info[11]} words after: ${info[10]}`);
 	console.log (`${info[5]} words before: ${info[4]}`);
 	if (botNode.ri > 0) console.log (`${botNode.parent2[2][0].length} words before (from parentTuple): ${botNode.parent2[2][0].join(" ")}`);
-	console.log(botNode.parent2);
 	console.log("");
 
 	return info;
