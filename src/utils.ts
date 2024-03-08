@@ -441,11 +441,7 @@ export class GameState extends Storable {
 		// DELETE this block once the bot tree algorithm is fully implemented.
 		// Randomly pick a hard mode opener for the bot first guess.
 		if (ri === 0) {
-			let openersArray = this.openers.split(" ");
-			let botGuess = randomSample(openersArray);
-			// Force the bot opener to be different than the human opener.
-			if (botGuess === humanGuess) botGuess = randomSample(openersArray);;
-			processGuess(botGuess, ri);
+			processGuess(humanGuess, ri);
 			copyHumanToBot(ri);
 		}
 
