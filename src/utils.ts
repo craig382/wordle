@@ -336,6 +336,7 @@ export class GameState extends Storable {
 	public botWords = 500;
 	public errorString: string = "";
 	public botTreeLeaves: string = "";
+	public nBotTreeLeaves: number = 0;
 	public easyGroup: Array<string>;
 
 	#valid = false;
@@ -750,23 +751,31 @@ export function timeRemaining(m: Mode) {
 
 export function createKids(pNode: BotNode) {
 
-	// Prevent a leaf node from creating kids.
+	// Prevent a leaf node from creating kids. DELETE? This should never happen.
 	if (pNode.isLeaf()) {
-		app.botTreeLeaves += `${pNode.parent[2][1] ? "P" : ""}${pNode.ri}${pNode.guess} `;
-		console.log("botTreeLeaves:", app.botTreeLeaves);
-		return;		
+		let e = new Error('createKids: a leaf node unexpectedly called createKids().');
+		console.log("This leaf node was told to create kids.", pNode);
+		// throw e;
+		return;
 	}
 
 	let kid: BotNode;
 
 	pNode.gangs.forEach((pGang, pGroupId) => {
-		if (pGroupId === "#####") return; // skip to next pGang
+		if (pGroupId === "#####") {
+			if (pNode.gangs.size === 1) {
+				// pNode is a leaf node that will not have kids.
+				app.botTreeLeaves += `${pNode.parent[2][1] ? "P" : ""}${pNode.ri}${pNode.guess} `;
+				app.nBotTreeLeaves++;
+			}
+			return; // skip to next pGang
+		}
 		let [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy] = pGang;
 
 		// Create hard mode kids.
 		for (let gi = 0; gi < pGroup.length; gi++) {
 			let gangs = calculateGroups(pGroup[gi], pGroup);
-			kid = new BotNode([null, "", null], pNode.ri + 1, pGroup[gi], gangs);
+			kid = new BotNode([pNode, pGroupId, null], pNode.ri + 1, pGroup[gi], gangs);
 			if ( kid.nGroups === pGroup.length) {
 				pPerfectKid = true; // hard mode perfect kid
 				pMgKidHard = kid;
@@ -775,7 +784,7 @@ export function createKids(pNode: BotNode) {
 				pSosKidEasy = kid;
 				pGang = [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ];
 				pNode.gangs.set(pGroupId, pGang);
-				kid.parent = [pNode, pGroupId, pGang];
+				kid.parent[2] = pGang;
 				createKids(kid);
 				return; // skip to next pGang
 			}
@@ -784,14 +793,14 @@ export function createKids(pNode: BotNode) {
 				pMgKidEasy = kid;
 				pGang = [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ];
 				pNode.gangs.set(pGroupId, pGang);
-				kid.parent = [pNode, pGroupId, pGang];
+				kid.parent[2] = pGang;
 			} 
 			if (pSosKidHard === null || kid.sumOfSquares < pSosKidHard.sumOfSquares) {
 				pSosKidHard = kid;
 				pSosKidEasy = kid;
 				pGang = [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ];
 				pNode.gangs.set(pGroupId, pGang);
-				kid.parent = [pNode, pGroupId, pGang];
+				kid.parent[2] = pGang;
 			} 
 		}
 		if ( pPerfectKid ) {
@@ -810,14 +819,14 @@ export function createKids(pNode: BotNode) {
 		// Create easy mode kids.
 		for (let gi = 0; gi < app.easyGroup.length; gi++) {
 			let gangs = calculateGroups(app.easyGroup[gi], pGroup);
-			kid = new BotNode([null, "", null], pNode.ri + 1, app.easyGroup[gi], gangs);
+			kid = new BotNode([pNode, pGroupId, null], pNode.ri + 1, app.easyGroup[gi], gangs);
 			if ( kid.nGroups === pGroup.length) {
 				pPerfectKid = true; // easy mode perfect kid
 				pMgKidEasy = kid;
 				pSosKidEasy = kid;
 				pGang = [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ];
 				pNode.gangs.set(pGroupId, pGang);
-				kid.parent = [pNode, pGroupId, pGang];
+				kid.parent[2] = pGang;
 				createKids(kid);
 				return; // skip to next pGang
 			}
@@ -825,13 +834,13 @@ export function createKids(pNode: BotNode) {
 				pMgKidEasy = kid;
 				pGang = [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ];
 				pNode.gangs.set(pGroupId, pGang);
-				kid.parent = [pNode, pGroupId, pGang];
+				kid.parent[2] = pGang;
 			} 
 			if (pSosKidEasy === null || kid.sumOfSquares < pSosKidEasy.sumOfSquares) {
 				pSosKidEasy = kid;
 				pGang = [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ];
 				pNode.gangs.set(pGroupId, pGang);
-				kid.parent = [pNode, pGroupId, pGang];
+				kid.parent[2] = pGang;
 			} 
 		}
 		if ( pMgKidEasy.nGroups > pMgKidHard.nGroups) createKids(pMgKidEasy);
@@ -939,8 +948,10 @@ export class BotNode // extends TreeNode
 	}
 
   	isLeaf() { 
-		let gang: GangTuple = this.gangs.entries().next().value;
-		return ( (this.nGroups === 1) && (gang[0].length === 1) );
+		let gang: GangTuple = this.gangs.entries().next().value[1];
+		let result = (this.nGroups === 1) && (gang[0].length === 1);
+		// console.log(`isLeaf: ${result} <= nGroups: ${this.nGroups} === 1 && gang[0].length: ${gang[0].length} === 1. gang: ${gang}. gang[0]: ${gang[0]}.`);
+		return result;
 	}
 
 }
@@ -1025,15 +1036,20 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 		info[9] = info[5] - info[11];
 	}
 
-	console.log(`ri ${info[1]} ${info[6]} ${info[0]} nGroups vs sumOfSquares: ${info[2]} vs ${info[3]}`);
-	console.log (`${info[7]} ${info[8]} eliminated ${info[9]} words`);
-	if (botNode.ri > 0) console.log(`${botNode.parent[0].guess} parent (from parentTuple) with kids: ${botNode.parent[2][2].guess}, ${botNode.parent[2][3].guess}, ${botNode.parent[2][4].guess}, ${botNode.parent[2][5].guess}`);
-	console.log (`${info[11]} words after: ${info[10]}`);
-	console.log (`${info[5]} words before: ${info[4]}`);
-	if (botNode.ri > 0) console.log (`${botNode.parent[2][0].length} words before (from parentTuple): ${botNode.parent[2][0].join(" ")}`);
-	console.log("");
+	logInfo(); // console.log()
 
 	return info;
+
+	function logInfo() {
+		console.log(`ri ${info[1]} ${info[6]} ${info[0]} nGroups vs sumOfSquares: ${info[2]} vs ${info[3]}`);
+		console.log(`isLeaf? ${botNode.isLeaf()}`);
+		console.log (`${info[7]} ${info[8]} eliminated ${info[9]} words`);
+		if (botNode.ri > 0) console.log(`${botNode.parent[0].guess} parent (from parentTuple) with kids: ${botNode.parent[2][2].guess}, ${botNode.parent[2][3].guess}, ${botNode.parent[2][4].guess}, ${botNode.parent[2][5].guess}`);
+		console.log (`${info[11]} words after: ${info[10]}`);
+		console.log (`${info[5]} words before: ${info[4]}`);
+		if (botNode.ri > 0) console.log (`${botNode.parent[2][0].length} words before (from parentTuple): ${botNode.parent[2][0].join(" ")}`);
+		console.log("");	
+	}
 }
 
 /** Calculates app.botLeft or app.botRight based on app.botLeft/RightMode.  */
@@ -1042,7 +1058,7 @@ export function calculateBotRowArray(botSide : "left" | "right" ) {
 	switch (botSide) {
 		case "left": botMode = app.botLeftMode; break;
 		case "right": botMode = app.botRightMode; break;
-		default: 
+		default:
 			let e = new Error('calculateBotRowArray: statSide must be "left" or "right".');
 			console.log(e);
 			throw e; 
