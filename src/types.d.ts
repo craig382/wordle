@@ -119,4 +119,6 @@ type BotNodeTuple = [
 	wordsEliminated: number,
 	wordListAfter: string,
 	wordsLeftAfter: number,
+
+	maxGroupsKidEasy: BotNode,
 ]

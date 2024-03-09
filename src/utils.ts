@@ -976,7 +976,8 @@ export enum aiModes {
 }
 
 export function botNodeInfo (botNode: BotNode, guessId = "") {
-	let info: BotNodeTuple = [,,,,,,,,,,,,]; // Initialize a multi element empty tuple.
+	let info: BotNodeTuple = [,,,,,,,,,,,,,]; // Initialize a multi element empty tuple.
+
 	info[0] = "";
 	info[1] = 0;
 	info[2] = 0;
@@ -991,9 +992,15 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 	info[11] = 0;
 
 	if (botNode === null || botNode === undefined) {
-		console.log("wARNING. botNodeInfo(), botNode was null or undefined.", guessId, botNode);
+		console.log("WARNING. botNodeInfo(), botNode was null or undefined.", guessId, botNode);
 		return;
 	}
+
+	if (guessId === "" && app.mode !== GameMode.solver) {
+		guessId = calculateGroupId(app.solution, botNode.guess);
+		info[7] = guessId;
+	}
+
 	info[0] = botNode.guess.toUpperCase();
 	info[1] = botNode.ri;
 	info[2] = botNode.nGroups;
@@ -1009,6 +1016,7 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 			info[8] = colorString(guessId);
 			info[11] = pGroup.length; // wordsLeftAfter
 			info[10] = pGroup.join(" "); // wordListAfter
+			info[12] = pGang[3]; // maxGroupsKidEasy
 		}	
 	});
 
@@ -1029,11 +1037,12 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 		info[9] = 0; // wordsEliminated
 		info[10] = ""; // wordListAfter
 		info[11] = 0; // wordsLeftAfter
+		info[12] = null; // maxGroupsKidEasy
 	} else { // wordsEliminated = wordsLeftBefore - wordsLeftAfter
 		info[9] = info[5] - info[11];
 	}
 
-	logInfo(); // console.log()
+	// logInfo(); // console.log()
 
 	return info;
 
