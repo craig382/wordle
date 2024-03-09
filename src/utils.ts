@@ -335,8 +335,13 @@ export class GameState extends Storable {
 	 */
 	public botWords = 500;
 	public errorString: string = "";
-	public botTreeLeaves: string = "";
+	public botTreeNodes: Array<string> = [];
 	public nBotTreeLeaves: number = 0;
+	/** Incremented each time a new BotNode is created.
+	 * calculateGroups() is usually performed once per new node.
+	 */
+	public nConstructedNodes: number = 0;
+	public nBotTreeNodes: number = 0;
 	public easyGroup: Array<string>;
 
 	#valid = false;
@@ -751,25 +756,21 @@ export function timeRemaining(m: Mode) {
 
 export function createKids(pNode: BotNode) {
 
-	// Prevent a leaf node from creating kids. DELETE? This should never happen.
-	if (pNode.isLeaf()) {
-		let e = new Error('createKids: a leaf node unexpectedly called createKids().');
-		console.log("This leaf node was told to create kids.", pNode);
-		// throw e;
-		return;
+	// Prevent a leaf node from creating kids.
+	// And build app.botTreeNodes, the path through the botTree.
+	app.nBotTreeNodes++
+	if (pNode.isLeaf()) { 
+		app.nBotTreeLeaves++;
+		// app.botTreeNodes.push(`L${pNode.ri}${pNode.guess}`);
+		return; 
 	}
+	// app.botTreeNodes.push(`${pNode.ri}${pNode.guess}`);
 
 	let kid: BotNode;
 
 	pNode.gangs.forEach((pGang, pGroupId) => {
-		if (pGroupId === "#####") {
-			if (pNode.gangs.size === 1) {
-				// pNode is a leaf node that will not have kids.
-				app.botTreeLeaves += `${pNode.parent[2][1] ? "P" : ""}${pNode.ri}${pNode.guess} `;
-				app.nBotTreeLeaves++;
-			}
-			return; // skip to next pGang
-		}
+		if (pGroupId === "#####") { return; } // skip to next pGroupId
+
 		let [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy] = pGang;
 
 		// Create hard mode kids.
@@ -945,14 +946,10 @@ export class BotNode // extends TreeNode
 		this.nGroups = gangs.size;
 		this.sumOfSquares = 0;
 		gangs.forEach(([group], _) => { this.sumOfSquares += group.length ** 2; });
+		app.nConstructedNodes++;
 	}
 
-  	isLeaf() { 
-		let gang: GangTuple = this.gangs.entries().next().value[1];
-		let result = (this.nGroups === 1) && (gang[0].length === 1);
-		// console.log(`isLeaf: ${result} <= nGroups: ${this.nGroups} === 1 && gang[0].length: ${gang[0].length} === 1. gang: ${gang}. gang[0]: ${gang[0]}.`);
-		return result;
-	}
+  	isLeaf() { return (this.sumOfSquares === 1); }
 
 }
 
