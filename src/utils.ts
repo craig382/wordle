@@ -353,9 +353,9 @@ export class GameState extends Storable {
 	public aiMaxGroupsEasy: Array<BotNode>;
 	public aiMinSumOfSquaresHard: Array<BotNode>;
 	public aiMinSumOfSquaresEasy: Array<BotNode>;
-	public botLeft: Array<BotNode>;
+	public botLeft: Array<BotNodeTuple>;
 	public botLeftMode: BotMode;
-	public botRight: Array<BotNode>;
+	public botRight: Array<BotNodeTuple>;
 	public botRightMode: BotMode;
 	
 	/** For each row, a map of 
@@ -559,9 +559,9 @@ export class GameState extends Storable {
 
 			// DELETE this block when done troubleshooting.
 			this.botLeftMode = BotMode["Bot Max Groups Hard"];
-			calculateBotRowArray("left");
+			calculateBotInfoArray("left");
 			this.botRightMode = BotMode["Bot Min Sum of Squares Hard"];
-			calculateBotRowArray("right");
+			calculateBotInfoArray("right");
 
 			this.human.forEach ( (bn, bni) => {
 				botNodeInfo(bn, this.guessGroupIds[bni]); // console.log()
@@ -1059,7 +1059,7 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 }
 
 /** Calculates app.botLeft or app.botRight based on app.botLeft/RightMode.  */
-export function calculateBotRowArray(botSide : "left" | "right" ) {
+export function calculateBotInfoArray(botSide : "left" | "right" ) {
 	let botMode: BotMode;
 	switch (botSide) {
 		case "left": botMode = app.botLeftMode; break;
@@ -1115,9 +1115,24 @@ export function calculateBotRowArray(botSide : "left" | "right" ) {
 		break;
 	}
 
+	let botInfoArray: Array<BotNodeTuple>;
 	switch (botSide) {
-		case "left": app.botLeft = botRowArray; break;
-		case "right": app.botRight = botRowArray; break;
+		// case "left": app.botLeft = botRowArray; break;
+		// case "right": app.botRight = botRowArray; break;
+		case "left": botInfoArray = app.botLeft; break;
+		case "right": botInfoArray = app.botRight; break;
+		// case "left": 
+		// 	botRowArray.forEach((node) => {
+		// 		app.botLeft.push(botNodeInfo(node));
+		// 	});
+		// break;
+		// case "right": 
+		// 	botRowArray.forEach((node) => {
+		// 		app.botRight.push(botNodeInfo(node));
+		// 	});
+		// break;
 	}
-
+	botInfoArray = [];
+	botRowArray.forEach((node) => {	botInfoArray.push(botNodeInfo(node)); });
+	return botInfoArray;
 }

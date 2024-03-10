@@ -106,19 +106,19 @@ type ParentTuple = [
 type Gangs = Map< string, GangTuple >;
 
 type BotNodeTuple = [
-	guess: string,
-	ri: number,
-	nGroups: number,
-	sumOfSquares: number,
-	wordListBefore: string,
-	wordsLeftBefore: number,
-	easyOrHard: string,
+	guess: string, // 0
+	ri: number, // 1
+	nGroups: number, // 2
+	sumOfSquares: number, // 3
+	wordListBefore: string, // 4
+	wordsLeftBefore: number, // 5
+	easyOrHard: string, // 6
 
-	guessId: string,
-	colorString: string,
-	wordsEliminated: number,
-	wordListAfter: string,
-	wordsLeftAfter: number,
+	guessId: string, // 7
+	colorString: string, // 8
+	wordsEliminated: number, // 9
+	wordListAfter: string, // 10
+	wordsLeftAfter: number, // 11
 
-	maxGroupsKidEasy: BotNode,
+	maxGroupsKidEasy: BotNode, // 12
 ]

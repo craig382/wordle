@@ -39,6 +39,7 @@
 		words,
 		Stats,
         groupIdFromColors,
+        calculateBotInfoArray,
 	} from "../utils";
 	import { letterStates, settings, mode, showRowHints } from "../stores";
     import { GameMode } from "../enums";
@@ -318,7 +319,42 @@
 		</div>
 	{/if}
 	{#if (app.nGuesses > 0)}
+		{@const infoL = calculateBotInfoArray("left")}
+		{@const infoR = calculateBotInfoArray("right")}
 		<br /><h3>Bot Results {#if !app.active}For Solution "{app.solution}"{/if}</h3>
+		{#each Array(Math.max(infoL.length, infoR.length)) as _, ri}
+			<h1>Guess # {(ri + 1)}</h1>
+			<div class="row">
+				<section>
+					{#if ri < infoL.length}
+						{app.botLeftMode}<br /><br />
+						{infoL[ri][0]}<br />
+						{infoL[ri][6]} Guess<br />
+						{infoL[ri][2]} groups<br /><br />
+						{infoL[ri][8]}<br />
+						Eliminated {infoL[ri][9]} words<br />
+						{infoL[ri][11]}  words left
+					{/if}
+				</section>
+				<section>
+					{#if ri < infoR.length}
+						{app.botRightMode}<br /><br />
+						{infoR[ri][0]}<br />
+						{infoR[ri][6]} Guess<br />
+						{infoR[ri][2]} groups<br /><br />
+						{infoR[ri][8]}<br />
+						Eliminated {infoR[ri][9]} words<br />
+						{infoR[ri][11]} words left
+					{/if}
+				</section>
+		</div>
+		{#if ri < app.nGuesses && app.guesses[ri] !== app.solution}
+			<div class="row">
+				Guess {infoL[ri][0]} left 
+				{infoL[ri][11]} words: {infoL[ri][10]}<br />
+			</div>
+		{/if}
+{/each}
 		{#each Array(app.nGuesses + 1) as _, ri}
 			{#if app.active || ri < app.nGuesses}
 				{@const nLeft = countOfAinB(" ", app.guessGroups[ri]) + 1}
