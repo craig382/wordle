@@ -430,7 +430,7 @@ export class GameState extends Storable {
 				console.log(`easyGroup.length: ${this.easyGroup.length}.`);
 				this.human.forEach ( (bn, bni) => {
 					console.log("human:", this.guessGroupIds[bni], bn);
-					if (bni > 0) console.log(`${bn.guess} parent ${bn.parent[0].guess} with kids: ${bn.parent[2][2].guess}, ${bn.parent[2][3].guess}, ${bn.parent[2][4].guess}, ${bn.parent[2][5].guess}`);
+					// if (bni > 0) console.log(`${bn.guess} parent ${bn.parent[0].guess} with kids: ${bn.parent[2][2].guess}, ${bn.parent[2][3].guess}, ${bn.parent[2][4].guess}, ${bn.parent[2][5].guess}`);
 				});
 				console.log("GameState:", this);
 				console.log("botRoot:", botRoot);
@@ -872,7 +872,7 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 		return;
 	}
 
-	if (guessId === "" && app.mode !== GameMode.solver) {
+	if (guessId === "" && app.solution !== "") {
 		guessId = calculateGroupId(app.solution, botNode.guess);
 		info[7] = guessId;
 	}
@@ -940,6 +940,7 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 export function calculateBotInfoArray(botSide : "left" | "right" ) {
 	let botMode: BotMode;
 	let botRowArray: Array<BotNode> = [];
+	let tuple: GangTuple;
 	let botInfoArray: Array<BotNodeTuple> = [];
 
 	switch (botSide) {
@@ -952,7 +953,6 @@ export function calculateBotInfoArray(botSide : "left" | "right" ) {
 	}
 
 	botRowArray.push(botRoot);
-	let tuple: GangTuple;
 	switch (botMode) {
 		case BotMode.Human:
 			botRowArray = app.human;

@@ -35,7 +35,7 @@
 					{:else}
 						Instead of {h1[0]}, the bot chose {b1[6]} 
 						guess {b1[0]} which created {b1[2]}
-						groups{#if app.mode === GameMode.solver}.
+						groups{#if !app.solution}.
 						{:else} &nbsp;and left {b1[11]} words.{/if}
 						<br /><br />
 					{/if}
@@ -44,7 +44,7 @@
 				For the guess after {h1[0]}, the bot 
 				chose {b2[6]} guess {b2[0]} 
 				which created {b2[2]} 
-				groups{#if app.mode === GameMode.solver}.{:else} &nbsp;and left 
+				groups{#if !app.solution}.{:else} &nbsp;and left 
 				{b2[11]} words.{/if}
 				<br /><br />
 			{/if}

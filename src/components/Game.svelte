@@ -314,7 +314,7 @@
 		</div>
 	{/if}
 
-	{#if showStats && app.nGuesses > 0}
+	{#if showStats && app.nGuesses > 0 }
 		{@const infoL = calculateBotInfoArray("left")}
 		{@const infoR = calculateBotInfoArray("right")}
 		<br /><h3>Bot Results {#if !app.active}For Solution "{app.solution}"{/if}</h3>
@@ -327,11 +327,13 @@
 						{infoL[ri][0]}<br />
 						{infoL[ri][6]} Guess<br />
 						{infoL[ri][2]} groups<br /><br />
-						{infoL[ri][8]}<br />
-						Eliminated {infoL[ri][9]} words<br />
-						{#if infoL[ri][0].toLowerCase() !== app.solution}
-							{infoL[ri][11]}  words left
-							<br /><br />{infoL[ri][13]}<br />
+						{#if infoL[ri][7]}
+							{infoL[ri][8]}<br />
+							Eliminated {infoL[ri][9]} words<br />
+							{#if infoL[ri][0].toLowerCase() !== app.solution}
+								{infoL[ri][11]}  words left
+								<br /><br />{infoL[ri][13]}<br />
+							{/if}
 						{/if}
 					{/if}
 				</section>
@@ -341,11 +343,13 @@
 						{infoR[ri][0]}<br />
 						{infoR[ri][6]} Guess<br />
 						{infoR[ri][2]} groups<br /><br />
-						{infoR[ri][8]}<br />
-						Eliminated {infoR[ri][9]} words<br />
-						{#if infoR[ri][0].toLowerCase() !== app.solution}
-							{infoR[ri][11]} words left
-							<br /><br />{infoR[ri][13]}<br />
+						{#if infoR[ri][7]}
+							{infoR[ri][8]}<br />
+							Eliminated {infoR[ri][9]} words<br />
+							{#if infoR[ri][0].toLowerCase() !== app.solution}
+								{infoR[ri][11]} words left
+								<br /><br />{infoR[ri][13]}<br />
+							{/if}
 						{/if}
 					{/if}
 				</section>
