@@ -237,9 +237,6 @@
 		{#if $mode === GameMode.ai}{aiModes[$settings.aiMode]}{/if}
 		{modeData.modes[$mode].name} Mode.
 		{#if $mode === GameMode.ai}
-			<!-- Click the "Refresh" icon in the upper left 
-			corner to watch the Bot play a randomly 
-			generated Wordle game. -->
 			<br />
 			<button on:click={newRandomAiSoltion}>New Word</button>
 			<input bind:value={aiSolution} />

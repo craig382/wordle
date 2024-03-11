@@ -188,7 +188,7 @@ export function groupIdFromColors(ri: number):
 		}
 	}
 	errorIndex = id.indexOf(" ");
-	console.log("groupIdFromRow:", id, errorIndex);
+	// console.log("groupIdFromRow:", id, errorIndex);
 	return [id.join(""), errorIndex];
 }
 
@@ -268,9 +268,7 @@ export class GameState extends Storable {
 	public aiMaxGroupsEasy: Array<BotNode>;
 	public aiMinSumOfSquaresHard: Array<BotNode>;
 	public aiMinSumOfSquaresEasy: Array<BotNode>;
-	public botLeft: Array<BotNodeTuple>;
 	public botLeftMode: BotMode;
-	public botRight: Array<BotNodeTuple>;
 	public botRightMode: BotMode;
 	
 	/** guesses[rowIndex]. 
@@ -309,10 +307,8 @@ export class GameState extends Storable {
 			}
 		}
 		this.errorString = "";
-		this.botLeft = [];
 		this.botLeftMode = BotMode.Human;
-		this.botRight = [];
-		this.botRightMode = BotMode["Bot Max Groups Hard"];
+		this.botRightMode = BotMode["Bot Max Groups Easy"];
 		this.aiMaxGroupsHard = [];
 		this.aiMaxGroupsEasy = [];
 		this.aiMinSumOfSquaresHard = [];
@@ -424,18 +420,17 @@ export class GameState extends Storable {
 				}
 			}
 
-			if (this.guessGroupIds[ri] === "#####") this.status = GameStatus.won;
-			else if (this.nGuesses === ROWS) this.status = GameStatus.lost;
+			if (this.guessGroupIds[ri] === "#####") {
+				this.status = GameStatus.won;
+				this.solution = this.guesses[ri]; // needed for solver mode
+			} else if (this.nGuesses === ROWS) this.status = GameStatus.lost;
 
 			if (!this.active) {
-
-				// DELETE this block when done troubleshooting.
-				this.botLeftMode = BotMode["AI Max Groups Hard"];
-				this.botRightMode = BotMode["AI Min Sum of Squares Easy"];
 	
 				console.log(`easyGroup.length: ${this.easyGroup.length}.`);
 				this.human.forEach ( (bn, bni) => {
 					console.log("human:", this.guessGroupIds[bni], bn);
+					if (bni > 0) console.log(`${bn.guess} parent ${bn.parent[0].guess} with kids: ${bn.parent[2][2].guess}, ${bn.parent[2][3].guess}, ${bn.parent[2][4].guess}, ${bn.parent[2][5].guess}`);
 				});
 				console.log("GameState:", this);
 				console.log("botRoot:", botRoot);
@@ -941,9 +936,12 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 	}
 }
 
-/** Calculates app.botLeft or app.botRight based on app.botLeft/RightMode.  */
+/** Calculates and returns botInfoArray based on app.botLeft/RightMode.  */
 export function calculateBotInfoArray(botSide : "left" | "right" ) {
 	let botMode: BotMode;
+	let botRowArray: Array<BotNode> = [];
+	let botInfoArray: Array<BotNodeTuple> = [];
+
 	switch (botSide) {
 		case "left": botMode = app.botLeftMode; break;
 		case "right": botMode = app.botRightMode; break;
@@ -953,13 +951,13 @@ export function calculateBotInfoArray(botSide : "left" | "right" ) {
 			throw e; 
 	}
 
-	let botRowArray: Array<BotNode> = [];
 	botRowArray.push(botRoot);
 	let tuple: GangTuple;
 	switch (botMode) {
 		case BotMode.Human:
 			botRowArray = app.human;
-		break;
+			botRowArray.forEach((node, ri) => {	botInfoArray.push(botNodeInfo(node, app.guessGroupIds[ri])); });
+			return botInfoArray;
 		case BotMode["Bot Max Groups Hard"]:
 			for (let ri = 0; ri < (app.nGuesses - (app.active ? 0 : 1)); ri++) {
 				tuple = app.human[ri].gangs.get(app.guessGroupIds[ri]);
@@ -998,24 +996,6 @@ export function calculateBotInfoArray(botSide : "left" | "right" ) {
 		break;
 	}
 
-	let botInfoArray: Array<BotNodeTuple>;
-	switch (botSide) {
-		// case "left": app.botLeft = botRowArray; break;
-		// case "right": app.botRight = botRowArray; break;
-		case "left": botInfoArray = app.botLeft; break;
-		case "right": botInfoArray = app.botRight; break;
-		// case "left": 
-		// 	botRowArray.forEach((node) => {
-		// 		app.botLeft.push(botNodeInfo(node));
-		// 	});
-		// break;
-		// case "right": 
-		// 	botRowArray.forEach((node) => {
-		// 		app.botRight.push(botNodeInfo(node));
-		// 	});
-		// break;
-	}
-	botInfoArray = [];
 	botRowArray.forEach((node) => {	botInfoArray.push(botNodeInfo(node)); });
 	return botInfoArray;
 }
