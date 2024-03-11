@@ -121,4 +121,7 @@ type BotNodeTuple = [
 	wordsLeftAfter: number, // 11
 
 	maxGroupsKidEasy: BotNode, // 12
+
+	/** truncated list of words left after for stat screen */
+	statWordListAfter: string, // 13
 ]

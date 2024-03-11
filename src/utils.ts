@@ -7,7 +7,7 @@ export const COLS: number = 5;
 export let app: GameState;
 export let botRoot: BotNode;
 
-let appSettings: Settings;
+export let appSettings: Settings;
 
 export const words = {
 	...wordList,
@@ -330,10 +330,6 @@ export class GameState extends Storable {
 	public openers = "trace crane slate crate plate saint least stare stale snare plane place";
 	// Bot scores: trace 2165, crane 2173, slate 2168, crate 2167, plate 2184,
 	// saint 2186, least 2175, stare 2182, stale 2173, snare 2183, plane 2183, place 2187
-	/** botWords is the max number of words the
-	 * bot will search for the best possible guess.
-	 */
-	public botWords = 500;
 	public errorString: string = "";
 	public botTreeNodes: Array<string> = [];
 	public nBotTreeLeaves: number = 0;
@@ -444,12 +440,6 @@ export class GameState extends Storable {
 		let ri = this.nGuesses - 1;
 		let humanGuess = app.guesses[ri];
 
-		// DELETE this block once the bot tree algorithm is fully implemented.
-		if (ri === 0) {
-			processGuess(humanGuess, ri);
-			copyHumanToBot(ri);
-		}
-
 		try {
 			// Process this guess.
 			processGuess(humanGuess, ri);
@@ -528,24 +518,6 @@ export class GameState extends Storable {
 			if (this.guessGroupIds[ri] === "#####") this.status = GameStatus.won;
 			else if (this.nGuesses === ROWS) this.status = GameStatus.lost;
 
-			// DELETE this block once the bot tree algorithm is fully implemented.
-			if (this.guessGroupIds[ri] !== "#####") {
-				// Advance ri 1 guess for bot to look for best possible guesses.
-				ri = this.nGuesses;
-
-				// Search for the best posssible hard mode guess.
-				this.guessGroups[ri-1].split(" ").some(aGuess => {processGuess(aGuess, ri);});
-
-				// Search for the best possible easy mode guess.
-				if (!appSettings.hard[this.mode] && this.nGroupsBot[ri] !== this.nAnswers[ri]) {
-					words.answers.slice(0, app.botWords).some(aGuess => {processGuess(aGuess, ri);});
-				}
-
-				// Revert 1 guess so human can take their turn.
-				this.guesses[ri] = "";
-				ri = this.nGuesses - 1;
-			}
-
 		} catch (e) {
 			// console.log("GameState.update: ", e);
 			throw e; // throw the error up the chain
@@ -553,18 +525,11 @@ export class GameState extends Storable {
 
 		app = this; // tell svelte to react to change in app
 
-		// botNodeInfo(this.human[ri], this.guessGroupIds[ri]); // console.log()
-
 		if (!this.active) {
 
 			// DELETE this block when done troubleshooting.
 			this.botLeftMode = BotMode["AI Max Groups Hard"];
-			// calculateBotInfoArray("left");
 			this.botRightMode = BotMode["AI Min Sum of Squares Easy"];
-			// calculateBotInfoArray("right");
-			// this.human.forEach ( (bn, bni) => {
-			// 	botNodeInfo(bn, this.guessGroupIds[bni]); // console.log()
-			// });
 
 			console.log(`easyGroup.length: ${this.easyGroup.length}.`);
 			this.human.forEach ( (bn, bni) => {
@@ -623,6 +588,8 @@ export class Settings extends Storable {
 	public dark = true;
 	public colorblind = false;
 	public tutorial: 0 | 1 | 2 | 3 = 3;
+	/** Maximum number of words to show on any stat words left list. */
+	public maxStatWords: number = 30;
 
 	constructor(settings?: string) {
 		super();
@@ -633,7 +600,9 @@ export class Settings extends Storable {
 			this.dark = parsed.dark;
 			this.colorblind = parsed.colorblind;
 			this.tutorial = parsed.tutorial;
+			this.maxStatWords = parsed.maxStatWords;
 		}
+		this.maxStatWords = 30; // DELETE?
 		appSettings = this;
 	}
 }
@@ -976,7 +945,7 @@ export enum aiModes {
 }
 
 export function botNodeInfo (botNode: BotNode, guessId = "") {
-	let info: BotNodeTuple = [,,,,,,,,,,,,,]; // Initialize a multi element empty tuple.
+	let info: BotNodeTuple = [,,,,,,,,,,,,,,]; // Initialize a multi element empty tuple.
 
 	info[0] = "";
 	info[1] = 0;
@@ -1016,6 +985,7 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 			info[8] = colorString(guessId);
 			info[11] = pGroup.length; // wordsLeftAfter
 			info[10] = pGroup.join(" "); // wordListAfter
+			info[13] = pGroup.slice(0, appSettings.maxStatWords).join(" "); // statWordListAfter
 			info[12] = pGang[3]; // maxGroupsKidEasy
 		}	
 	});
@@ -1036,6 +1006,7 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 		info[8] = ""; // colorString
 		info[9] = 0; // wordsEliminated
 		info[10] = ""; // wordListAfter
+		info[13] = ""; // statWordListAfter
 		info[11] = 0; // wordsLeftAfter
 		info[12] = null; // maxGroupsKidEasy
 	} else { // wordsEliminated = wordsLeftBefore - wordsLeftAfter

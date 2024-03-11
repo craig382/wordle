@@ -21,9 +21,6 @@
 	} from "./widgets";
 	import {
 		contractNum,
-		countOfAinB,
-		colorString,
-		easyOrHard,
 		randomSample,
 		DELAY_INCREMENT,
 		PRAISE,
@@ -37,6 +34,7 @@
 		GameState,
 		LetterStates,
 		words,
+		appSettings,
 		Stats,
         groupIdFromColors,
         calculateBotInfoArray,
@@ -336,8 +334,8 @@
 						{infoL[ri][8]}<br />
 						Eliminated {infoL[ri][9]} words<br />
 						{#if infoL[ri][0].toLowerCase() !== app.solution}
-							{infoL[ri][11]}  words left
-							<br /><br />{infoL[ri][10]}<br />
+							{infoL[ri][11]}  words left {appSettings.maxStatWords}
+							<br /><br />{infoL[ri][13]}<br />
 						{/if}
 					{/if}
 				</section>
@@ -351,7 +349,7 @@
 						Eliminated {infoR[ri][9]} words<br />
 						{#if infoR[ri][0].toLowerCase() !== app.solution}
 							{infoR[ri][11]} words left
-							<br /><br />{infoR[ri][10]}<br />
+							<br /><br />{infoR[ri][13]}<br />
 						{/if}
 					{/if}
 				</section>
@@ -387,8 +385,8 @@
 			The Bot starts by searching through the prior guess's remaining
 			answers for a Hard Mode recommended guess. If the Bot finds
 			a perfect Hard Mode recommended guess, its search is finished. 
-			Otherwise, the Bot will continue searching through the first 
-			{app.botWords} words of the Wordle solution dictionary for a 
+			Otherwise, the Bot will continue searching through a portion 
+			of the Wordle solution dictionary for a 
 			possible Easy Mode recommended guess.
 		</div>
 	{/if}
