@@ -319,6 +319,7 @@
 			give up
 		</div>
 	{/if}
+
 	{#if (app.nGuesses > 0)}
 		{@const infoL = calculateBotInfoArray("left")}
 		{@const infoR = calculateBotInfoArray("right")}
@@ -334,7 +335,10 @@
 						{infoL[ri][2]} groups<br /><br />
 						{infoL[ri][8]}<br />
 						Eliminated {infoL[ri][9]} words<br />
-						{infoL[ri][11]}  words left
+						{#if infoL[ri][0].toLowerCase() !== app.solution}
+							{infoL[ri][11]}  words left
+							<br /><br />{infoL[ri][10]}<br />
+						{/if}
 					{/if}
 				</section>
 				<section>
@@ -345,54 +349,15 @@
 						{infoR[ri][2]} groups<br /><br />
 						{infoR[ri][8]}<br />
 						Eliminated {infoR[ri][9]} words<br />
-						{infoR[ri][11]} words left
+						{#if infoR[ri][0].toLowerCase() !== app.solution}
+							{infoR[ri][11]} words left
+							<br /><br />{infoR[ri][10]}<br />
+						{/if}
 					{/if}
 				</section>
 			</div>
-			{#if ri < infoL.length && infoL[ri][0].toLowerCase() !== app.solution}
-				<div class="row">
-					Guess {infoL[ri][0]} left 
-					{infoL[ri][11]} words: {infoL[ri][10]}<br />
-				</div>
-			{/if}
 		{/each}
-		{#each Array(app.nGuesses + 1) as _, ri}
-			{#if app.active || ri < app.nGuesses}
-				{@const nLeft = countOfAinB(" ", app.guessGroups[ri]) + 1}
-				{@const nLeftBot = countOfAinB(" ", app.guessGroupsBot[ri]) + 1}
-				<h1>Guess # {(ri + 1)}</h1>
-				<div class="row">
-						<section>
-							{#if ri < app.nGuesses}
-								Human<br /><br />
-								{app.guesses[ri].toUpperCase()}<br />
-								{easyOrHard(app.guesses[ri], ri)} Guess<br />
-								{app.nGroups[ri]} groups<br /><br />
-								{colorString(app.guessGroupIds[ri])}<br />
-								Eliminated {app.nAnswers[ri] - nLeft} words<br />
-								{nLeft}  words left
-							{/if}
-						</section>
-						<section>
-							Bot<br /><br />
-							{app.guessesBot[ri].toUpperCase()}<br />
-							{easyOrHard(app.guessesBot[ri], ri)} Guess<br />
-							{app.nGroupsBot[ri]} groups<br /><br />
-							{#if app.mode !== GameMode.solver}
-								{colorString(app.guessGroupIdsBot[ri])}<br />
-								Eliminated {app.nAnswers[ri] - nLeftBot} words<br />
-								{nLeftBot} words left
-							{/if}
-						</section>
-				</div>
-				{#if ri < app.nGuesses && app.guesses[ri] !== app.solution}
-					<div class="row">
-						Guess {app.guesses[ri].toUpperCase()} left 
-						{nLeft} words: {app.guessGroups[ri]}<br />
-					</div>
-				{/if}
-			{/if}
-		{/each}
+
 		<div class="row">
 			The Wordle dictionary has {words.answers.length} possible 
 			solutions and {words.otherGuesses.length} additional other
@@ -494,7 +459,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		inline-size: 150px;
+		flex: 1;
 		text-align: center;
 		overflow-wrap: break-word;
 		vertical-align: top;
