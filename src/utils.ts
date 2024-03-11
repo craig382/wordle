@@ -188,7 +188,7 @@ export function groupIdFromColors(ri: number):
 		}
 	}
 	errorIndex = id.indexOf(" ");
-	// console.log("groupIdFromRow:", id, errorIndex);
+	console.log("groupIdFromRow:", id, errorIndex);
 	return [id.join(""), errorIndex];
 }
 
@@ -220,74 +220,6 @@ export function easyOrHard(guess: string, ri: number) {
 	} else {
 		return "Easy";
 	}
-}
-
-/** 
- * ProcessGuess(guess).
- * Processes the guess assuming guessString 
- * is the latest guess and ri is its row index.
- * Returns true for a "perfect" guess.
- */
-function SIMPLIFYprocessGuess(guess: string, ri: number): boolean {
-
-	// Initialize guesses[ri] and guessGroupIds[ri]
-	app.guesses[ri] = guess; // REQUIRED
-	if ( app.mode !== GameMode.solver) {
-		app.guessGroupIds[ri] = calculateGroupId(app.solution, guess);
-	}
-
-	// /** answers[answerIndex].
-	//  * An array of remaining answers before the row's guess. */	
-	// let answers: string[] = [];
-
-	// // Initialize answers[ri].
-	// if (ri === 0) answers = words.answers;
-	// else answers = app.DELETEguessGroups[ri-1].split(" ");	
-
-	// // Initialize guessGroupId and guessGroupIds[ri].
-	// let guessGroupId = "";
-	// if ( app.mode === GameMode.solver ) {
-	// 	if (ri < app.nGuesses) {
-	// 		// In Solver mode, the user entered letter colors
-	// 		// are used to calculate guessGroupIds[ri].
-	// 		guessGroupId = app.guessGroupIds[ri];	
-	// 	} else {
-	// 		// Calculate a fake guessGroupId so that later
-	// 		// a new Gang can be created for game.groups[ri]
-	// 		guessGroupId = calculateGroupId(answers[0], guess);
-	// 	}
-	// } else {
-	// 	guessGroupId = calculateGroupId(app.solution, guess); // REQUIED
-	// 	app.guessGroupIds[ri] = guessGroupId;	// REQUIRED
-	// }
-
-	// // Create the groups Map.
-	// app.DELETEgroups[ri] = new Map([[guessGroupId, undefined]]);
-	// for (let a = 0; a < answers.length; a++) {
-	// 	let gid = calculateGroupId(answers[a], guess);
-	// 	let gList = app.DELETEgroups[ri].get(gid);
-	// 	if (gList === undefined) app.DELETEgroups[ri].set(gid, answers[a]);
-	// 	else app.DELETEgroups[ri].set(gid, (gList + " " + answers[a]));
-	// }
-
-	// // Calculate nGroups and perfectGuess.
-	// app.DELETEnGroups[ri] = app.DELETEgroups[ri].size;
-
-	// if ( ri < app.nGuesses || app.mode != GameMode.solver ) {
-	// 	// Find guessGroup and remove it from groups.
-	// 	app.DELETEguessGroups[ri]  = app.DELETEgroups[ri].get(app.guessGroupIds[ri]);
-	// 	if (app.DELETEguessGroups[ri] === undefined) { // REQUIRED, somewhere else.
-	// 		app.errorString =`No possible solutions left. Did you enter ` +
-	// 		`some color(s) wrong? Or perhaps the other Wordle's solution ` + 
-	// 		`dictionary is not the same as mine. Click the refresh icon ` +
-	// 		`to try again.`;
-	// 		let e = new Error('processGroups: No possible solutions left.');
-	// 		// console.log(e);
-	// 		throw e; 
-	// 	} else app.DELETEgroups[ri].delete(app.guessGroupIds[ri]);
-	// }
-
-	return;
 }
 
 export function randomSample(anArray: Array<any>) {
@@ -341,14 +273,6 @@ export class GameState extends Storable {
 	public botRight: Array<BotNodeTuple>;
 	public botRightMode: BotMode;
 	
-	/** For each row, a map of 
-	 * space separated eliminated answers keyed to groupId. */	
-	public DELETEgroups: Array<Map<string, string>> = [];
-	/** nGroups[rowIndex]. 
-	 * Number of groups created by the row guess.
-	 * "Bot" parameters are used to store
-	 * the best (maximum) nGroups found so far. */
-	public DELETEnGroups = Array<number>(ROWS+1).fill(0);
 	/** guesses[rowIndex]. 
 	 * Array of each row's guess. 
 	 * guesses is an alias for board.words. */
@@ -356,10 +280,6 @@ export class GameState extends Storable {
 	/** guessGroupIds[rowIndex]. 
 	 * GroupId of the row's guess. */
 	public guessGroupIds = Array<string>(ROWS+1).fill("");
-	/** guessGroups[rowIndex]. 
-	 * For each row, a space separated list of 
-	 * answers remaining after the guess. */
-	public DELETEguessGroups = Array<string>(ROWS+1).fill("");
 
 	constructor(mode: GameMode, data?: string) {
 		super();
@@ -417,10 +337,12 @@ export class GameState extends Storable {
 		try {
 			// Set ri for this guess.
 			let ri = this.nGuesses;
-			let humanGuess = app.guesses[ri];
+			let guess = this.guesses[ri];
 
-			// Process this guess.
-			SIMPLIFYprocessGuess(humanGuess, ri);
+			// Initialize guessGroupIds[ri]
+			if ( this.mode !== GameMode.solver) {
+				this.guessGroupIds[ri] = calculateGroupId(this.solution, guess);
+			}
 
 			if (ri === 0) {
 				/** Calculate Bot Tree and initialize the human and ai BotNode arrays. */
@@ -476,9 +398,17 @@ export class GameState extends Storable {
 				}
 			} else {
 				// Find or create this human guess in the bot tree.
-				let guess = this.guesses[ri];
 				let pGang: GangTuple;
 				pGang = this.human[ri-1].gangs.get(this.guessGroupIds[ri-1]);
+				if (pGang === undefined) {
+					this.errorString =`No possible solutions left. Did you enter ` +
+					`some color(s) wrong? Or perhaps the other Wordle's solution ` + 
+					`dictionary is not the same as mine. Click the refresh icon ` +
+					`to try again.`;
+					let e = new Error('processGroups: No possible solutions left.');
+					console.log(e);
+					throw e; 		
+				}
 				let pGroup = pGang[0];
 				if (guess === pGang[2].guess) this.human.push(pGang[2]);
 				else if (guess === pGang[3].guess) this.human.push(pGang[3]);
