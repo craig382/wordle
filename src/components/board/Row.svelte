@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from "svelte";
-	import { COLS, countOfAinB, GameState, easyOrHard, botNodeInfo } from "../../utils";
+	import { COLS, GameState, botNodeInfo } from "../../utils";
 	import Tile from "./Tile.svelte";
 	import { showRowHints } from "../../stores";
 	import { GameMode } from "../../enums";
