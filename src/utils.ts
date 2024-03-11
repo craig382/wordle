@@ -305,6 +305,7 @@ export enum GameStatus {
 
 export class GameState extends Storable {
 	public status: GameStatus;
+	/** Number of completely crunched guesses. */
 	public nGuesses: number;
 	public validHard: boolean;
 	public time: number;
@@ -413,11 +414,11 @@ export class GameState extends Storable {
 	/** The Bot processes the latest human guess
 	 *  and searches for its next guess. */
 	updateBot() {
-		// Set ri for this guess.
-		let ri = this.nGuesses - 1;
-		let humanGuess = app.guesses[ri];
-
 		try {
+			// Set ri for this guess.
+			let ri = this.nGuesses;
+			let humanGuess = app.guesses[ri];
+
 			// Process this guess.
 			SIMPLIFYprocessGuess(humanGuess, ri);
 
@@ -487,7 +488,8 @@ export class GameState extends Storable {
 					// Guess BotNode not found.
 					// Thus create new BotNode for the guess 
 					// and create kids for the new BotNode.
-					this.human.push(new BotNode( this.human[ri-1].parent, ri, guess, calculateGroups(guess, pGroup)));
+					// this.human.push(new BotNode( this.human[ri-1].parent, ri, guess, calculateGroups(guess, pGroup)));
+					this.human.push(new BotNode( [this.human[ri-1], this.guessGroupIds[ri-1], pGang], ri, guess, calculateGroups(guess, pGroup)));
 					createKids(this.human[ri]);
 				}
 			}
@@ -495,26 +497,29 @@ export class GameState extends Storable {
 			if (this.guessGroupIds[ri] === "#####") this.status = GameStatus.won;
 			else if (this.nGuesses === ROWS) this.status = GameStatus.lost;
 
+			if (!this.active) {
+
+				// DELETE this block when done troubleshooting.
+				this.botLeftMode = BotMode["AI Max Groups Hard"];
+				this.botRightMode = BotMode["AI Min Sum of Squares Easy"];
+	
+				console.log(`easyGroup.length: ${this.easyGroup.length}.`);
+				this.human.forEach ( (bn, bni) => {
+					console.log("human:", this.guessGroupIds[bni], bn);
+				});
+				console.log("GameState:", this);
+				console.log("botRoot:", botRoot);
+			}
+	
+			app.nGuesses++;
+			app = this; // tell svelte to react to change in app
+
 		} catch (e) {
-			// console.log("GameState.update: ", e);
+			console.log("GameState.update: ", e);
 			throw e; // throw the error up the chain
 		}; 
 
-		app = this; // tell svelte to react to change in app
 
-		if (!this.active) {
-
-			// DELETE this block when done troubleshooting.
-			this.botLeftMode = BotMode["AI Max Groups Hard"];
-			this.botRightMode = BotMode["AI Min Sum of Squares Easy"];
-
-			console.log(`easyGroup.length: ${this.easyGroup.length}.`);
-			this.human.forEach ( (bn, bni) => {
-				console.log("human:", this.guessGroupIds[bni], bn);
-			});
-			console.log("GameState:", this);
-			console.log("botRoot:", botRoot);
-		}
 	}
 
 	/**

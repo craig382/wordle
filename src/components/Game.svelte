@@ -80,7 +80,6 @@
 				if (gid === "#####") app.solution = app.board.guesses[app.nGuesses];
 				else app.board.state[app.nGuesses + 1].fill("⬛");
 			} else app.board.state[app.nGuesses] = app.guess(app.solution);
-			++app.nGuesses;
 			try {
 				app.updateBot();
 				if (app.status === GameStatus.won) win();
@@ -89,7 +88,7 @@
 				$letterStates.update(app.lastState, app.lastWord);
 				$letterStates = $letterStates;
 			} catch (e) {
-				// console.log("processValidGuess: ", e);
+				console.log("processValidGuess: ", e);
 				app.nGuesses = app.nGuesses - 1; // Roll back the unsucessful guess.
 				app.status = GameStatus.lost; // Abort the game.
 			}
@@ -318,7 +317,7 @@
 		</div>
 	{/if}
 
-	{#if (app.nGuesses > 0)}
+	{#if showStats && app.nGuesses > 0}
 		{@const infoL = calculateBotInfoArray("left")}
 		{@const infoR = calculateBotInfoArray("right")}
 		<br /><h3>Bot Results {#if !app.active}For Solution "{app.solution}"{/if}</h3>
@@ -334,7 +333,7 @@
 						{infoL[ri][8]}<br />
 						Eliminated {infoL[ri][9]} words<br />
 						{#if infoL[ri][0].toLowerCase() !== app.solution}
-							{infoL[ri][11]}  words left {appSettings.maxStatWords}
+							{infoL[ri][11]}  words left
 							<br /><br />{infoL[ri][13]}<br />
 						{/if}
 					{/if}
