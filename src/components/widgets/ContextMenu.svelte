@@ -1,8 +1,7 @@
 <script lang="ts">
 	import Definition from "./Definition.svelte";
-	import {easyOrHard, app, countOfAinB, botNodeInfo} from "../../utils";
+	import {app, botNodeInfo} from "../../utils";
 	import { GameMode } from "../../enums";
-    import { get_custom_elements_slots } from "svelte/internal";
 
 	export let x = 0;
 	export let y = 0;
