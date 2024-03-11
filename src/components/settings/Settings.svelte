@@ -46,7 +46,6 @@
 				</svelte:fragment>
 			</Setting>
 		</div>
-		<!-- <Setting type="dropdown" bind:value={$settings.aiMode} options={Object.values(aiModes).map(e => e.valueOf)}> -->
 		<Setting type="dropdown" bind:value={$settings.aiMode} options={Object.values(aiModes).slice(0, 4)}>
 			<svelte:fragment slot="title">AI Mode</svelte:fragment>
 			<svelte:fragment slot="desc">

@@ -558,14 +558,14 @@ export class GameState extends Storable {
 		if (!this.active) {
 
 			// DELETE this block when done troubleshooting.
-			this.botLeftMode = BotMode["Bot Max Groups Hard"];
-			calculateBotInfoArray("left");
-			this.botRightMode = BotMode["Bot Min Sum of Squares Hard"];
-			calculateBotInfoArray("right");
+			this.botLeftMode = BotMode["AI Max Groups Hard"];
+			// calculateBotInfoArray("left");
+			this.botRightMode = BotMode["AI Min Sum of Squares Easy"];
+			// calculateBotInfoArray("right");
+			// this.human.forEach ( (bn, bni) => {
+			// 	botNodeInfo(bn, this.guessGroupIds[bni]); // console.log()
+			// });
 
-			this.human.forEach ( (bn, bni) => {
-				botNodeInfo(bn, this.guessGroupIds[bni]); // console.log()
-			});
 			console.log(`easyGroup.length: ${this.easyGroup.length}.`);
 			this.human.forEach ( (bn, bni) => {
 				console.log("human:", this.guessGroupIds[bni], bn);
