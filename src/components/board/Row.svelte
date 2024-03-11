@@ -69,7 +69,7 @@
 	<section on:click|self={() => {$showRowHints = !$showRowHints;}}>
 		{#if showRowHint }
 			{app.nGroups[ri]}{easyOrHard(app.guesses[ri], ri)[0]}/
-			<br />{app.nGroupsBot[ri]}{easyOrHard(app.guessesBot[ri], ri)[0]}
+			<br />{app.DELETEnGroupsBot[ri]}{easyOrHard(app.DELETEguessesBot[ri], ri)[0]}
 			<br />{countOfAinB(" ", app.guessGroups[ri]) + 1}W
 		{:else if ri === 0}
 			Row<br />Hints<br />

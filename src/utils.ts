@@ -228,9 +228,7 @@ export function easyOrHard(guess: string, ri: number) {
  * is the latest guess and ri is its row index.
  * Returns true for a "perfect" guess.
  */
-function processGuess(guess: string, ri: number): boolean {
-
-	let perfectGuess: boolean;
+function SIMPLIFYprocessGuess(guess: string, ri: number): boolean {
 
 	// Initialize guesses[ri]
 	app.guesses[ri] = guess;
@@ -242,7 +240,6 @@ function processGuess(guess: string, ri: number): boolean {
 	// Initialize answers[ri].
 	if (ri === 0) answers = words.answers;
 	else answers = app.guessGroups[ri-1].split(" ");	
-	app.nAnswers[ri]= answers.length;
 
 	// Initialize guessGroupId and guessGroupIds[ri].
 	let guessGroupId = "";
@@ -272,9 +269,6 @@ function processGuess(guess: string, ri: number): boolean {
 
 	// Calculate nGroups and perfectGuess.
 	app.nGroups[ri] = app.groups[ri].size;
-	if (app.nGroups[ri] === app.nAnswers[ri] || ri === (ROWS-1)) 
-		perfectGuess = true;
-	else perfectGuess = false;
 
 	if ( ri < app.nGuesses || app.mode != GameMode.solver ) {
 		// Find guessGroup and remove it from groups.
@@ -290,10 +284,7 @@ function processGuess(guess: string, ri: number): boolean {
 		} else app.groups[ri].delete(app.guessGroupIds[ri]);
 	}
 
-	// If this score is the best found so far, save it.
-	if (app.nGroups[ri] > app.nGroupsBot[ri] && ri > 0) copyHumanToBot(ri);
-
-	return perfectGuess;
+	return;
 }
 
 export function randomSample(anArray: Array<any>) {
@@ -301,14 +292,6 @@ export function randomSample(anArray: Array<any>) {
 	let [rs] = anArray.splice(i, 1);
 	// console.log("randomSample", rs, anArray);
 	return rs;
-}
-
-function copyHumanToBot(ri: number) {
-	app.nGroupsBot[ri] = app.nGroups[ri];
-	app.guessesBot[ri] = app.guesses[ri];
-	app.guessGroupIdsBot[ri] = app.guessGroupIds[ri];
-	app.guessGroupsBot[ri] = app.guessGroups[ri];
-	app.groupsBot[ri] = app.groups[ri];
 }
 
 export enum GameStatus {
@@ -357,31 +340,26 @@ export class GameState extends Storable {
 	/** For each row, a map of 
 	 * space separated eliminated answers keyed to groupId. */	
 	public groups: Array<Map<string, string>> = [];
-	public groupsBot: Array<Map<string, string>> = [];
-	/** nAnswers[rowIndex]. 
-	 * For each row, the number of remaining 
-	 * answers before the row's guess. */
-	public nAnswers = Array<number>(ROWS+1).fill(0);
 	/** nGroups[rowIndex]. 
 	 * Number of groups created by the row guess.
 	 * "Bot" parameters are used to store
 	 * the best (maximum) nGroups found so far. */
 	public nGroups = Array<number>(ROWS+1).fill(0);
-	public nGroupsBot = Array<number>(ROWS+1).fill(0);
+	public DELETEnGroupsBot = Array<number>(ROWS+1).fill(0);
 	/** guesses[rowIndex]. 
 	 * Array of each row's guess. 
 	 * guesses is an alias for board.words. */
 	public guesses = Array<string>(ROWS+1).fill("");
-	public guessesBot = Array<string>(ROWS+1).fill("");
+	public DELETEguessesBot = Array<string>(ROWS+1).fill("");
 	/** guessGroupIds[rowIndex]. 
 	 * GroupId of the row's guess. */
 	public guessGroupIds = Array<string>(ROWS+1).fill("");
-	public guessGroupIdsBot = Array<string>(ROWS+1).fill("");
+	public DELETEguessGroupIdsBot = Array<string>(ROWS+1).fill("");
 	/** guessGroups[rowIndex]. 
 	 * For each row, a space separated list of 
 	 * answers remaining after the guess. */
 	public guessGroups = Array<string>(ROWS+1).fill("");
-	public guessGroupsBot = Array<string>(ROWS+1).fill("");
+	public DELETEguessGroupsBot = Array<string>(ROWS+1).fill("");
 
 	constructor(mode: GameMode, data?: string) {
 		super();
@@ -442,7 +420,7 @@ export class GameState extends Storable {
 
 		try {
 			// Process this guess.
-			processGuess(humanGuess, ri);
+			SIMPLIFYprocessGuess(humanGuess, ri);
 
 			if (ri === 0) {
 				/** Calculate Bot Tree and initialize the human and ai BotNode arrays. */
