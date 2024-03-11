@@ -345,21 +345,17 @@ export class GameState extends Storable {
 	 * "Bot" parameters are used to store
 	 * the best (maximum) nGroups found so far. */
 	public nGroups = Array<number>(ROWS+1).fill(0);
-	public DELETEnGroupsBot = Array<number>(ROWS+1).fill(0);
 	/** guesses[rowIndex]. 
 	 * Array of each row's guess. 
 	 * guesses is an alias for board.words. */
 	public guesses = Array<string>(ROWS+1).fill("");
-	public DELETEguessesBot = Array<string>(ROWS+1).fill("");
 	/** guessGroupIds[rowIndex]. 
 	 * GroupId of the row's guess. */
 	public guessGroupIds = Array<string>(ROWS+1).fill("");
-	public DELETEguessGroupIdsBot = Array<string>(ROWS+1).fill("");
 	/** guessGroups[rowIndex]. 
 	 * For each row, a space separated list of 
 	 * answers remaining after the guess. */
 	public guessGroups = Array<string>(ROWS+1).fill("");
-	public DELETEguessGroupsBot = Array<string>(ROWS+1).fill("");
 
 	constructor(mode: GameMode, data?: string) {
 		super();
