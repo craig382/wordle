@@ -421,7 +421,7 @@ export class GameState extends Storable {
 		if (this.guessGroupIds[ri] === "#####") {
 			this.status = GameStatus.won;
 			this.solution = this.guesses[ri]; // needed for solver mode
-		} else if (this.nGuesses === ROWS) this.status = GameStatus.lost;
+		} else if (this.nGuesses === (ROWS - 1)) this.status = GameStatus.lost;
 
 		if (!this.active) {
 
@@ -684,37 +684,42 @@ export function createKids(pNode: BotNode) {
 		createKids(pMgKidHard);
 		if ( pSosKidHard.sumOfSquares < pMgKidHard.sumOfSquares ) createKids(pSosKidHard);
 
-		// Create easy mode kids.
-		for (let gi = 0; gi < app.easyGroup.length; gi++) {
-			let gangs = calculateGroups(app.easyGroup[gi], pGroup);
-			kid = new BotNode([pNode, pGroupId, null], pNode.ri + 1, app.easyGroup[gi], gangs);
-			if ( kid.nGroups === pGroup.length) {
-				pPerfectKid = true; // easy mode perfect kid
-				pMgKidEasy = kid;
-				pSosKidEasy = kid;
-				pGang = [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ];
-				pNode.gangs.set(pGroupId, pGang);
-				kid.parent[2] = pGang;
-				createKids(kid);
-				return; // skip to next pGang
+		// Create easy mode kids if not almost the last allowed guess.
+		// For example, when ROWS = 6, the 5th guess (ri = 4 = ROWS - 2) 
+		// must have a hard kid, never an easy kid.
+		if (pNode.ri < (ROWS - 2)) {
+			for (let gi = 0; gi < app.easyGroup.length; gi++) {
+				let gangs = calculateGroups(app.easyGroup[gi], pGroup);
+				kid = new BotNode([pNode, pGroupId, null], pNode.ri + 1, app.easyGroup[gi], gangs);
+				if ( kid.nGroups === pGroup.length) {
+					pPerfectKid = true; // easy mode perfect kid
+					pMgKidEasy = kid;
+					pSosKidEasy = kid;
+					pGang = [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ];
+					pNode.gangs.set(pGroupId, pGang);
+					kid.parent[2] = pGang;
+					createKids(kid);
+					return; // skip to next pGang
+				}
+				if (pMgKidEasy === null || kid.nGroups > pMgKidEasy.nGroups) {
+					pMgKidEasy = kid;
+					pGang = [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ];
+					pNode.gangs.set(pGroupId, pGang);
+					kid.parent[2] = pGang;
+				} 
+				if (pSosKidEasy === null || kid.sumOfSquares < pSosKidEasy.sumOfSquares) {
+					pSosKidEasy = kid;
+					pGang = [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ];
+					pNode.gangs.set(pGroupId, pGang);
+					kid.parent[2] = pGang;
+				} 
 			}
-			if (pMgKidEasy === null || kid.nGroups > pMgKidEasy.nGroups) {
-				pMgKidEasy = kid;
-				pGang = [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ];
-				pNode.gangs.set(pGroupId, pGang);
-				kid.parent[2] = pGang;
-			} 
-			if (pSosKidEasy === null || kid.sumOfSquares < pSosKidEasy.sumOfSquares) {
-				pSosKidEasy = kid;
-				pGang = [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ];
-				pNode.gangs.set(pGroupId, pGang);
-				kid.parent[2] = pGang;
-			} 
-		}
-		if ( pMgKidEasy.nGroups > pMgKidHard.nGroups) createKids(pMgKidEasy);
-		if ( pSosKidEasy.sumOfSquares < pMgKidEasy.sumOfSquares &&
-			pSosKidEasy.sumOfSquares < pSosKidHard.sumOfSquares ) 
-			createKids(pSosKidEasy);
+			if ( pMgKidEasy.nGroups > pMgKidHard.nGroups) createKids(pMgKidEasy);
+			if ( pSosKidEasy.sumOfSquares < pMgKidEasy.sumOfSquares &&
+				pSosKidEasy.sumOfSquares < pSosKidHard.sumOfSquares ) 
+				createKids(pSosKidEasy);
+	
+		} 
 	});
 }
 
@@ -816,7 +821,12 @@ export class BotNode // extends TreeNode
 		app.nNodesCreated++;
 	}
 
-  	isLeaf() { return (this.sumOfSquares === 1); }
+	/** Two types of leaves.
+	 * 1. A true leaf, which has only 1 word left (itself).
+	 * 2. And a "no more gueses remaining" leaf.
+	 * This function returns true for both types.
+	 */
+  	isLeaf() { return (this.sumOfSquares === 1 || this.ri === (ROWS - 1)); }
 
 }
 

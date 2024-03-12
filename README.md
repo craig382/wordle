@@ -42,6 +42,7 @@
 - The original modes are Daily, Hourly, and Infinite.
 - To enter AI mode, click on "WORDLE+" in the header to switch modes until the temporary mode pop up displays "AI Mode".
 - In AI mode, click "New Word" for a new random word or type in the word yourself, then click "Solve" to see the Bot solve the Wordle game.
+- BOXER is a challenging AI Mode test case. Especially for the "hard" AI Mode algorithms, BOXER often cannot be solved in 6 guesses.
 
 
 ### Solver Mode

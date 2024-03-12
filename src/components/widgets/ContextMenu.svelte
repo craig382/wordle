@@ -1,7 +1,6 @@
 <script lang="ts">
 	import Definition from "./Definition.svelte";
-	import {app, botNodeInfo} from "../../utils";
-	import { GameMode } from "../../enums";
+	import {app, botNodeInfo, ROWS} from "../../utils";
 
 	export let x = 0;
 	export let y = 0;
@@ -19,28 +18,28 @@
 			{h1[5]} words left before guessing {h1[0]}.
 			<br /><br />
 
-			{#if word != app.solution}
-				{@const b2 = botNodeInfo(h1[12], "")}
-				{h1[6]} guess {h1[0]} created 
-				{h1[2]} groups and left {h1[11]} words.
-				{#if ri === 0}
-					The bot always uses the first human guess as its first guess.
+			{h1[6]} guess {h1[0]} created 
+			{h1[2]} groups and left {h1[11]} words.
+			{#if ri === 0}
+				The bot always uses the first human guess as its first guess.
+				<br /><br />
+			{:else if ri > 0}
+				{@const h0 = botNodeInfo(app.human[ri-1], app.guessGroupIds[ri-1])}
+				{@const b1 = botNodeInfo(h0[12], "")}
+				{#if b1[0] === h1[0] }
+					The bot also chose {b1[0]} for this guess.
 					<br /><br />
-				{:else if ri > 0}
-					{@const h0 = botNodeInfo(app.human[ri-1], app.guessGroupIds[ri-1])}
-					{@const b1 = botNodeInfo(h0[12], "")}
-					{#if b1[0] === h1[0] }
-						The bot also chose {b1[0]} for this guess.
-						<br /><br />
-					{:else}
-						Instead of {h1[0]}, the bot chose {b1[6]} 
-						guess {b1[0]} which created {b1[2]}
-						groups{#if !app.solution}.
-						{:else} &nbsp;and left {b1[11]} words.{/if}
-						<br /><br />
-					{/if}
+				{:else}
+					Instead of {h1[0]}, the bot chose {b1[6]} 
+					guess {b1[0]} which created {b1[2]}
+					groups{#if !app.solution}.
+					{:else} &nbsp;and left {b1[11]} words.{/if}
+					<br /><br />
 				{/if}
+			{/if}
 
+			{#if word != app.solution && ri < (ROWS - 1) }
+				{@const b2 = botNodeInfo(h1[12], "")}
 				For the guess after {h1[0]}, the bot 
 				chose {b2[6]} guess {b2[0]} 
 				which created {b2[2]} 
