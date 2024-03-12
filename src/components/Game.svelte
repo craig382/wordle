@@ -68,8 +68,7 @@
 	 * Processes a valid guess, including:
 	 * updating the colors of the guess tiles,
 	 * updating  the colors of the keyboard tiles,
-	 * and updating the GameState
-	 * (including bot calculations).
+	 * and updating the GameState (including bot calculations).
 	 */
 	 export function processValidGuess() {
 			if ($mode === GameMode.solver) {
@@ -87,11 +86,7 @@
 				$showRowHints = $showRowHints;
 				$letterStates.update(app.lastState, app.lastWord);
 				$letterStates = $letterStates;
-			} catch (e) {
-				console.log("processValidGuess: ", e);
-				app.nGuesses = app.nGuesses - 1; // Roll back the unsucessful guess.
-				app.status = GameStatus.lost; // Abort the game.
-			}
+			} catch (e) { console.log(e); }
 	}
 
 	function submitWord() {

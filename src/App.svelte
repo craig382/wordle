@@ -64,9 +64,7 @@
 		let error: Error;
 		try {
 			error = new Error("App.svelte.saveState(GameState). GameState cannot be saved becasue BotNode is a circular tree.");
-		} catch (e) {
-			console.log(e.stack);
-		}
+		} catch (e) { console.log(e); }
 	}
 </script>
 

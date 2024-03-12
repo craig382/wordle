@@ -316,7 +316,6 @@ export class GameState extends Storable {
 	
 		app = this;
 		console.log("app = new GameState:", app);
-		// console.log(new Error().stack); 
 	}
 
 	get latestWord() { return this.board.guesses[this.nGuesses]; }
@@ -396,15 +395,6 @@ export class GameState extends Storable {
 				// Find or create this human guess in the bot tree.
 				let pGang: GangTuple;
 				pGang = this.human[ri-1].gangs.get(this.guessGroupIds[ri-1]);
-				if (pGang === undefined) {
-					this.errorString =`No possible solutions left. Did you enter ` +
-					`some color(s) wrong? Or perhaps the other Wordle's solution ` + 
-					`dictionary is not the same as mine. Click the refresh icon ` +
-					`to try again.`;
-					let e = new Error('processGroups: No possible solutions left.');
-					console.log(e);
-					throw e; 		
-				}
 				let pGroup = pGang[0];
 				if (guess === pGang[2].guess) this.human.push(pGang[2]);
 				else if (guess === pGang[3].guess) this.human.push(pGang[3]);
@@ -414,8 +404,17 @@ export class GameState extends Storable {
 					// Guess BotNode not found.
 					// Thus create new BotNode for the guess 
 					// and create kids for the new BotNode.
-					// this.human.push(new BotNode( this.human[ri-1].parent, ri, guess, calculateGroups(guess, pGroup)));
-					this.human.push(new BotNode( [this.human[ri-1], this.guessGroupIds[ri-1], pGang], ri, guess, calculateGroups(guess, pGroup)));
+					let gangs = calculateGroups(guess, pGroup);
+					if (gangs.get(this.guessGroupIds[ri]) === undefined) {
+						this.errorString =`No possible solutions left. Did you enter ` +
+						`some color(s) wrong? Or perhaps the other Wordle's solution ` + 
+						`dictionary is not the same as mine. Click the refresh icon ` +
+						`to try again.`;
+						let e = new Error('updateBot: No possible solutions left.');
+						app.status = GameStatus.lost; // Abort the game.
+						throw e; 		
+					}
+					this.human.push(new BotNode( [this.human[ri-1], this.guessGroupIds[ri-1], pGang], ri, guess, gangs));
 					createKids(this.human[ri]);
 				}
 			}
@@ -866,11 +865,8 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 	info[9] = 0;
 	info[10] = "";
 	info[11] = 0;
-
-	if (botNode === null || botNode === undefined) {
-		console.log("WARNING. botNodeInfo(), botNode was null or undefined.", guessId, botNode);
-		return;
-	}
+	info[12] = null;
+	info[13] = "";
 
 	if (guessId === "" && app.solution !== "") {
 		guessId = calculateGroupId(app.solution, botNode.guess);

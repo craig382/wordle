@@ -8,16 +8,21 @@
 	export let alternates = 9;
 
 	async function getWordData(word: string): Promise<DictionaryEntry> {
+		if ( !word ) {
+			let e = new Error(`getWordData( word: "${word}" ) passed an empty string.`);
+				console.log(e);
+				throw e;
+		}
 		if (!cache.has(word)) {
-			const data = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`, {
-				mode: "cors",
-			});
+			const data = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`, { mode: "cors", });
 			if (data.ok) {
 				cache.set(word, (await data.json())[0]);
 			} else {
-				throw new Error(`Failed to fetch definition`);
+				let e = new Error(`Failed to fetch definition of "${word}".`);
+				console.log(e);
+				throw e;
 			}
-		}
+		} 
 		return cache.get(word);
 	}
 </script>
@@ -37,7 +42,7 @@
 			{/each}
 		</ol>
 	{:catch}
-		<div>Your word was <strong>{word}</strong>. (failed to fetch definition)</div>
+		<div>Failed to fetch definition of <strong>{word}</strong>.</div>
 	{/await}
 </div>
 
