@@ -4,7 +4,7 @@ import App from "./App.svelte";
 const mainApp = new App({
 	target: document.body,
 	props: {
-		version: "2.0.7",
+		version: "2.0.8",
 	}
 });
 

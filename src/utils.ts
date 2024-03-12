@@ -329,121 +329,113 @@ export class GameState extends Storable {
 	/** The Bot processes the latest human guess
 	 *  and searches for its next guess. */
 	updateBot() {
-		try {
-			// Set ri for this guess.
-			let ri = this.nGuesses;
-			let guess = this.guesses[ri];
+		// Set ri for this guess.
+		let ri = this.nGuesses;
+		let guess = this.guesses[ri];
 
-			// Initialize guessGroupIds[ri]
-			if ( this.mode !== GameMode.solver) {
-				this.guessGroupIds[ri] = calculateGroupId(this.solution, guess);
-			}
+		// Initialize guessGroupIds[ri]
+		if ( this.mode !== GameMode.solver) {
+			this.guessGroupIds[ri] = calculateGroupId(this.solution, guess);
+		}
 
-			if (ri === 0) {
-				/** Calculate Bot Tree and initialize the human and ai BotNode arrays. */
-				this.human = [];
-				this.aiMaxGroupsHard = [];
-				this.aiMaxGroupsEasy = [];
-				this.aiMinSumOfSquaresHard = [];
-				this.aiMinSumOfSquaresEasy = [];
-				calculateBotTree(app.board.guesses[0], app.guessGroupIds[0]);
-				this.human.push(botRoot);
-				this.aiMaxGroupsHard.push(botRoot);
-				this.aiMaxGroupsEasy.push(botRoot);
-				this.aiMinSumOfSquaresHard.push(botRoot);
-				this.aiMinSumOfSquaresEasy.push(botRoot);
-				if (this.guessGroupIds[0] !== "#####") {
-					let gang: GangTuple;
-					if ( app.mode === GameMode.solver ) {
-						gang = this.human[0].gangs.get(app.guessGroupIds[0]);
-						this.aiMaxGroupsHard.push(gang[2]);
-						this.aiMaxGroupsEasy.push(gang[3]);
-						this.aiMinSumOfSquaresHard.push(gang[4]);
-						this.aiMinSumOfSquaresEasy.push(gang[5]);
-					} else {
-						let i = 0;
-						while (true) {
-							gang = this.aiMaxGroupsHard[i].gangs.get(calculateGroupId(this.solution, this.aiMaxGroupsHard[i].guess));
-							if (gang[2] === null) break;
-							else this.aiMaxGroupsHard.push(gang[2]);
-							i++;
-						}
-						i = 0;
-						while (true) {
-							gang = this.aiMaxGroupsEasy[i].gangs.get(calculateGroupId(this.solution, this.aiMaxGroupsEasy[i].guess));
-							if (gang[3] === null) break;
-							else this.aiMaxGroupsEasy.push(gang[3]);
-							i++;
-						}
-						i = 0;
-						while (true) {
-							gang = this.aiMinSumOfSquaresHard[i].gangs.get(calculateGroupId(this.solution, this.aiMinSumOfSquaresHard[i].guess));
-							if (gang[4] === null) break;
-							else this.aiMinSumOfSquaresHard.push(gang[4]);
-							i++;
-						}
-						i = 0;
-						while (true) {
-							gang = this.aiMinSumOfSquaresEasy[i].gangs.get(calculateGroupId(this.solution, this.aiMinSumOfSquaresEasy[i].guess));
-							if (gang[5] === null) break;
-							else this.aiMinSumOfSquaresEasy.push(gang[5]);
-							i++;
-						}
-					}	
-				}
-			} else {
-				// Find or create this human guess in the bot tree.
-				let pGang: GangTuple;
-				pGang = this.human[ri-1].gangs.get(this.guessGroupIds[ri-1]);
-				let pGroup = pGang[0];
-				if (guess === pGang[2].guess) this.human.push(pGang[2]);
-				else if (guess === pGang[3].guess) this.human.push(pGang[3]);
-				else if (guess === pGang[4].guess) this.human.push(pGang[4]);
-				else if (guess === pGang[5].guess) this.human.push(pGang[5]);
-				else {
-					// Guess BotNode not found.
-					// Thus create new BotNode for the guess 
-					// and create kids for the new BotNode.
-					let gangs = calculateGroups(guess, pGroup);
-					if (gangs.get(this.guessGroupIds[ri]) === undefined) {
-						this.errorString =`No possible solutions left. Did you enter ` +
-						`some color(s) wrong? Or perhaps the other Wordle's solution ` + 
-						`dictionary is not the same as mine. Click the refresh icon ` +
-						`to try again.`;
-						let e = new Error('updateBot: No possible solutions left.');
-						app.status = GameStatus.lost; // Abort the game.
-						throw e; 		
+		if (ri === 0) {
+			/** Calculate Bot Tree and initialize the human and ai BotNode arrays. */
+			this.human = [];
+			this.aiMaxGroupsHard = [];
+			this.aiMaxGroupsEasy = [];
+			this.aiMinSumOfSquaresHard = [];
+			this.aiMinSumOfSquaresEasy = [];
+			calculateBotTree(app.board.guesses[0], app.guessGroupIds[0]);
+			this.human.push(botRoot);
+			this.aiMaxGroupsHard.push(botRoot);
+			this.aiMaxGroupsEasy.push(botRoot);
+			this.aiMinSumOfSquaresHard.push(botRoot);
+			this.aiMinSumOfSquaresEasy.push(botRoot);
+			if (this.guessGroupIds[0] !== "#####") {
+				let gang: GangTuple;
+				if ( app.mode === GameMode.solver ) {
+					gang = this.human[0].gangs.get(app.guessGroupIds[0]);
+					this.aiMaxGroupsHard.push(gang[2]);
+					this.aiMaxGroupsEasy.push(gang[3]);
+					this.aiMinSumOfSquaresHard.push(gang[4]);
+					this.aiMinSumOfSquaresEasy.push(gang[5]);
+				} else {
+					let i = 0;
+					while (true) {
+						gang = this.aiMaxGroupsHard[i].gangs.get(calculateGroupId(this.solution, this.aiMaxGroupsHard[i].guess));
+						if (gang[2] === null) break;
+						else this.aiMaxGroupsHard.push(gang[2]);
+						i++;
 					}
-					this.human.push(new BotNode( [this.human[ri-1], this.guessGroupIds[ri-1], pGang], ri, guess, gangs));
-					createKids(this.human[ri]);
+					i = 0;
+					while (true) {
+						gang = this.aiMaxGroupsEasy[i].gangs.get(calculateGroupId(this.solution, this.aiMaxGroupsEasy[i].guess));
+						if (gang[3] === null) break;
+						else this.aiMaxGroupsEasy.push(gang[3]);
+						i++;
+					}
+					i = 0;
+					while (true) {
+						gang = this.aiMinSumOfSquaresHard[i].gangs.get(calculateGroupId(this.solution, this.aiMinSumOfSquaresHard[i].guess));
+						if (gang[4] === null) break;
+						else this.aiMinSumOfSquaresHard.push(gang[4]);
+						i++;
+					}
+					i = 0;
+					while (true) {
+						gang = this.aiMinSumOfSquaresEasy[i].gangs.get(calculateGroupId(this.solution, this.aiMinSumOfSquaresEasy[i].guess));
+						if (gang[5] === null) break;
+						else this.aiMinSumOfSquaresEasy.push(gang[5]);
+						i++;
+					}
+				}	
+			}
+		} else {
+			// Find or create this human guess in the bot tree.
+			let pGang: GangTuple;
+			pGang = this.human[ri-1].gangs.get(this.guessGroupIds[ri-1]);
+			let pGroup = pGang[0];
+			if (guess === pGang[2].guess) this.human.push(pGang[2]);
+			else if (guess === pGang[3].guess) this.human.push(pGang[3]);
+			else if (guess === pGang[4].guess) this.human.push(pGang[4]);
+			else if (guess === pGang[5].guess) this.human.push(pGang[5]);
+			else {
+				// Guess BotNode not found.
+				// Thus create new BotNode for the guess 
+				// and create kids for the new BotNode.
+				let gangs = calculateGroups(guess, pGroup);
+				if (gangs.get(this.guessGroupIds[ri]) === undefined) {
+					this.errorString =`No possible solutions left. Did you enter ` +
+					`some color(s) wrong? Or perhaps the other Wordle's solution ` + 
+					`dictionary is not the same as mine. Click the refresh icon ` +
+					`to try again.`;
+					let e = new Error('updateBot: No possible solutions left.');
+					app.status = GameStatus.lost; // Abort the game.
+					throw e; 		
 				}
+				this.human.push(new BotNode( [this.human[ri-1], this.guessGroupIds[ri-1], pGang], ri, guess, gangs));
+				createKids(this.human[ri]);
 			}
+		}
 
-			if (this.guessGroupIds[ri] === "#####") {
-				this.status = GameStatus.won;
-				this.solution = this.guesses[ri]; // needed for solver mode
-			} else if (this.nGuesses === ROWS) this.status = GameStatus.lost;
+		if (this.guessGroupIds[ri] === "#####") {
+			this.status = GameStatus.won;
+			this.solution = this.guesses[ri]; // needed for solver mode
+		} else if (this.nGuesses === ROWS) this.status = GameStatus.lost;
 
-			if (!this.active) {
-	
-				console.log(`easyGroup.length: ${this.easyGroup.length}.`);
-				this.human.forEach ( (bn, bni) => {
-					console.log("human:", this.guessGroupIds[bni], bn);
-					// if (bni > 0) console.log(`${bn.guess} parent ${bn.parent[0].guess} with kids: ${bn.parent[2][2].guess}, ${bn.parent[2][3].guess}, ${bn.parent[2][4].guess}, ${bn.parent[2][5].guess}`);
-				});
-				console.log("GameState:", this);
-				console.log("botRoot:", botRoot);
-			}
-	
-			app.nGuesses++;
-			app = this; // tell svelte to react to change in app
+		if (!this.active) {
 
-		} catch (e) {
-			console.log("GameState.update: ", e);
-			throw e; // throw the error up the chain
-		}; 
+			console.log(`easyGroup.length: ${this.easyGroup.length}.`);
+			this.human.forEach ( (bn, bni) => {
+				console.log("human:", this.guessGroupIds[bni], bn);
+				// if (bni > 0) console.log(`${bn.guess} parent ${bn.parent[0].guess} with kids: ${bn.parent[2][2].guess}, ${bn.parent[2][3].guess}, ${bn.parent[2][4].guess}, ${bn.parent[2][5].guess}`);
+			});
+			console.log("GameState:", this);
+			console.log("botRoot:", botRoot);
+		}
 
-
+		app.nGuesses++;
+		app = this; // tell svelte to react to change in app
 	}
 
 	/**

@@ -10,7 +10,7 @@
 	async function getWordData(word: string): Promise<DictionaryEntry> {
 		if ( !word ) {
 			let e = new Error(`getWordData( word: "${word}" ) passed an empty string.`);
-				console.log(e);
+				// console.log(e);
 				throw e;
 		}
 		if (!cache.has(word)) {
@@ -42,7 +42,7 @@
 			{/each}
 		</ol>
 	{:catch}
-		<div>Failed to fetch definition of <strong>{word}</strong>.</div>
+		<div>Failed to fetch definition of "{word}".</div>
 	{/await}
 </div>
 

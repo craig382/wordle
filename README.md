@@ -24,10 +24,11 @@
 - The original publish.yml .github workflow was not working.
 - Thus, I used the first method ("Vite.config.js outDir build option") from an article entitled "Two Easy Ways to Publish Your Svelte Project on GitHub Pages" at https://medium.com/mkdir-awesome/two-easy-ways-to-publish-your-svelte-project-on-github-pages-c8eaca2b6225
 - The steps are...
-- In vite.config.js, add the "outDir: './docs'," line and comment out the "dir: './dist'," line.
-- Within Code - OSS (open source vs code), in the wordle project, run "npm run build" in the terminal. You have to repeat this step each time, otherwise the compiled code in the /docs folder will not update to your latest source code.
-- In the GitHub wordle repro, open "Settings", select "Pages" from the side bar, in the "Build and deployment" section, ensure (change as needed) "Source" is "Deploy from Branch", "Branch" is "main" with folder "/docs" and click the "Save" button next to "/docs".
-- Everytime a change to the "main" branch is pushed to (synchronized with) the GitHub repro, the app is re-built and re-deployed. It takes a few minutes to build and deploy, and you watch the build and deploy progress in the GitHub "Actions" tab.
+- One time. In vite.config.js, add the "outDir: './docs'," line and comment out the "dir: './dist'," line.
+- One time. In the GitHub wordle repro, open "Settings", select "Pages" from the side bar, in the "Build and deployment" section, ensure (change as needed) "Source" is "Deploy from Branch", "Branch" is "main" with folder "/docs" and click the "Save" button next to "/docs".
+- Every time. Update the version number in: package.json, main.ts, and sw.js.
+- Every time. run "npm run build" in the Code - OSS (open source vs code) terminal. This updates the compiled code in the /docs folder.
+- Everytime a change to the "main" branch is pushed to (synchronized with) the GitHub repro, the app is re-built and re-deployed. It takes a few minutes to build and deploy, and you can watch the build and deploy progress in the GitHub "Actions" tab.
 
 ### To run the hidden "Reset your stats" function...
 - Click on the Wordle+ Settings icon (the gear icon).
