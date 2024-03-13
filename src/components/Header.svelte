@@ -35,10 +35,6 @@
 		{#if showRefresh}&#10227;{:else}&#10710;{/if}
 	</p>
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<p on:click|self={() => {toggleShowRowHints();}}>
-		&nbsp;&plusmn;&nbsp;
-	</p>
-	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<p
 		on:click|self={() => {
 			$mode = ($mode + 1) % modeData.modes.length;
@@ -47,7 +43,7 @@
 			$mode = ($mode - 1 + modeData.modes.length) % modeData.modes.length;
 		}}
 	>
-		Wordle+
+		&nbsp;Wordle+
 	</p>
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<p on:click|self={() => {dispatch("tutorial");}} >

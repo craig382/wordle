@@ -20,6 +20,13 @@ export function countOfAinB(a: string, b: string): number {
 	return b.split(a).length - 1;
 }
 
+/** Given anEnumDef, this function returns a string array
+ * containing all the names of the enum.
+ */
+export function namesOf(anEnumDef) {
+	return Object.keys(anEnumDef).filter((v) => isNaN(Number(v)));
+}
+
 /** Returns groupId string with # = green, $ = yellow, and - = blank. */
 export function calculateGroupId(key: string, test: string): string {
 	let yi: number;

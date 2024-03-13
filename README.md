@@ -52,8 +52,11 @@
 - In Solver mode, enter the guess letters, then before clicking on "Enter", click on each letter as needed to change the letter's color.
 
 ### Row Hints
-- Click the "&plusmn;" ("Show/Hide") icon in the upper left side to show or hide the row hints.
+- Click on "Row Hints" to toggle the row hints ON and OFF.
 - Each Row Hint shows the number of groups created by the human H or E (hard or easy) guess over the number of groups created by the bot, and W words remaining after the human guess.
+
+### BOT RESULTS Table on the Stats Screen
+- Click on the column algorithm title (e.g. "Human" or "Bot Max Groups Easy") in the Stats screen BOT RESULTS table to change the results in that column to another algorithm.
 
 ### Mikha Davids' original ReadMe.md continues below.
 

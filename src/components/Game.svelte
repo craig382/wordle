@@ -34,11 +34,11 @@
 		GameState,
 		LetterStates,
 		words,
-		appSettings,
 		Stats,
         groupIdFromColors,
         calculateBotInfoArray,
         BotMode,
+        namesOf,
 	} from "../utils";
 	import { letterStates, settings, mode, showRowHints } from "../stores";
     import { GameMode } from "../enums";
@@ -60,6 +60,8 @@
 	let showHistorical = false;
 	let showRefresh = false;
 	let aiSolution = "";
+	let infoL: Array<BotNodeTuple>;
+	let infoR: Array<BotNodeTuple>;
 
 	let board: Board;
 	let timer: Timer;
@@ -310,40 +312,60 @@
 	{/if}
 
 	{#if showStats && app.nGuesses > 0 }
-		{@const infoL = calculateBotInfoArray("left")}
-		{@const infoR = calculateBotInfoArray("right")}
+		{@const LL = (infoL = calculateBotInfoArray("left"))}
+		{@const RR = (infoR = calculateBotInfoArray("right"))}
+		{@const modes = namesOf(BotMode)}
 		<br /><h3>Bot Results {#if !app.active}For Solution "{app.solution}"{/if}</h3>
-		{#each Array(Math.max(infoL.length, infoR.length)) as _, ri}
+		{#each Array(Math.max(LL.length, RR.length)) as _, ri}
 			<h1>Guess # {(ri + 1)}</h1>
 			<div class="row">
 				<section>
-					{#if ri < infoL.length}
-						{Object.values(BotMode)[app.botLeftMode]}<br /><br />
-						{infoL[ri][0]}<br />
-						{infoL[ri][6]} Guess<br />
-						{infoL[ri][2]} groups<br /><br />
-						{#if infoL[ri][7]}
-							{infoL[ri][8]}<br />
-							Eliminated {infoL[ri][9]} words<br />
-							{#if infoL[ri][0].toLowerCase() !== app.solution}
-								{infoL[ri][11]}  words left
-								<br /><br />{infoL[ri][13]}<br />
+					{#if ri < LL.length}
+						<!-- svelte-ignore a11y-click-events-have-key-events -->
+						<h4
+							on:click|self={() => {
+							app.botLeftMode = (app.botLeftMode + 1) % modes.length;
+							infoL = calculateBotInfoArray("left")
+						}}
+						>
+							{modes[app.botLeftMode]}<br /><br />
+						</h4>
+						{LL[ri][0]}<br />
+						{LL[ri][6]} Guess<br />
+						{LL[ri][2]} groups<br />
+						{LL[ri][3].toLocaleString()} SoS<br /><br />
+						{#if LL[ri][7]}
+							{LL[ri][8]}<br />
+							Eliminated {LL[ri][9].toLocaleString()} words<br />
+							{#if LL[ri][0].toLowerCase() !== app.solution}
+								{LL[ri][11]}  words left
+								<br /><br />{LL[ri][13]}<br />
 							{/if}
 						{/if}
 					{/if}
 				</section>
 				<section>
-					{#if ri < infoR.length}
-						{Object.values(BotMode)[app.botRightMode]}<br /><br />
-						{infoR[ri][0]}<br />
-						{infoR[ri][6]} Guess<br />
-						{infoR[ri][2]} groups<br /><br />
-						{#if infoR[ri][7]}
-							{infoR[ri][8]}<br />
-							Eliminated {infoR[ri][9]} words<br />
-							{#if infoR[ri][0].toLowerCase() !== app.solution}
-								{infoR[ri][11]} words left
-								<br /><br />{infoR[ri][13]}<br />
+					{#if ri < RR.length}
+						<!-- svelte-ignore a11y-click-events-have-key-events -->
+						<h4
+							on:click|self={() => {
+							app.botRightMode = (app.botRightMode + 1) % modes.length;
+							infoR = calculateBotInfoArray("right")
+							}}
+						>
+							{modes[app.botRightMode]}<br /><br />
+
+						</h4>
+						{RR[ri][0]}<br />
+						{RR[ri][6]} Guess<br />
+						{RR[ri][2]} groups<br />
+						{RR[ri][3].toLocaleString()} SoS<br /><br />
+						{#if RR[ri][7]}
+							{RR[ri][8]}<br />
+							Eliminated {RR[ri][9].toLocaleString()} words<br />
+							{#if RR[ri][0].toLowerCase() !== app.solution}
+								{RR[ri][11]} words left
+								<br /><br />{RR[ri][13]}<br />
 							{/if}
 						{/if}
 					{/if}
@@ -352,37 +374,84 @@
 		{/each}
 
 		<div class="row">
-			The Wordle dictionary has {words.answers.length} possible 
-			solutions and {words.otherGuesses.length} additional other
-			words you may use as guesses. All words counted and listed
-			below are from the possible solutions dictionary.
+			The Wordle dictionary contains {words.answers.length.toLocaleString()} possible 
+			solutions and {words.otherGuesses.length.toLocaleString()} additional other
+			words you may use as guesses.<br /><br />
+			
+			The NYT Wordle possible solutions dictionary excludes: 
+			plural nouns that end in S or ES, 
+			past tense verbs that end in ED, proper nouns,
+			and words outside the vocabulary of the "general public".
+			The vocabulary rule is subjective and might use 
+			the "typical NYT reader" instead of the "general public".
 		</div>
 		<div class="row">
-			Top New York Times WordleBot openers (each 
+			Top NYT WordleBot openers (each 
 			with 97+ NYT WordleBot score): {app.openers}.
 		</div>
 		<div class="row">
-			The Bot Algorithm.<br /><br />
+			All Bot and AI Algorithms...<br /><br />
+
+			The algorithm uses the first human guess as its first guess.<br /><br />
+
+			For the last guess (guess 6), all "words left" from the 
+			previous guess are equally
+			likely to win or lose, and the algorithm selects one
+			of them as its guess.<br /><br />
 			
-			For guess 6, all remaining answers are equally likely
-			to win or lose, and the Bot selects the first remaining
-			answer as its recommended guess.<br /><br />
-			
-			For guesses 1 to 5, the Bot recommends the first
-			guess it finds that creates the maximum number of groups.<br /><br />
-			
+			An "Hard" algorithm must select each guess from  
+			the "words left" list of the previous guess.<br /><br />
+
+			An "Easy" algorithm is  allowed to use any word in its
+			Wordle solution dictionary as a guess.<br /><br />
+
+			A "Bot" algorithm selects each guess based on "human" history
+			(based on the previous human guesses).<br /><br />
+
+			An "AI" algoritm selects each guess based on "AI" history
+			(based on the previous AI guesses).<br /><br />
+
 			A "perfect" guess is one that creates as many groups as there
 			were remaining answers before the guess.<br /><br />
 			
-			If the Bot finds a perfect guess, it immediately ends its 
+			If the algorithm finds a perfect guess, it immediately ends its 
 			searching.<br /><br />
 
-			The Bot starts by searching through the prior guess's remaining
-			answers for a Hard Mode recommended guess. If the Bot finds
-			a perfect Hard Mode recommended guess, its search is finished. 
-			Otherwise, the Bot will continue searching through a portion 
+			The algorithm starts by searching through the "words left" list
+			of the prior guess. If the algoritm finds
+			a perfect Hard guess, its search is finished.<br /><br />
+
+			If the Hard guess was not perfect, an Easy algoritm will 
+			continue searching through a portion 
 			of the Wordle solution dictionary for a 
-			possible Easy Mode recommended guess.
+			possible better Easy guess.
+		</div>
+		<div class="row">
+			The Max Groups Algorithms.<br /><br />
+			
+			For guesses 2 to 5, the algorithm selects the first
+			guess it finds that creates the maximum number of groups.
+		</div>
+		<div class="row">
+			The Min Sum of Squares Algorithms.<br /><br />
+
+			In the table above, "SoS" stands for "Sum of Squares".<br /><br />
+			
+			For guesses 2 to 5, the algorithm selects the first
+			guess it finds that produces the minimum sum of squares.<br /><br />
+
+			The sum of squares is calculated by accumulating (summing) 
+			the square of each group size. For example, if the guess
+			creates 3 groups, the first containing 1 word, the second 
+			containing 2 words, and the third containing 3 words, then  
+			SoS = 1^2 + 2^2 + 3^2 = 1 + 4 + 9 = 14<br /><br />
+
+			This algorithm trades off two goals. The algorithm tries to
+			create as many groups as possible but also prefers smaller groups
+			to larger groups. Each word in a group of 1 is penalized 1 point.
+			Each word in a group of 2 is penalized 2 points. Each word in a 
+			group of 3 is penalized 3 points. And so forth. The larger the 
+			group, the more each of its words is penalized.
 		</div>
 	{/if}
 </Modal>
@@ -463,6 +532,9 @@
 	}
 	h1 {
 		text-align: center;
+	}
+	h4 {
+		cursor: pointer;	
 	}
 	button {
 		text-align: center;
