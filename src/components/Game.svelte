@@ -399,7 +399,7 @@
 			likely to win or lose, and the algorithm selects one
 			of them as its guess.<br /><br />
 			
-			An "Hard" algorithm must select each guess from  
+			A "Hard" algorithm must select each guess from  
 			the "words left" list of the previous guess.<br /><br />
 
 			An "Easy" algorithm is  allowed to use any word in its
