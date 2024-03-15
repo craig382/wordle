@@ -1,7 +1,7 @@
 {
 	"short_name": "Wordle+",
 	"name": "Wordle+ with AI and Solver Modes",
-	"start_url": "https://craig382.github.io/wordle/",
+	"start_url": "/?standalone=true",
 	"background_color": "#6aaa64",
 	"theme_color": "#6aaa64",
 	"description": "Wordle+ with AI and Solver Modes",
