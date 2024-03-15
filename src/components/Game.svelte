@@ -65,21 +65,7 @@
 
 	let board: Board;
 	let timer: Timer;
-
-	window.addEventListener("beforeunload", function (e) {
-		if (showStats === true) { showStats = false; }
-		else if (showSettings === true) { showStats = false; }
-		else if (showTutorial === true) { showTutorial = false; }
-		else {
-			// Cancel the event
-			e.preventDefault();
-    		// Chrome requires returnValue to be set
-    		e.returnValue = '';
-    		// Prompt the user with a confirmation message
-    		return 'Are you sure you want to exit?';
-		}
-	});
-
+	
 	/**
 	 * Processes a valid guess, including:
 	 * updating the colors of the guess tiles,

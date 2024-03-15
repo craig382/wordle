@@ -65,10 +65,6 @@
 		}
 	}
 
-	window.addEventListener("beforeunload", function (e) {
-		if (showCtx === true) { showCtx = false; } 
-	});
-
 </script>
 
 {#if showCtx}
