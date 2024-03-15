@@ -422,6 +422,7 @@ export class GameState extends Storable {
 				}
 				this.human.push(new BotNode( [this.human[ri-1], this.guessGroupIds[ri-1], pGang], ri, guess, gangs));
 				createKids(this.human[ri]);
+				console.log("ri, human[ri]", ri, this.human[ri]);
 			}
 		}
 
@@ -833,7 +834,10 @@ export class BotNode // extends TreeNode
 	 * 2. And a "no more gueses remaining" leaf.
 	 * This function returns true for both types.
 	 */
-  	isLeaf() { return (this.sumOfSquares === 1 || this.ri === (ROWS - 1)); }
+  	isLeaf() { 
+		let isTrueLeaf = this.sumOfSquares === 1 && this.gangs.entries().next().value[0] === "#####";
+		return ( isTrueLeaf || this.ri === (ROWS - 1) ); 
+	}
 
 }
 
@@ -860,6 +864,13 @@ export enum aiModes {
 }
 
 export function botNodeInfo (botNode: BotNode, guessId = "") {
+
+	if (botNode === null) {
+		let e = new Error(`botNodeInfo( botNode: ${botNode}, guessId: "${guessId}" ): botNodeInfo called for a null botNode.`);
+		console.log(e);
+		throw e;
+	}
+
 	let info: BotNodeTuple = [,,,,,,,,,,,,,,]; // Initialize a multi element empty tuple.
 
 	info[0] = "";
@@ -952,7 +963,7 @@ export function calculateBotInfoArray(botSide : "left" | "right" ) {
 		case "left": botMode = app.botLeftMode; break;
 		case "right": botMode = app.botRightMode; break;
 		default:
-			let e = new Error('calculateBotRowArray: statSide must be "left" or "right".');
+			let e = new Error(`calculateBotRowArray: statSide must be "left" or "right".`);
 			console.log(e);
 			throw e; 
 	}

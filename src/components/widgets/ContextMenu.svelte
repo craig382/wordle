@@ -38,7 +38,7 @@
 				{/if}
 			{/if}
 
-			{#if word != app.solution && ri < (ROWS - 1) }
+			{#if word !== app.solution && ri < (ROWS - 1) }
 				{@const b2 = botNodeInfo(h1[12], "")}
 				For the guess after {h1[0]}, the bot 
 				chose {b2[6]} guess {b2[0]} 
