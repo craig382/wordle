@@ -64,6 +64,11 @@
 			dispatch("swipe", { direction: deltaX < 0 ? "left" : "right" });
 		}
 	}
+
+	window.addEventListener("beforeunload", function (e) {
+		if (showCtx === true) { showCtx = false; } 
+	});
+
 </script>
 
 {#if showCtx}
