@@ -497,6 +497,7 @@
 		max-width: var(--game-width);
 		margin: auto;
 		position: relative;
+		overflow-y: auto;
 	}
 	.historical {
 		text-align: center;
