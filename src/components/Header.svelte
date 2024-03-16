@@ -75,7 +75,13 @@
 <style lang="scss">
 	header {
 		--height: 51px;
-		position: relative;
+		position: sticky; 
+		top: 0; 
+		left: 0; 
+		right: 0; 
+		z-index: 1;
+		padding: 5px;
+
 		font-weight: 500;
 		letter-spacing: 0.1rem;
 		display: flex;
@@ -84,8 +90,9 @@
 		border-bottom: 1px solid var(--border-primary);
 		width: 100%;
 		height: var(--height);
-		position: relative;
 		font-size: var(--fs-large);
+		background: var(--bg-primary);
+		margin-bottom: 10px;
 	}
 	p {
 		cursor: pointer;
