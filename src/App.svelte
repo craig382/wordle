@@ -18,6 +18,7 @@
 
 <script lang="ts">
 	export let version: string;
+	console.log(`App.svelte version = ${version}.`);
 	let app: GameState;
 	setContext("version", version);
 	localStorage.setItem("version", version);

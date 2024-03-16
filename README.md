@@ -26,7 +26,7 @@
 - The steps are...
 - One time. In vite.config.js, add the "outDir: './docs'," line and comment out the "dir: './dist'," line.
 - One time. In the GitHub wordle repro, open "Settings", select "Pages" from the side bar, in the "Build and deployment" section, ensure (change as needed) "Source" is "Deploy from Branch", "Branch" is "main" with folder "/docs" and click the "Save" button next to "/docs".
-- Every time. Update the version number in: package.json, main.ts, and sw.js.
+- Every time. Update the version number in package.json.
 - Every time. run "npm run build" in the Code - OSS (open source vs code) terminal. This updates the compiled code in the /docs folder.
 - Everytime a change to the "main" branch is pushed to (synchronized with) the GitHub repro, the app is re-built and re-deployed. It takes a few minutes to build and deploy, and you can watch the build and deploy progress in the GitHub "Actions" tab.
 
