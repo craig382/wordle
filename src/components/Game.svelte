@@ -153,9 +153,10 @@
 		lose();
 	}
 
-	function newRandomAiSoltion() {
+	function playRandomAiGame() {
 		reload();
 		aiSolution = app.solution;
+		playAiGame();
 	}
 
 	function playAiGame() {
@@ -171,10 +172,26 @@
 		processValidGuess(); 
 
 		switch ($settings.aiMode) {
-			case aiModes["Max Groups Hard"]: aiBot = app.aiMaxGroupsHard; break;
-			case aiModes["Max Groups Easy"]: aiBot = app.aiMaxGroupsEasy; break;
-			case aiModes["Min Sum of Squares Hard"]: aiBot = app.aiMinSumOfSquaresHard; break;
-			case aiModes["Min Sum of Squares Easy"]: aiBot = app.aiMinSumOfSquaresEasy; break;
+			case aiModes["Max Groups Hard"]: 
+				aiBot = app.aiMaxGroupsHard;
+				app.botLeftMode = BotMode["AI Max Groups Hard"];
+				app.botRightMode = BotMode["AI Min Sum of Squares Hard"]; 
+			break;
+			case aiModes["Max Groups Easy"]: 
+				aiBot = app.aiMaxGroupsEasy; 
+				app.botLeftMode = BotMode["AI Max Groups Easy"];
+				app.botRightMode = BotMode["AI Min Sum of Squares Easy"]; 
+			break;
+			case aiModes["Min Sum of Squares Hard"]: 
+				aiBot = app.aiMinSumOfSquaresHard; 
+				app.botLeftMode = BotMode["AI Min Sum of Squares Hard"];
+				app.botRightMode = BotMode["AI Max Groups Hard"]; 
+			break;
+			case aiModes["Min Sum of Squares Easy"]: 
+				aiBot = app.aiMinSumOfSquaresEasy; 
+				app.botLeftMode = BotMode["AI Min Sum of Squares Easy"];
+				app.botRightMode = BotMode["AI Max Groups Easy"]; 
+			break;
 		}
 
 		for (let ri = 1; ri < aiBot.length; ri++) {
@@ -235,7 +252,7 @@
 		{modeData.modes[$mode].name} Mode.
 		{#if $mode === GameMode.ai}
 			<br />
-			<button on:click={newRandomAiSoltion}>New Word</button>
+			<button on:click={playRandomAiGame}>New Word</button>
 			<input bind:value={aiSolution} />
 			<button on:click={playAiGame} >Solve</button>
 		{:else if $mode === GameMode.solver}
@@ -324,12 +341,16 @@
 						<!-- svelte-ignore a11y-click-events-have-key-events -->
 						<h4
 							on:click|self={() => {
-							app.botLeftMode = (app.botLeftMode + 1) % modes.length;
-							infoL = calculateBotInfoArray("left")
-						}}
+								app.botLeftMode = (app.botLeftMode + 1) % modes.length;
+								infoL = calculateBotInfoArray("left")
+							}}
+							on:contextmenu|preventDefault|self={() => {
+								app.botLeftMode = (app.botLeftMode - 1 + modes.length) % modes.length;
+							}}
 						>
 							{modes[app.botLeftMode]}<br /><br />
 						</h4>
+
 						{LL[ri][0]}<br />
 						{LL[ri][6]} Guess<br />
 						{LL[ri][2]} groups<br />
@@ -349,13 +370,16 @@
 						<!-- svelte-ignore a11y-click-events-have-key-events -->
 						<h4
 							on:click|self={() => {
-							app.botRightMode = (app.botRightMode + 1) % modes.length;
-							infoR = calculateBotInfoArray("right")
+								app.botRightMode = (app.botRightMode + 1) % modes.length;
+								infoR = calculateBotInfoArray("right")
+							}}
+							on:contextmenu|preventDefault|self={() => {
+								app.botRightMode = (app.botRightMode - 1 + modes.length) % modes.length;
 							}}
 						>
 							{modes[app.botRightMode]}<br /><br />
-
 						</h4>
+
 						{RR[ri][0]}<br />
 						{RR[ri][6]} Guess<br />
 						{RR[ri][2]} groups<br />

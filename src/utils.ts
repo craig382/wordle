@@ -286,36 +286,34 @@ export class GameState extends Storable {
 	 * GroupId of the row's guess. */
 	public guessGroupIds = Array<string>(ROWS+1).fill("");
 
-	constructor(mode: GameMode, data?: string) {
+	constructor(mode: GameMode) {
 		super();
 		this.mode = mode;
-		// if (data) {
-		// 	this.parse(data);
-		// }
-		if (!this.#valid) {
-			this.status = GameStatus.active;
-			this.nGuesses = 0;
-			this.validHard = true;
-			this.time = modeData.modes[mode].seed;
-			this.solutionNumber = getWordNumber(mode);
-			let solutionIndex = seededRandomInt(0, words.answers.length, this.time);
-			this.solution = words.answers[solutionIndex];
-			this.board = {
-				guesses: Array(ROWS).fill(""),
-				state: Array.from({ length: ROWS }, () => (Array(COLS).fill("🔳"))),
-			};
+		
+		this.status = GameStatus.active;
+		this.nGuesses = 0;
+		this.validHard = true;
+		this.time = modeData.modes[mode].seed;
+		this.solutionNumber = getWordNumber(mode);
+		let solutionIndex = seededRandomInt(0, words.answers.length, this.time);
+		this.solution = words.answers[solutionIndex];
+		this.board = {
+			guesses: Array(ROWS).fill(""),
+			state: Array.from({ length: ROWS }, () => (Array(COLS).fill("🔳"))),
+		};
 
-			this.guesses = this.board.guesses;
-			this.#valid = true;
+		this.guesses = this.board.guesses;
+		this.#valid = true;
 
-			if (mode === GameMode.solver) {
-				this.board.state[0].fill("⬛");
-				this.solution = "";
-			}
+		if (mode === GameMode.solver) {
+			this.board.state[0].fill("⬛");
+			this.solution = "";
 		}
-		this.errorString = "";
+
 		this.botLeftMode = BotMode.Human;
-		this.botRightMode = BotMode["Bot Max Groups Easy"];
+		this.botRightMode = BotMode["Bot Max Groups Easy"];	
+
+		this.errorString = "";
 		this.aiMaxGroupsHard = [];
 		this.aiMaxGroupsEasy = [];
 		this.aiMinSumOfSquaresHard = [];
@@ -469,21 +467,6 @@ export class GameState extends Storable {
 
 	guess(solution: string): LetterState[] {
 		return colorArray(calculateGroupId(solution, this.latestWord));
-	}
-
-	private parse(str: string) {
-		const parsed = JSON.parse(str) as GameState;
-		if (parsed.solutionNumber !== getWordNumber(this.mode)) return;
-		this.status = parsed.status;
-		this.nGuesses = parsed.nGuesses;
-		this.validHard = parsed.validHard;
-		this.time = parsed.time;
-		this.solutionNumber = parsed.solutionNumber;
-		this.solution = parsed.solution;
-		this.board = parsed.board;
-		this.guesses = this.board.guesses;
-
-		this.#valid = true;
 	}
 
 }
