@@ -81,7 +81,7 @@
 				[ gid, errorIndex ] = groupIdFromColors(app.nGuesses);
 				app.guessGroupIds[app.nGuesses] = gid;
 				if (gid === "#####") app.solution = app.board.guesses[app.nGuesses];
-				else app.board.state[app.nGuesses + 1].fill("⬛");
+				else if (app.nGuesses < (ROWS - 1)) app.board.state[app.nGuesses + 1].fill("⬛");
 			} else app.board.state[app.nGuesses] = app.guess(app.solution);
 			try {
 				app.updateBot();
@@ -345,9 +345,7 @@
 		<Share slot="2" game={app} />
 	</Separator>
 	<ShareGame solutionNumber={app.solutionNumber} />
-	{#if !app.active}
-		<Definition word={app.solution} alternates={2} />
-	{:else}
+	{#if app.active}
 		<!-- Fade with delay is to prevent a bright red button from appearing as soon as refresh is pressed -->
 		<div
 			in:fade={{ delay: 300 }}
@@ -363,9 +361,15 @@
 		{@const LL = (infoL = calculateBotInfoArray("left"))}
 		{@const RR = (infoR = calculateBotInfoArray("right"))}
 		{@const modes = namesOf(BotMode)}
-		<br /><h3>Bot Results {#if !app.active}For Solution "{app.solution}"{/if}</h3>
+		<br /><h3>Bot Results {#if !app.active && $mode !== GameMode.solver}For Solution "{app.solution}"{/if}</h3>
+		{#if app.status === GameStatus.lost && $mode !== GameMode.solver}
+			<Definition word={app.solution} alternates={2} />
+		{/if}
 		{#each Array(Math.max(LL.length, RR.length)) as _, ri}
 			<h1>Guess # {(ri + 1)}</h1>
+			{#if ri < LL.length}
+				<Definition word={LL[ri][0].toLowerCase()} alternates={2} />
+			{/if}
 			<div class="row">
 				<section>
 					{#if ri < LL.length}
