@@ -2,7 +2,7 @@
 	import { createEventDispatcher, getContext, onMount } from "svelte";
 
 	import { mode, settings } from "../../stores";
-	import { modeData, GameState, aiModes, namesOf } from "../../utils";
+	import { modeData, GameState, aiModes, namesOf, OpenerModes } from "../../utils";
 	import type { Toaster } from "../widgets";
 	import Setting from "./Setting.svelte";
 
@@ -50,6 +50,12 @@
 			<svelte:fragment slot="title">AI Mode</svelte:fragment>
 			<svelte:fragment slot="desc">
 				Max Groups or Min Sum of Squares algorithm?
+			</svelte:fragment>
+		</Setting>
+		<Setting type="dropdown" bind:value={$settings.openerMode} options={namesOf(OpenerModes)}>
+			<svelte:fragment slot="title">Opener Mode</svelte:fragment>
+			<svelte:fragment slot="desc">
+				How is first guess entered?
 			</svelte:fragment>
 		</Setting>
 		<Setting type="switch" bind:value={$settings.dark}>

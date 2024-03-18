@@ -18,7 +18,7 @@
 
 <script lang="ts">
 	export let version: string;
-	console.log(`App.svelte version = ${version}.`);
+	console.log(`Wordle version ${version} restarted`);
 	let app: GameState;
 	setContext("version", version);
 	localStorage.setItem("version", version);
@@ -43,30 +43,9 @@
 		localStorage.setItem("mode", `${m}`);
 		window.location.hash = GameMode[m];
 		stats = new Stats(localStorage.getItem(`stats-${m}`) || m);
-		if (modeData.modes[m].historical) {
-			app = new GameState(m, localStorage.getItem(`state-${m}-h`));
-		} else {
-			app = new GameState(m, localStorage.getItem(`state-${m}`));
-		}
-		// Set the letter states when data for a new game mode is loaded so the keyboard is correct
+		app = new GameState(m);
 		letterStates.set(new LetterStates(app.board));
 	});
-
-	$: saveState(app);
-	// Can no longer save GameState. Because BotNodes
-	// are arranged in a circular tree.
-	function saveState(game: GameState) {
-		// if (modeData.modes[$mode].historical) {
-		// 	localStorage.setItem(`state-${$mode}-h`, game.toString());
-		// } else {
-		// 	localStorage.setItem(`state-${$mode}`, game.toString());
-		// }
-
-		let error: Error;
-		try {
-			error = new Error("App.svelte.saveState(GameState). GameState cannot be saved becasue BotNode is a circular tree.");
-		} catch (e) { console.log(e); }
-	}
 
 </script>
 

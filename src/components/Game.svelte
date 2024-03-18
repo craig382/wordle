@@ -39,6 +39,8 @@
         calculateBotInfoArray,
         BotMode,
         namesOf,
+        appSettings,
+        OpenerModes,
 	} from "../utils";
 	import { letterStates, settings, mode, showRowHints } from "../stores";
     import { GameMode } from "../enums";
@@ -72,7 +74,7 @@
 	 * updating  the colors of the keyboard tiles,
 	 * and updating the GameState (including bot calculations).
 	 */
-	 export function processValidGuess() {
+	 function processValidGuess() {
 			if ($mode === GameMode.solver) {
 				let errorIndex: number = 0;
 				let gid = "";
@@ -153,22 +155,28 @@
 		lose();
 	}
 
-	function playRandomAiGame() {
-		reload();
-		aiSolution = app.solution;
-		playAiGame();
-	}
+	function playAiGame(randomWord: boolean = false) {
 
-	function playAiGame() {
-		reload();
+		// newGame() clears the board and
+		// creates a new random solution and a default random opener.
+		newGame();
+
+		// New Word (randomWord) mode may use a chain opener.
+		// Entered Word (non-randomWord) mode always uses the default random opener.  
+		if (randomWord) {
+			aiSolution = app.solution;
+			if (appSettings.openerMode === OpenerModes["Chain Mode"]) {
+				app.opener = appSettings.prevSolution;
+			}
+		} 
+
 		let ais = aiSolution.toLowerCase();
 		let aiBot: Array<BotNode>;
 		if (words.answers.includes(ais)) app.solution = ais;
 		else aiSolution = app.solution;
-		let openersArray = app.openers.split(" ");
 
-		// Processing the first guess calculates the bot tree and ai row arrays.
-		app.board.guesses[0] = randomSample(openersArray);
+		// Processing the opener calculates the bot tree and ai row arrays.
+		app.board.guesses[0] = app.opener;
 		processValidGuess(); 
 
 		switch ($settings.aiMode) {
@@ -202,14 +210,42 @@
 		// console.log("playAiGame:", aiModes[$settings.aiMode], aiBot);
 	}
 
-	function reload() {
+	onMount(() => {
+		if (!app.active) setTimeout(setShowStatsTrue, delay);
+		else newGame();
+		
+	});
+
+	function newGame() {
 		modeData.modes[$mode].historical = false;
 		modeData.modes[$mode].seed = newSeed($mode);
-		app = new GameState($mode, localStorage.getItem(`state-${$mode}`));
+		app = new GameState($mode);
 		$letterStates = new LetterStates();
 		showStats = false;
 		showRefresh = false;
 		timer.reset($mode);
+
+		if (appSettings.openerMode === OpenerModes["Random NYT WordleBot"] || 
+			app.mode === GameMode.ai || appSettings.prevSolution === "") {
+			let openersArray = app.openers.split(" ");
+			app.opener = randomSample(openersArray);
+		} else app.opener = appSettings.prevSolution; // Chain mode opener.
+
+		// Use auto opener rules...
+		// 1) AI mode uses playAiGame() to set and process the opener.
+		// 2) Solver mode never uses auto opener.
+		// 3) All other modes use auto opener if openerMode is not manual.
+		let autoOpener: boolean = false;
+		if (app.mode === GameMode.solver || app.mode === GameMode.ai) 
+			autoOpener = false;
+		else autoOpener = (appSettings.openerMode !== OpenerModes.Manual);
+		if (autoOpener) {
+			app.board.guesses[0] = app.opener;
+			processValidGuess(); 
+		}
+
+		console.log("newGame:", app);
+
 	}
 
 	function setShowStatsTrue() {
@@ -227,11 +263,6 @@
 		}
 	}
 
-	onMount(() => {
-		if (!app.active) setTimeout(setShowStatsTrue, delay);
-		console.log("Wordle restarted");
-		
-	});
 </script>
 
 <svelte:body on:click={board.hideCtx} on:contextmenu={board.hideCtx} />
@@ -245,16 +276,16 @@
 		on:stats={() => (showStats = true)}
 		on:tutorial={() => (showTutorial = true)}
 		on:settings={() => (showSettings = true)}
-		on:reload={reload}
+		on:reload={newGame}
 	/>
 	<p>
 		{#if $mode === GameMode.ai}{aiModes[$settings.aiMode]}{/if}
 		{modeData.modes[$mode].name} Mode.
 		{#if $mode === GameMode.ai}
 			<br />
-			<button on:click={playRandomAiGame}>New Word</button>
+			<button on:click={() => playAiGame(true)}>New Word</button>
 			<input bind:value={aiSolution} />
-			<button on:click={playAiGame} >Solve</button>
+			<button on:click={() => playAiGame()} >Solve</button>
 		{:else if $mode === GameMode.solver}
 			Enter the guess letters, then before clicking "Enter", 
 			click on each letter as needed to change its color.
@@ -309,7 +340,7 @@
 			slot="1"
 			bind:this={timer}
 			on:timeup={() => (showRefresh = true)}
-			on:reload={reload}
+			on:reload={newGame}
 		/>
 		<Share slot="2" game={app} />
 	</Separator>

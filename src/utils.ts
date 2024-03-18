@@ -1,6 +1,7 @@
 import seedRandom from "seedrandom";
 import { GameMode, ms } from "./enums";
 import wordList from "./words_5";
+import { settings } from "./stores";
 
 export const ROWS: number = 6;
 export const COLS: number = 5;
@@ -251,6 +252,7 @@ export class GameState extends Storable {
 	public solutionNumber: number;
 	public solution: string;
 	public board: GameBoard;
+	public opener: string;
 	/** Space separated list of top 12 New York Times 
 	 * WordleBot openers (each with 97+ NYT WordleBot score). */
 	public openers = "trace crane slate crate plate saint least stare stale snare plane place";
@@ -266,7 +268,6 @@ export class GameState extends Storable {
 	public nBotTreeNodes: number = 0;
 	public easyGroup: Array<string>;
 
-	#valid = false;
 	mode: GameMode;
 
 	/** These are the Bot Row Arrays and their modes. */
@@ -303,7 +304,6 @@ export class GameState extends Storable {
 		};
 
 		this.guesses = this.board.guesses;
-		this.#valid = true;
 
 		if (mode === GameMode.solver) {
 			this.board.state[0].fill("⬛");
@@ -319,8 +319,10 @@ export class GameState extends Storable {
 		this.aiMinSumOfSquaresHard = [];
 		this.aiMinSumOfSquaresEasy = [];
 	
-		app = this;
-		console.log("app = new GameState:", app);
+		app = this; // tell svelte to react to change in app
+		
+		// console.log("app = new GameState:", app);
+		// console.log(new Error(`GameState.constructor() stack. No Error.`));
 	}
 
 	get latestWord() { return this.board.guesses[this.nGuesses]; }
@@ -431,6 +433,10 @@ export class GameState extends Storable {
 
 		if (!this.active) {
 
+			if (this.status === GameStatus.won || this.mode !== GameMode.solver ) {
+				appSettings.prevSolution = this.solution;
+			}
+			
 			console.log(`easyGroup.length: ${this.easyGroup.length}.`);
 			this.human.forEach ( (bn, bni) => {
 				console.log("human:", this.guessGroupIds[bni], bn);
@@ -474,6 +480,8 @@ export class GameState extends Storable {
 export class Settings extends Storable {
 	public hard = new Array(modeData.modes.length).fill(false);
 	public aiMode: aiModes = aiModes["AI Max Groups Easy"];
+	public openerMode: OpenerModes = OpenerModes["Random NYT WordleBot"];
+	public prevSolution: string = "happy";
 	public dark = true;
 	public colorblind = false;
 	public tutorial: 0 | 1 | 2 | 3 = 3;
@@ -486,12 +494,13 @@ export class Settings extends Storable {
 			const parsed = JSON.parse(settings) as Settings;
 			this.hard = parsed.hard;
 			this.aiMode = parsed.aiMode;
+			this.openerMode = parsed.openerMode;
+			this.prevSolution = parsed.prevSolution;
 			this.dark = parsed.dark;
 			this.colorblind = parsed.colorblind;
 			this.tutorial = parsed.tutorial;
 			this.maxStatWords = parsed.maxStatWords;
 		}
-		this.maxStatWords = 30; // DELETE?
 		appSettings = this;
 	}
 }
@@ -844,6 +853,12 @@ export enum aiModes {
 	"Max Groups Easy",
 	"Min Sum of Squares Hard",
 	"Min Sum of Squares Easy",
+}
+
+export enum OpenerModes {
+	"Manual",
+	"Random NYT WordleBot",
+	"Chain Mode",
 }
 
 export function botNodeInfo (botNode: BotNode, guessId = "") {
