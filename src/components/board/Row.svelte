@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from "svelte";
-	import { COLS, GameState, botNodeInfo } from "../../utils";
+	import { COLS, GameState, botNodeInfo, words, } from "../../utils";
 	import Tile from "./Tile.svelte";
 	import { showRowHints } from "../../stores";
 	import { GameMode } from "../../enums";
@@ -19,6 +19,11 @@
 	let animation = "";
 	let complete = false;
 	let showRowHint = false;
+	let showGuessHint = false;
+	let guess = "";
+	let inDictionary = false;
+	let isHard = false;
+	let guessHint = "";
 	let tiles: Tile[] = [];
 
 	const MAX_DOUBLE_CLICK_INTERVAL = 400;
@@ -41,12 +46,37 @@
 		let ng = app.nGuesses;
 		if (ng > ri) {
 			showRowHint = $showRowHints;
+			showGuessHint = false;
 			complete = true;
 		} else {
-			showRowHint = false;
-			if( (ng === ri) && (app.mode === GameMode.solver) ) 
-				complete = true;
-			else complete = false;
+			showRowHint = false;			
+			if (ng === ri) {
+				if (app.mode === GameMode.solver) complete = true;
+				if (app.board.guesses[ri][4] !== undefined) {
+					showGuessHint = $showRowHints;
+					if (showGuessHint) {
+						guess = app.board.guesses[ri];
+						if (ri > 0) {
+							isHard = app.human[ri-1].gangs.get(app.guessGroupIds[ri-1])[0].includes(guess);
+							if (isHard) guessHint = `\u{2713}\u{2713}`;
+							else {
+								inDictionary = words.answers.includes(guess)
+								if (inDictionary) guessHint = `\u{2713}`;
+								else guessHint = "x";
+							}
+						} else {
+							inDictionary = words.answers.includes(guess)
+							if (inDictionary) guessHint = `\u{2713}\u{2713}`;
+							else guessHint = "x";
+						}
+					}
+
+				}
+				else showGuessHint = false;
+			} else {
+				complete = false;
+				showGuessHint = false;
+			}
 		}
 	}
 
@@ -78,6 +108,8 @@
 				<br />{h1[2]}{h1[6][0]}
 			{/if}
 			<br />{h1[11]}W
+		{:else if showGuessHint}
+			{guessHint}
 		{:else if ri === 0}
 			Row<br />Hints<br />
 			{#if $showRowHints}ON{:else}OFF{/if}
