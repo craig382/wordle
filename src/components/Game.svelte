@@ -180,25 +180,25 @@
 		processValidGuess(); 
 
 		switch ($settings.aiMode) {
-			case aiModes["Max Groups Hard"]: 
+			case aiModes["Max % Groups Hard"]: 
 				aiBot = app.aiMaxGroupsHard;
-				app.botLeftMode = BotMode["AI Max Groups Hard"];
+				app.botLeftMode = BotMode["AI Max % Groups Hard"];
 				app.botRightMode = BotMode["AI Min Sum of Squares Hard"]; 
 			break;
-			case aiModes["Max Groups Easy"]: 
+			case aiModes["Max % Groups Easy"]: 
 				aiBot = app.aiMaxGroupsEasy; 
-				app.botLeftMode = BotMode["AI Max Groups Easy"];
+				app.botLeftMode = BotMode["AI Max % Groups Easy"];
 				app.botRightMode = BotMode["AI Min Sum of Squares Easy"]; 
 			break;
 			case aiModes["Min Sum of Squares Hard"]: 
 				aiBot = app.aiMinSumOfSquaresHard; 
 				app.botLeftMode = BotMode["AI Min Sum of Squares Hard"];
-				app.botRightMode = BotMode["AI Max Groups Hard"]; 
+				app.botRightMode = BotMode["AI Max % Groups Hard"]; 
 			break;
 			case aiModes["Min Sum of Squares Easy"]: 
 				aiBot = app.aiMinSumOfSquaresEasy; 
 				app.botLeftMode = BotMode["AI Min Sum of Squares Easy"];
-				app.botRightMode = BotMode["AI Max Groups Easy"]; 
+				app.botRightMode = BotMode["AI Max % Groups Easy"]; 
 			break;
 		}
 
@@ -387,7 +387,7 @@
 
 						{LL[ri][0]}<br />
 						{LL[ri][6]} Guess<br />
-						{LL[ri][2]} groups<br />
+						{LL[ri][14]}% groups ({LL[ri][2]}/{LL[ri][5]})<br />
 						{LL[ri][3].toLocaleString()} SoS<br /><br />
 						{#if LL[ri][7]}
 							{LL[ri][8]}<br />
@@ -416,7 +416,7 @@
 
 						{RR[ri][0]}<br />
 						{RR[ri][6]} Guess<br />
-						{RR[ri][2]} groups<br />
+						{RR[ri][14]}% groups ({RR[ri][2]}/{RR[ri][5]})<br />
 						{RR[ri][3].toLocaleString()} SoS<br /><br />
 						{#if RR[ri][7]}
 							{RR[ri][8]}<br />
@@ -437,11 +437,15 @@
 			words you may use as guesses.<br /><br />
 			
 			The NYT Wordle possible solutions dictionary excludes: 
-			plural nouns that end in S or ES, 
-			past tense verbs that end in ED, proper nouns,
-			and words outside the vocabulary of the "general public".
-			The vocabulary rule is subjective and might use 
-			the "typical NYT reader" instead of the "general public".
+			proper nouns, plural nouns that end in S or ES, 
+			and past tense verbs that end in ED.<br /><br />
+
+			If row hints are ON, after you have typed the 5 letters of
+			your guess but before you hit "ENTER", the Row Hint shows an
+			"x" if your guess is not in the Wordle solution dictionary, 
+			a single check "&check;" if your guess is in the Wordle
+			solution dictionay, and a double check "&check;&check;"
+			if your guess is one of the words left after the prior guess.
 		</div>
 		<div class="row">
 			Top NYT WordleBot openers (each 
@@ -469,8 +473,8 @@
 			An "AI" algoritm selects each guess based on "AI" history
 			(based on the previous AI guesses).<br /><br />
 
-			A "perfect" guess is one that creates as many groups as there
-			were remaining answers before the guess.<br /><br />
+			A "perfect" (100%) guess is one that creates as many groups as 
+			there were remaining answers before the guess.<br /><br />
 			
 			If the algorithm finds a perfect guess, it immediately ends its 
 			searching.<br /><br />
@@ -485,10 +489,12 @@
 			possible better Easy guess.
 		</div>
 		<div class="row">
-			The Max Groups Algorithms.<br /><br />
+			The Max % Groups Algorithms.<br /><br />
 			
 			For guesses 2 to 5, the algorithm selects the first
-			guess it finds that creates the maximum number of groups.
+			guess it finds that creates the maximum number of groups,
+			which also maximizes the % groups because<br />
+			%groups = 100 * nGroups / nWordsLeftBeforeGuess.
 		</div>
 		<div class="row">
 			The Min Sum of Squares Algorithms.<br /><br />

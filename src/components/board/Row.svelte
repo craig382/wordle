@@ -99,13 +99,13 @@
 	<section on:click|self={() => {$showRowHints = !$showRowHints;}}>
 		{#if showRowHint }
 			{@const h1 = botNodeInfo(app.human[ri], app.guessGroupIds[ri])}
-			{h1[2]}{h1[6][0]}/
+			{h1[14]}%{h1[6][0]}
 			{#if ri > 0 }
 				{@const h0 = botNodeInfo(app.human[ri-1], app.guessGroupIds[ri-1])}
 				{@const b1 = botNodeInfo(h0[12], "")}
-				<br />{b1[2]}{b1[6][0]}
+				<br />{b1[14]}%{b1[6][0]}
 			{:else}
-				<br />{h1[2]}{h1[6][0]}
+				<br />{h1[14]}%{h1[6][0]}
 			{/if}
 			<br />{h1[11]}W
 		{:else if showGuessHint}

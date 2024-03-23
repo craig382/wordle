@@ -112,17 +112,18 @@ type BotNodeTuple = [
 	nGroups: number, // 2
 	sumOfSquares: number, // 3
 	wordListBefore: string, // 4
-	wordsLeftBefore: number, // 5
+	nWordsBefore: number, // 5
 	easyOrHard: string, // 6
 
 	guessId: string, // 7
 	colorString: string, // 8
-	wordsEliminated: number, // 9
+	nWordsEliminated: number, // 9
 	wordListAfter: string, // 10
-	wordsLeftAfter: number, // 11
+	nWordsAfter: number, // 11
 
 	maxGroupsKidEasy: BotNode, // 12
 
 	/** truncated list of words left after for stat screen */
 	statWordListAfter: string, // 13
+	groupPercent: number, // 14
 ]

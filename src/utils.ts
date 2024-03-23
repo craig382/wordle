@@ -304,7 +304,7 @@ export class GameState extends Storable {
 		}
 
 		this.botLeftMode = BotMode.Human;
-		this.botRightMode = BotMode["Bot Max Groups Easy"];	
+		this.botRightMode = BotMode["Bot Max % Groups Easy"];	
 
 		this.errorString = "";
 		this.aiMaxGroupsHard = [];
@@ -413,7 +413,7 @@ export class GameState extends Storable {
 					app.status = GameStatus.lost; // Abort the game.
 					throw e; 		
 				}
-				this.human.push(new BotNode( [this.human[ri-1], this.guessGroupIds[ri-1], pGang], ri, guess, gangs));
+				this.human.push(new BotNode( [this.human[ri-1], this.guessGroupIds[ri-1], pGang], ri, guess, gangs, pGroup.length));
 				createKids(this.human[ri]);
 				console.log("ri, human[ri]", ri, this.human[ri]);
 			}
@@ -640,7 +640,7 @@ export function createKids(pNode: BotNode) {
 		// Create hard mode kids.
 		for (let gi = 0; gi < pGroup.length; gi++) {
 			let gangs = calculateGroups(pGroup[gi], pGroup);
-			kid = new BotNode([pNode, pGroupId, null], pNode.ri + 1, pGroup[gi], gangs);
+			kid = new BotNode([pNode, pGroupId, null], pNode.ri + 1, pGroup[gi], gangs, pGroup.length);
 			if ( kid.nGroups === pGroup.length) {
 				pPerfectKid = true; // hard mode perfect kid
 				pMgKidHard = kid;
@@ -687,7 +687,7 @@ export function createKids(pNode: BotNode) {
 		if (pNode.ri < (ROWS - 2)) {
 			for (let gi = 0; gi < app.easyGroup.length; gi++) {
 				let gangs = calculateGroups(app.easyGroup[gi], pGroup);
-				kid = new BotNode([pNode, pGroupId, null], pNode.ri + 1, app.easyGroup[gi], gangs);
+				kid = new BotNode([pNode, pGroupId, null], pNode.ri + 1, app.easyGroup[gi], gangs, pGroup.length);
 				if ( kid.nGroups === pGroup.length) {
 					pPerfectKid = true; // easy mode perfect kid
 					pMgKidEasy = kid;
@@ -727,7 +727,7 @@ export function calculateBotTree(rootGuess: string, rootGuessId: string) {
 	// it contains the correct nGroups and sumOfSquares values.
 	gangs = calculateGroups(rootGuess, words.answers);
 	let pGang = gangs.get(rootGuessId);
-	botRoot = new BotNode([null, "", null], 0, rootGuess, gangs);
+	botRoot = new BotNode([null, "", null], 0, rootGuess, gangs, words.answers.length);
 
 	// To reduce the BotTree size and calculation time,
 	// reduce the botRoot gangs map down to 1 or 2 groups. 
@@ -746,7 +746,7 @@ export function calculateBotTree(rootGuess: string, rootGuessId: string) {
 	if (rootGuessId !== "-----") easyGroupId = "-----";
 	else {
 		// Find a gang pair wihose groupId has the most 
-		// dashes (up to 4 dashes, 5dashes is not allowed).
+		// dashes (up to 4 dashes, 5 dashes is not allowed).
 		let maxDashes = -1;
 		let dashes: number;
 		for (const pGroupId of gangs.keys()) {
@@ -795,9 +795,15 @@ export class BotNode // extends TreeNode
 { 
 	public ri: number;
 	public guess: string;
-	/** guess divides the parent group  
-	 * remaining words into nGroups = map.size. */
+	/** 0 to 100 %, nGroups / nWordsBefore, 
+	 * expressed as a percentage, 
+	 * rounded to 0 decimal places */
+	public groupPercent: number;
+	/** guess divides nWordsBefore  
+	 * into nGroups. nGroups = gangs.size. */
 	public nGroups: number;
+	/** number of words left before this guess */
+	public nWordsBefore: number;
 	/** sum of each group.length^2 */
 	public sumOfSquares: number;
 	/** Tuple [groupWordListArray, groupId] */
@@ -806,15 +812,17 @@ export class BotNode // extends TreeNode
 	//** gang<groupId, GangTuple > */
 	public gangs: Gangs;
  
-	constructor(parent:ParentTuple, ri: number, guess: string, gangs: Gangs )
+	constructor(parent:ParentTuple, ri: number, guess: string, gangs: Gangs, nWordsBefore: number )
 	{ 
 		this.parent = parent;
 		this.ri = ri;
 		this.guess = guess;
 		this.gangs = gangs;
+		this.nWordsBefore = nWordsBefore;
 		this.nGroups = gangs.size;
 		this.sumOfSquares = 0;
 		gangs.forEach(([group], _) => { this.sumOfSquares += group.length ** 2; });
+		this.groupPercent = Math.round(100 * this.nGroups / this.nWordsBefore);
 		app.nNodesCreated++;
 	}
 
@@ -832,22 +840,22 @@ export class BotNode // extends TreeNode
 
 export enum BotMode {
 	"Human",
-	"Bot Max Groups Hard",
-	"Bot Max Groups Easy",
+	"Bot Max % Groups Hard",
+	"Bot Max % Groups Easy",
 
 	"Bot Min Sum of Squares Hard",
 	"Bot Min Sum of Squares Easy",
 
-	"AI Max Groups Hard",
-	"AI Max Groups Easy",
+	"AI Max % Groups Hard",
+	"AI Max % Groups Easy",
 
 	"AI Min Sum of Squares Hard",
 	"AI Min Sum of Squares Easy",
 };
 
 export enum aiModes {
-	"Max Groups Hard",
-	"Max Groups Easy",
+	"Max % Groups Hard",
+	"Max % Groups Easy",
 	"Min Sum of Squares Hard",
 	"Min Sum of Squares Easy",
 }
@@ -866,7 +874,7 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 		throw e;
 	}
 
-	let info: BotNodeTuple = [,,,,,,,,,,,,,,]; // Initialize a multi element empty tuple.
+	let info: BotNodeTuple = [,,,,,,,,,,,,,,,]; // Initialize a multi element empty tuple.
 
 	info[0] = "";
 	info[1] = 0;
@@ -892,16 +900,17 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 	info[1] = botNode.ri;
 	info[2] = botNode.nGroups;
 	info[3] = botNode.sumOfSquares;
+	info[5] = botNode.nWordsBefore; // nWordsBefore
 	info[7] = guessId;
+	info[14] = botNode.groupPercent;
 
 	let wordsBefore: Array<string> = [];
-	info[5] = 0; // wordsLeftBefore
 	botNode.gangs.forEach((pGang, pGroupId) => {
 		let pGroup = pGang[0];
 		wordsBefore.push(pGroup.join(" "));
 		if (guessId === pGroupId) {
 			info[8] = colorString(guessId);
-			info[11] = pGroup.length; // wordsLeftAfter
+			info[11] = pGroup.length; // nWordsAfter
 			info[10] = pGroup.join(" "); // wordListAfter
 			info[13] = pGroup.slice(0, appSettings.maxStatWords).join(" "); // statWordListAfter
 			info[12] = pGang[3]; // maxGroupsKidEasy
@@ -909,12 +918,10 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 	});
 
 	if (botNode.ri === 0) {
-		info[5] = words.answers.length; // wordsLeftBefore
 		info[4] = ""; // wordListBefore
 		info[6] = "Hard"; // easyOrHard
 	} else {
 		info[4] = wordsBefore.join(", "); // wordListBefore
-		info[5] = botNode.parent[2][0].length; // wordsLeftBefore
 		if (countOfAinB(botNode.guess, info[4]) > 0) info[6] = "Hard"; // easyOrHard
 		else info[6] = "Easy"; // easyOrHard
 	}
@@ -922,12 +929,12 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 	if (guessId === "") {
 		info[7] = ""; // guessId
 		info[8] = ""; // colorString
-		info[9] = 0; // wordsEliminated
+		info[9] = 0; // nWordsEliminated
 		info[10] = ""; // wordListAfter
 		info[13] = ""; // statWordListAfter
-		info[11] = 0; // wordsLeftAfter
+		info[11] = 0; // nWordsAfter
 		info[12] = null; // maxGroupsKidEasy
-	} else { // wordsEliminated = wordsLeftBefore - wordsLeftAfter
+	} else { // nWordsEliminated = nWordsBefore - nWordsAfter
 		info[9] = info[5] - info[11];
 	}
 
@@ -969,13 +976,13 @@ export function calculateBotInfoArray(botSide : "left" | "right" ) {
 			botRowArray = app.human;
 			botRowArray.forEach((node, ri) => {	botInfoArray.push(botNodeInfo(node, app.guessGroupIds[ri])); });
 			return botInfoArray;
-		case BotMode["Bot Max Groups Hard"]:
+		case BotMode["Bot Max % Groups Hard"]:
 			for (let ri = 0; ri < (app.nGuesses - (app.active ? 0 : 1)); ri++) {
 				tuple = app.human[ri].gangs.get(app.guessGroupIds[ri]);
 				botRowArray.push(tuple[2]);
 			}
 		break;
-		case BotMode["Bot Max Groups Easy"]:
+		case BotMode["Bot Max % Groups Easy"]:
 			for (let ri = 0; ri < (app.nGuesses - (app.active ? 0 : 1)); ri++) {
 				tuple = app.human[ri].gangs.get(app.guessGroupIds[ri]);
 				botRowArray.push(tuple[3]);
@@ -993,10 +1000,10 @@ export function calculateBotInfoArray(botSide : "left" | "right" ) {
 				botRowArray.push(tuple[5]);
 			}
 		break;
-		case BotMode["AI Max Groups Hard"]:
+		case BotMode["AI Max % Groups Hard"]:
 			botRowArray = app.aiMaxGroupsHard;
 		break;
-		case BotMode["AI Max Groups Easy"]:
+		case BotMode["AI Max % Groups Easy"]:
 			botRowArray = app.aiMaxGroupsEasy;
 		break;
 		case BotMode["AI Min Sum of Squares Hard"]:
