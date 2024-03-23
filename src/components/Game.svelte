@@ -363,12 +363,12 @@
 		{@const modes = namesOf(BotMode)}
 		<br /><h3>Bot Results {#if !app.active && $mode !== GameMode.solver}For Solution "{app.solution}"{/if}</h3>
 		{#if app.status === GameStatus.lost && $mode !== GameMode.solver}
-			<Definition word={app.solution} alternates={2} />
+			<Definition word={app.solution} alternates={0} />
 		{/if}
 		{#each Array(Math.max(LL.length, RR.length)) as _, ri}
 			<h1>Guess # {(ri + 1)}</h1>
 			{#if ri < LL.length}
-				<Definition word={LL[ri][0].toLowerCase()} alternates={2} />
+				<Definition word={LL[ri][0].toLowerCase()} alternates={0} />
 			{/if}
 			<div class="row">
 				<section>

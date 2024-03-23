@@ -15,6 +15,7 @@ type RowData = {
 	guess: number;
 };
 
+/** undefined | blank | yellow | green */
 type LetterState = "🔳" | "⬛" | "🟨" | "🟩";
 
 type GameBoard = {

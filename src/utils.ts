@@ -605,13 +605,19 @@ export class LetterStates {
 
 	update(state: LetterState[], word: string) {
 		state.forEach((e, i) => {
-			const ls = this[word[i]];
-			if (ls === "🔳" || e === "🟩") {
-				this[word[i]] = e;
-			}
+			const ls: LetterState = this[word[i]];
+			if ( colorIndex[e] > colorIndex[ls] ) this[word[i]] = e;
+			// console.log("LetterStates.update for word, letter", word, word[i], colorIndex[e], e, "colorIndex[e] > colorIndex[ls] ?", (colorIndex[e] > colorIndex[ls]), colorIndex[ls], ls, "this[word[i]]:", this[word[i]] );
 		});
 
 	}
+}
+
+export const colorIndex = {
+	"🔳": 0, // undefined
+	"⬛": 1, // blank
+	"🟨": 2, // yellow
+	"🟩": 3, // green
 }
 
 export function timeRemaining(m: Mode) {
