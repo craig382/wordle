@@ -1,7 +1,6 @@
 import seedRandom from "seedrandom";
 import { GameMode, ms } from "./enums";
 import wordList from "./words_5";
-import { settings } from "./stores";
 
 export const ROWS: number = 6;
 export const COLS: number = 5;
@@ -102,7 +101,6 @@ export const modeData: ModeData = {
 			start: 1642370400000,	// 17/01/2022 UTC+2
 			seed: newSeed(GameMode.daily),
 			historical: false,
-			streak: true,
 			useTimeZone: true,
 		},
 		{
@@ -111,7 +109,6 @@ export const modeData: ModeData = {
 			start: 1642528800000,	// 18/01/2022 8:00pm UTC+2
 			seed: newSeed(GameMode.hourly),
 			historical: false,
-			streak: true,
 		},
 		{
 			name: "Infinite",
@@ -119,7 +116,6 @@ export const modeData: ModeData = {
 			start: 1642428600000,	// 17/01/2022 4:10:00pm UTC+2
 			seed: newSeed(GameMode.infinite),
 			historical: false,
-			streak: true,
 		},
 		{
 			name: "AI",
@@ -127,7 +123,6 @@ export const modeData: ModeData = {
 			start: 1642428600000,	// 17/01/2022 4:10:00pm UTC+2
 			seed: newSeed(GameMode.infinite),
 			historical: false,
-			streak: true,
 		},
 		{
 			name: "Solver",
@@ -135,7 +130,6 @@ export const modeData: ModeData = {
 			start: 1642428600000,	// 17/01/2022 4:10:00pm UTC+2
 			seed: newSeed(GameMode.infinite),
 			historical: false,
-			streak: true,
 		},
 		// {
 		// 	name: "Minutely",
@@ -144,7 +138,6 @@ export const modeData: ModeData = {
 		// 	seed: newSeed(GameMode.minutely),
 		// 	historical: false,
 		// 	icon: "m7,200v-200l93,100l93,-100v200",
-		// 	streak: true,
 		// },
 	]
 };
@@ -434,6 +427,9 @@ export class GameState extends Storable {
 		if (!this.active) {
 
 			if (this.status === GameStatus.won || this.mode !== GameMode.solver ) {
+				if (this.solution === appSettings.prevSolution) {
+					modeData.modes[this.mode].historical = true;
+				}
 				appSettings.prevSolution = this.solution;
 			}
 			
@@ -507,7 +503,6 @@ export class Settings extends Storable {
 
 export class Stats extends Storable {
 	public played = 0;
-	public lastGame = 0;
 	public guesses = {
 		fail: 0,
 		1: 0,
@@ -517,9 +512,8 @@ export class Stats extends Storable {
 		5: 0,
 		6: 0,
 	};
-	public streak: number;
-	public maxStreak: number;
-	#hasStreak = false;
+	public streak: number = 0;
+	public maxStreak: number = 0;
 
 	constructor(param: string | GameMode) {
 		super();
@@ -528,39 +522,36 @@ export class Stats extends Storable {
 		} else if (modeData.modes[param].streak) {
 			this.streak = 0;
 			this.maxStreak = 0;
-			this.#hasStreak = true;
 		}
 	}
 	private parse(str: string) {
 		const parsed = JSON.parse(str) as Stats;
 		this.played = parsed.played;
-		this.lastGame = parsed.lastGame;
 		this.guesses = parsed.guesses;
 		if (parsed.streak != undefined) {
 			this.streak = parsed.streak;
 			this.maxStreak = parsed.maxStreak;
-			this.#hasStreak = true;
 		}
 	}
 	
 	
-	addWin(guesses: number, mode: Mode) {
+	addWin(guesses: number) {
 		++this.guesses[guesses];
 		++this.played;
-		if (this.#hasStreak) {
-			this.streak = mode.seed - this.lastGame > mode.unit ? 1 : this.streak + 1;
-			this.maxStreak = Math.max(this.streak, this.maxStreak);
-		}
-		this.lastGame = mode.seed;
+		++this.streak;
+		this.maxStreak = Math.max(this.streak, this.maxStreak);
+
+		// console.log("Stats after win:", this);
 	}
 
-	addLoss(mode: Mode) {
+	addLoss() {
 		++this.guesses.fail;
 		++this.played;
-		if (this.#hasStreak) this.streak = 0;
-		this.lastGame = mode.seed;
+		this.streak = 0;
+
+		// console.log("Stats after loss:", this);
 	}
-	get hasStreak() { return this.#hasStreak; }
+
 }
 
 export class LetterStates {

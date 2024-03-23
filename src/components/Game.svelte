@@ -133,7 +133,7 @@
 		);
 		setTimeout(setShowStatsTrue, delay * 1.4);
 		if (!modeData.modes[$mode].historical) {
-			stats.addWin(app.nGuesses, modeData.modes[$mode]);
+			stats.addWin(app.nGuesses);
 			stats = stats; // tell svelte to react to change in stats
 			localStorage.setItem(`stats-${$mode}`, stats.toString());
 		}
@@ -143,7 +143,7 @@
 		app.status = GameStatus.lost;
 		setTimeout(setShowStatsTrue, delay);
 		if (!modeData.modes[$mode].historical) {
-			stats.addLoss(modeData.modes[$mode]);
+			stats.addLoss();
 			stats = stats; // tell svelte to react to change in stats
 			localStorage.setItem(`stats-${$mode}`, stats.toString());
 		}
@@ -328,13 +328,12 @@
 </Modal>
 
 <Modal bind:visible={showStats}>
+	<h3>Statistics ({modeData.modes[$mode].name})</h3>
 	{#if modeData.modes[$mode].historical}
-		<h2 class="historical">Statistics not available for historical games</h2>
-	{:else}
-		<h3>Statistics ({modeData.modes[$mode].name})</h3>
-		<Statistics data={stats} />
-		<Distribution distribution={stats.guesses} {app} />
+		<h3 class="historical">Statistics not updated for historical games</h3>
 	{/if}
+	<Statistics data={stats} />
+	<Distribution distribution={stats.guesses} {app} />
 	<Separator visible={!app.active}>
 		<Timer
 			slot="1"

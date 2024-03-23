@@ -20,14 +20,10 @@
 					}, 0) / data.played || 0
 				).toFixed(1),
 			],
+			["Lost", data.guesses.fail],
+			["Current Streak", data.streak],
+			["Max Streak", data.maxStreak]
 		];
-		if (data.guesses.fail > 0) {
-			stats.push(["Lost", data.guesses.fail]);
-		}
-		if (data.hasStreak) {
-			stats.push(["Current Streak", data.streak]);
-			stats.push(["Max Streak", data.maxStreak]);
-		}
 	}
 </script>
 
