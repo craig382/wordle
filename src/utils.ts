@@ -475,7 +475,7 @@ export class GameState extends Storable {
 
 export class Settings extends Storable {
 	public hard = new Array(modeData.modes.length).fill(false);
-	public aiMode: aiModes = aiModes["AI Max Groups Easy"];
+	public aiMode: aiModes = aiModes["Max % Groups Easy"];
 	public openerMode: OpenerModes = OpenerModes["Random NYT WordleBot"];
 	public prevSolution: string = "happy";
 	public dark = true;
