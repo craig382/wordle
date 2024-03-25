@@ -376,10 +376,11 @@
 						<h4
 							on:click|self={() => {
 								app.botLeftMode = (app.botLeftMode + 1) % modes.length;
-								infoL = calculateBotInfoArray("left")
+								infoL = calculateBotInfoArray("left");
 							}}
 							on:contextmenu|preventDefault|self={() => {
 								app.botLeftMode = (app.botLeftMode - 1 + modes.length) % modes.length;
+								infoL = calculateBotInfoArray("left");
 							}}
 						>
 							{modes[app.botLeftMode]}<br /><br />
@@ -406,10 +407,11 @@
 						<h4
 							on:click|self={() => {
 								app.botRightMode = (app.botRightMode + 1) % modes.length;
-								infoR = calculateBotInfoArray("right")
+								infoR = calculateBotInfoArray("right");
 							}}
 							on:contextmenu|preventDefault|self={() => {
 								app.botRightMode = (app.botRightMode - 1 + modes.length) % modes.length;
+								infoR = calculateBotInfoArray("right");
 							}}
 						>
 							{modes[app.botRightMode]}<br /><br />
