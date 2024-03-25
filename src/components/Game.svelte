@@ -416,8 +416,8 @@
 							{LL[ri][8]}<br />
 							{LL[ri][17]}% eliminated<br />
 							({LL[ri][9]}/{LL[ri][5]} words)<br />
+							{LL[ri][11]}  words left
 							{#if LL[ri][0].toLowerCase() !== app.solution}
-								{LL[ri][11]}  words left
 								<br /><br />{LL[ri][13]}<br />
 							{/if}
 						{/if}
@@ -437,8 +437,8 @@
 							{RR[ri][8]}<br />
 							{RR[ri][17]}% eliminated<br />
 							({RR[ri][9]}/{RR[ri][5]} words)<br />
+							{RR[ri][11]} words left
 							{#if RR[ri][0].toLowerCase() !== app.solution}
-								{RR[ri][11]} words left
 								<br /><br />{RR[ri][13]}<br />
 							{/if}
 						{/if}
