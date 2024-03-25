@@ -383,9 +383,30 @@
 								infoL = calculateBotInfoArray("left");
 							}}
 						>
-							{modes[app.botLeftMode]}<br /><br />
+							{modes[app.botLeftMode]}<br />
 						</h4>
-
+					{/if}
+				</section>
+				<section>
+					{#if ri < RR.length}
+						<!-- svelte-ignore a11y-click-events-have-key-events -->
+						<h4
+							on:click|self={() => {
+								app.botRightMode = (app.botRightMode + 1) % modes.length;
+								infoR = calculateBotInfoArray("right");
+							}}
+							on:contextmenu|preventDefault|self={() => {
+								app.botRightMode = (app.botRightMode - 1 + modes.length) % modes.length;
+								infoR = calculateBotInfoArray("right");
+							}}
+						>
+							{modes[app.botRightMode]}<br />
+						</h4>
+					{/if}
+				</section>
+				<div class="new-row"></div>
+				<section>
+					{#if ri < LL.length}
 						{LL[ri][0]}<br />
 						{LL[ri][6]} Guess<br />
 						{LL[ri][14]}% groups ({LL[ri][2]}/{LL[ri][5]})<br />
@@ -402,21 +423,10 @@
 					{/if}
 				</section>
 				<section>
-					{#if ri < RR.length}
-						<!-- svelte-ignore a11y-click-events-have-key-events -->
-						<h4
-							on:click|self={() => {
-								app.botRightMode = (app.botRightMode + 1) % modes.length;
-								infoR = calculateBotInfoArray("right");
-							}}
-							on:contextmenu|preventDefault|self={() => {
-								app.botRightMode = (app.botRightMode - 1 + modes.length) % modes.length;
-								infoR = calculateBotInfoArray("right");
-							}}
-						>
-							{modes[app.botRightMode]}<br /><br />
-						</h4>
-
+					{#if ri === 0}
+						Same first guess<br />
+						for all algorithms.
+					{:else if ri < RR.length && ri > 0}
 						{RR[ri][0]}<br />
 						{RR[ri][6]} Guess<br />
 						{RR[ri][14]}% groups ({RR[ri][2]}/{RR[ri][5]})<br />
@@ -585,6 +595,11 @@
 		border: 1px solid;
 		border-radius: 4px;
 		padding: 8px;
+		flex-wrap: wrap;
+	}
+	.new-row {
+  		flex-basis: 100%;
+  		height: 0;
 	}
 	section {
 		display: flex;
