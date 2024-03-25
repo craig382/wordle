@@ -410,11 +410,12 @@
 						{LL[ri][0]}<br />
 						{LL[ri][6]} Guess<br />
 						{LL[ri][14]}% groups ({LL[ri][2]}/{LL[ri][5]})<br />
-						{LL[ri][16]}% largest group ({LL[ri][15]}/{LL[ri][5]})<br />
+						{LL[ri][15]} largest group<br />
 						{LL[ri][3].toLocaleString()} SoS<br /><br />
 						{#if LL[ri][7]}
 							{LL[ri][8]}<br />
-							Eliminated {LL[ri][9].toLocaleString()} words<br />
+							{LL[ri][17]}% eliminated<br />
+							({LL[ri][9]}/{LL[ri][5]} words)<br />
 							{#if LL[ri][0].toLowerCase() !== app.solution}
 								{LL[ri][11]}  words left
 								<br /><br />{LL[ri][13]}<br />
@@ -430,11 +431,12 @@
 						{RR[ri][0]}<br />
 						{RR[ri][6]} Guess<br />
 						{RR[ri][14]}% groups ({RR[ri][2]}/{RR[ri][5]})<br />
-						{RR[ri][16]}% largest group ({RR[ri][15]}/{RR[ri][5]})<br />
+						{RR[ri][15]} largest group<br />
 						{RR[ri][3].toLocaleString()} SoS<br /><br />
 						{#if RR[ri][7]}
 							{RR[ri][8]}<br />
-							Eliminated {RR[ri][9].toLocaleString()} words<br />
+							{RR[ri][17]}% eliminated<br />
+							({RR[ri][9]}/{RR[ri][5]} words)<br />
 							{#if RR[ri][0].toLowerCase() !== app.solution}
 								{RR[ri][11]} words left
 								<br /><br />{RR[ri][13]}<br />

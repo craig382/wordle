@@ -128,4 +128,5 @@ type BotNodeTuple = [
 	groupPercent: number, // 14
 	largestGroup: number, // 15
 	largestGroupPercent: number, // 16
+	eliminatedPercent: number, // 17
 ]

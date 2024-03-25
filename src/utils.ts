@@ -874,25 +874,25 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 		throw e;
 	}
 
-	let info: BotNodeTuple = [,,,,,,,,,,,,,,,,,]; // Initialize a multi element empty tuple.
+	let info: BotNodeTuple = [,,,,,,,,,,,,,,,,,,]; // Initialize a multi element empty tuple.
 
-	info[0] = "";
-	info[1] = 0;
-	info[2] = 0;
-	info[3] = 0;
-	info[4] = "";
-	info[5] = 0;
-	info[6] = "";
-	info[7] = guessId;
-	info[8] = "";
-	info[9] = 0;
-	info[10] = "";
-	info[11] = 0;
-	info[12] = null;
-	info[13] = "";
-	info[14] = 0;
-	info[15] = 0;
-	info[16] = 0;
+	info[0] = ""; // guess
+	info[1] = 0; // ri
+	info[2] = 0; // nGroups
+	info[3] = 0; // sumOfSquares
+	info[4] = ""; // wordListBefore
+	info[5] = 0; // nWordsBefore
+	info[6] = ""; // easyOrHard
+	info[7] = guessId; // guessId
+	info[8] = ""; // colorString
+	info[9] = 0; // nWordsEliminated
+	info[10] = ""; // wordListAfter
+	info[11] = 0; // nWordsAfter
+	info[12] = null; // maxGroupsKidEasy
+	info[13] = ""; // statWordListAfter
+	info[14] = 0; // groupPercent
+	info[15] = 0; // largestGroup
+	info[16] = 0; // largestGroupPercent
 
 	if (guessId === "" && app.solution !== "") {
 		guessId = calculateGroupId(app.solution, botNode.guess);
@@ -915,10 +915,12 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 		wordsBefore.push(pGroup.join(" "));
 		if (guessId === pGroupId) {
 			info[8] = colorString(guessId);
-			info[11] = pGroup.length; // nWordsAfter
-			info[10] = pGroup.join(" "); // wordListAfter
-			info[13] = pGroup.slice(0, appSettings.maxStatWords).join(" "); // statWordListAfter
-			info[12] = pGang[3]; // maxGroupsKidEasy
+			if (guessId !== "#####") { // nWordsAfter is 0 for the solution
+				info[11] = pGroup.length; // nWordsAfter
+				info[10] = pGroup.join(" "); // wordListAfter
+				info[13] = pGroup.slice(0, appSettings.maxStatWords).join(" "); // statWordListAfter
+				info[12] = pGang[3]; // maxGroupsKidEasy	
+			}
 		}	
 	});
 
@@ -931,17 +933,8 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 		else info[6] = "Easy"; // easyOrHard
 	}
 
-	if (guessId === "") {
-		info[7] = ""; // guessId
-		info[8] = ""; // colorString
-		info[9] = 0; // nWordsEliminated
-		info[10] = ""; // wordListAfter
-		info[13] = ""; // statWordListAfter
-		info[11] = 0; // nWordsAfter
-		info[12] = null; // maxGroupsKidEasy
-	} else { // nWordsEliminated = nWordsBefore - nWordsAfter
-		info[9] = info[5] - info[11];
-	}
+	info[9] = botNode.nWordsBefore - info[11]; // nWordsEliminated = nWordsBefore - nWordsAfter
+	info[17] = Math.round(100 * info[9] / botNode.nWordsBefore); // eliminatedPercent
 
 	// logInfo(); // console.log()
 
