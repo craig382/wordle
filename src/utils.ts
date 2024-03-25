@@ -795,14 +795,11 @@ export class BotNode // extends TreeNode
 { 
 	public ri: number;
 	public guess: string;
-	/** 0 to 100 %, nGroups / nWordsBefore, 
-	 * expressed as a percentage, 
-	 * rounded to 0 decimal places */
-	public groupPercent: number;
 	/** guess divides nWordsBefore  
 	 * into nGroups. nGroups = gangs.size. */
 	public nGroups: number;
 	/** number of words left before this guess */
+	public largestGroup: number;
 	public nWordsBefore: number;
 	/** sum of each group.length^2 */
 	public sumOfSquares: number;
@@ -821,8 +818,11 @@ export class BotNode // extends TreeNode
 		this.nWordsBefore = nWordsBefore;
 		this.nGroups = gangs.size;
 		this.sumOfSquares = 0;
-		gangs.forEach(([group], _) => { this.sumOfSquares += group.length ** 2; });
-		this.groupPercent = Math.round(100 * this.nGroups / this.nWordsBefore);
+		this.largestGroup = 0;
+		gangs.forEach(([group], _) => { 
+			this.sumOfSquares += group.length ** 2; 
+			if (group.length > this.largestGroup) this.largestGroup = group.length;
+		});
 		app.nNodesCreated++;
 	}
 
@@ -874,7 +874,7 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 		throw e;
 	}
 
-	let info: BotNodeTuple = [,,,,,,,,,,,,,,,]; // Initialize a multi element empty tuple.
+	let info: BotNodeTuple = [,,,,,,,,,,,,,,,,,]; // Initialize a multi element empty tuple.
 
 	info[0] = "";
 	info[1] = 0;
@@ -890,6 +890,9 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 	info[11] = 0;
 	info[12] = null;
 	info[13] = "";
+	info[14] = 0;
+	info[15] = 0;
+	info[16] = 0;
 
 	if (guessId === "" && app.solution !== "") {
 		guessId = calculateGroupId(app.solution, botNode.guess);
@@ -902,7 +905,9 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 	info[3] = botNode.sumOfSquares;
 	info[5] = botNode.nWordsBefore; // nWordsBefore
 	info[7] = guessId;
-	info[14] = botNode.groupPercent;
+	info[14] = Math.round(100 * botNode.nGroups / botNode.nWordsBefore); // groupPercent
+	info[15] = botNode.largestGroup; // largestGroup
+	info[16] = Math.round(100 * botNode.largestGroup / botNode.nWordsBefore); // largestGroupPercent
 
 	let wordsBefore: Array<string> = [];
 	botNode.gangs.forEach((pGang, pGroupId) => {

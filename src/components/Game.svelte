@@ -388,6 +388,7 @@
 						{LL[ri][0]}<br />
 						{LL[ri][6]} Guess<br />
 						{LL[ri][14]}% groups ({LL[ri][2]}/{LL[ri][5]})<br />
+						{LL[ri][16]}% largest group ({LL[ri][15]}/{LL[ri][5]})<br />
 						{LL[ri][3].toLocaleString()} SoS<br /><br />
 						{#if LL[ri][7]}
 							{LL[ri][8]}<br />
@@ -417,6 +418,7 @@
 						{RR[ri][0]}<br />
 						{RR[ri][6]} Guess<br />
 						{RR[ri][14]}% groups ({RR[ri][2]}/{RR[ri][5]})<br />
+						{RR[ri][16]}% largest group ({RR[ri][15]}/{RR[ri][5]})<br />
 						{RR[ri][3].toLocaleString()} SoS<br /><br />
 						{#if RR[ri][7]}
 							{RR[ri][8]}<br />

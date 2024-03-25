@@ -126,4 +126,6 @@ type BotNodeTuple = [
 	/** truncated list of words left after for stat screen */
 	statWordListAfter: string, // 13
 	groupPercent: number, // 14
+	largestGroup: number, // 15
+	largestGroupPercent: number, // 16
 ]
