@@ -67,6 +67,12 @@
 
 	let board: Board;
 	let timer: Timer;
+
+	window.addEventListener('popstate', function() {
+		if (showStats === true) { showStats = false; } 
+		else if (showSettings === true) { showSettings = false; } 
+		else if (showTutorial === true) { showTutorial = false; }
+	});
 	
 	/**
 	 * Processes a valid guess, including:

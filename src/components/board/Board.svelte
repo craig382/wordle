@@ -30,6 +30,10 @@
 	let y = 0;
 	let word = "";
 
+	window.addEventListener('popstate', function() {
+		if (showCtx === true) { showCtx = false; } 
+	});
+
 	function context(cx: number, cy: number, ri: number, val: string) {
 		// console.log("nGuesses:", guesses, "rowIndex:", ri);
 		if (app.nGuesses > ri) {
