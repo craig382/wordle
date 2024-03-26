@@ -69,6 +69,7 @@
 	let timer: Timer;
 
 	window.addEventListener('popstate', function() {
+		window.history.pushState({}, '')
 		if (showStats === true) { showStats = false; } 
 		else if (showSettings === true) { showSettings = false; } 
 		else if (showTutorial === true) { showTutorial = false; }

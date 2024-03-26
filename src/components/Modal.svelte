@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from "svelte";
 
-	import GameIcon from "./GameIcon.svelte";
-
 	export let visible = false;
 	export let fullscreen = false;
 

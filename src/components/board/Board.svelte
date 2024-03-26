@@ -31,6 +31,7 @@
 	let word = "";
 
 	window.addEventListener('popstate', function() {
+		window.history.pushState({}, '')
 		if (showCtx === true) { showCtx = false; } 
 	});
 
