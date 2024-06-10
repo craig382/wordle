@@ -7,7 +7,6 @@
 	let stats: [string, string | number][];
 	$: {
 		stats = [
-			["Played", data.played],
 			["Win %", Math.round(((data.played - data.guesses.fail) / data.played) * 100) || 0],
 			[
 				"Average Guesses",
@@ -20,7 +19,6 @@
 					}, 0) / data.played || 0
 				).toFixed(1),
 			],
-			["Lost", data.guesses.fail],
 			["Current Streak", data.streak],
 			["Max Streak", data.maxStreak]
 		];

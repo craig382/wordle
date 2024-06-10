@@ -336,21 +336,14 @@
 
 <Modal bind:visible={showStats}>
 	<h3>Statistics ({modeData.modes[$mode].name})</h3>
+	<h3>{stats.played} Played, {stats.guesses.fail} Lost</h3>
+
 	{#if modeData.modes[$mode].historical}
 		<h3 class="historical">Statistics not updated for historical games</h3>
 	{/if}
 	<Statistics data={stats} />
 	<Distribution distribution={stats.guesses} {app} />
-	<Separator visible={!app.active}>
-		<Timer
-			slot="1"
-			bind:this={timer}
-			on:timeup={() => (showRefresh = true)}
-			on:reload={newGame}
-		/>
-		<Share slot="2" game={app} />
-	</Separator>
-	<ShareGame solutionNumber={app.solutionNumber} />
+
 	{#if app.active}
 		<!-- Fade with delay is to prevent a bright red button from appearing as soon as refresh is pressed -->
 		<div
@@ -453,94 +446,108 @@
 				</section>
 			</div>
 		{/each}
-
-		<div class="row">
-			The Wordle dictionary contains {words.answers.length.toLocaleString()} possible 
-			solutions and {words.otherGuesses.length.toLocaleString()} additional other
-			words you may use as guesses.<br /><br />
-			
-			The NYT Wordle possible solutions dictionary excludes: 
-			proper nouns, plural nouns that end in S or ES, 
-			and past tense verbs that end in ED.<br /><br />
-
-			If row hints are ON, after you have typed the 5 letters of
-			your guess but before you hit "ENTER", the Row Hint shows an
-			"x" if your guess is not in the Wordle solution dictionary, 
-			a single check "&check;" if your guess is in the Wordle
-			solution dictionay, and a double check "&check;&check;"
-			if your guess is one of the words left after the prior guess.
-		</div>
-		<div class="row">
-			Top NYT WordleBot openers (each 
-			with 97+ NYT WordleBot score): {app.openers}.
-		</div>
-		<div class="row">
-			All Bot and AI Algorithms...<br /><br />
-
-			The algorithm uses the first human guess as its first guess.<br /><br />
-
-			For the last guess (guess 6), all "words left" from the 
-			previous guess are equally
-			likely to win or lose, and the algorithm selects one
-			of them as its guess.<br /><br />
-			
-			A "Hard" algorithm must select each guess from  
-			the "words left" list of the previous guess.<br /><br />
-
-			An "Easy" algorithm is  allowed to use any word in its
-			Wordle solution dictionary as a guess.<br /><br />
-
-			A "Bot" algorithm selects each guess based on "human" history
-			(based on the previous human guesses).<br /><br />
-
-			An "AI" algoritm selects each guess based on "AI" history
-			(based on the previous AI guesses).<br /><br />
-
-			A "perfect" (100%) guess is one that creates as many groups as 
-			there were remaining answers before the guess.<br /><br />
-			
-			If the algorithm finds a perfect guess, it immediately ends its 
-			searching.<br /><br />
-
-			The algorithm starts by searching through the "words left" list
-			of the prior guess. If the algoritm finds
-			a perfect Hard guess, its search is finished.<br /><br />
-
-			If the Hard guess was not perfect, an Easy algoritm will 
-			continue searching through a portion 
-			of the Wordle solution dictionary for a 
-			possible better Easy guess.
-		</div>
-		<div class="row">
-			The Max % Groups Algorithms.<br /><br />
-			
-			For guesses 2 to 5, the algorithm selects the first
-			guess it finds that creates the maximum number of groups,
-			which also maximizes the % groups because<br />
-			%groups = 100 * nGroups / nWordsLeftBeforeGuess.
-		</div>
-		<div class="row">
-			The Min Sum of Squares Algorithms.<br /><br />
-
-			In the table above, "SoS" stands for "Sum of Squares".<br /><br />
-			
-			For guesses 2 to 5, the algorithm selects the first
-			guess it finds that produces the minimum sum of squares.<br /><br />
-
-			The sum of squares is calculated by accumulating (summing) 
-			the square of each group size. For example, if the guess
-			creates 3 groups, the first containing 1 word, the second 
-			containing 2 words, and the third containing 3 words, then  
-			SoS = 1^2 + 2^2 + 3^2 = 1 + 4 + 9 = 14<br /><br />
-
-			This algorithm trades off two goals. The algorithm tries to
-			create as many groups as possible but also prefers smaller groups
-			to larger groups. Each word in a group of 1 is penalized 1 point.
-			Each word in a group of 2 is penalized 2 points. Each word in a 
-			group of 3 is penalized 3 points. And so forth. The larger the 
-			group, the more each of its words is penalized.
-		</div>
 	{/if}
+
+	<br />
+	<Separator visible={!app.active}>
+		<Timer
+			slot="1"
+			bind:this={timer}
+			on:timeup={() => (showRefresh = true)}
+			on:reload={newGame}
+		/>
+		<Share slot="2" game={app} />
+	</Separator>
+	<ShareGame solutionNumber={app.solutionNumber} />
+	<br />
+
+	<div class="row">
+		The Wordle dictionary contains {words.answers.length.toLocaleString()} possible 
+		solutions and {words.otherGuesses.length.toLocaleString()} additional other
+		words you may use as guesses.<br /><br />
+		
+		The NYT Wordle possible solutions dictionary excludes: 
+		proper nouns, plural nouns that end in S or ES, 
+		and past tense verbs that end in ED.<br /><br />
+
+		If row hints are ON, after you have typed the 5 letters of
+		your guess but before you hit "ENTER", the Row Hint shows an
+		"x" if your guess is not in the Wordle solution dictionary, 
+		a single check "&check;" if your guess is in the Wordle
+		solution dictionay, and a double check "&check;&check;"
+		if your guess is one of the words left after the prior guess.
+	</div>
+	<div class="row">
+		Top NYT WordleBot openers (each 
+		with 97+ NYT WordleBot score): {app.openers}.
+	</div>
+	<div class="row">
+		All Bot and AI Algorithms...<br /><br />
+
+		The algorithm uses the first human guess as its first guess.<br /><br />
+
+		For the last guess (guess 6), all "words left" from the 
+		previous guess are equally
+		likely to win or lose, and the algorithm selects one
+		of them as its guess.<br /><br />
+		
+		A "Hard" algorithm must select each guess from  
+		the "words left" list of the previous guess.<br /><br />
+
+		An "Easy" algorithm is  allowed to use any word in its
+		Wordle solution dictionary as a guess.<br /><br />
+
+		A "Bot" algorithm selects each guess based on "human" history
+		(based on the previous human guesses).<br /><br />
+
+		An "AI" algoritm selects each guess based on "AI" history
+		(based on the previous AI guesses).<br /><br />
+
+		A "perfect" (100%) guess is one that creates as many groups as 
+		there were remaining answers before the guess.<br /><br />
+		
+		If the algorithm finds a perfect guess, it immediately ends its 
+		searching.<br /><br />
+
+		The algorithm starts by searching through the "words left" list
+		of the prior guess. If the algoritm finds
+		a perfect Hard guess, its search is finished.<br /><br />
+
+		If the Hard guess was not perfect, an Easy algoritm will 
+		continue searching through a portion 
+		of the Wordle solution dictionary for a 
+		possible better Easy guess.
+	</div>
+	<div class="row">
+		The Max % Groups Algorithms.<br /><br />
+		
+		For guesses 2 to 5, the algorithm selects the first
+		guess it finds that creates the maximum number of groups,
+		which also maximizes the % groups because<br />
+		%groups = 100 * nGroups / nWordsLeftBeforeGuess.
+	</div>
+	<div class="row">
+		The Min Sum of Squares Algorithms.<br /><br />
+
+		In the table above, "SoS" stands for "Sum of Squares".<br /><br />
+		
+		For guesses 2 to 5, the algorithm selects the first
+		guess it finds that produces the minimum sum of squares.<br /><br />
+
+		The sum of squares is calculated by accumulating (summing) 
+		the square of each group size. For example, if the guess
+		creates 3 groups, the first containing 1 word, the second 
+		containing 2 words, and the third containing 3 words, then  
+		SoS = 1^2 + 2^2 + 3^2 = 1 + 4 + 9 = 14<br /><br />
+
+		This algorithm trades off two goals. The algorithm tries to
+		create as many groups as possible but also prefers smaller groups
+		to larger groups. Each word in a group of 1 is penalized 1 point.
+		Each word in a group of 2 is penalized 2 points. Each word in a 
+		group of 3 is penalized 3 points. And so forth. The larger the 
+		group, the more each of its words is penalized.
+	</div>
+
 </Modal>
 
 <Modal fullscreen={true} bind:visible={showSettings}>
