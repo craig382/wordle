@@ -168,12 +168,17 @@
 		// creates a new random solution and a default random opener.
 		newGame();
 
-		// New Word (randomWord) mode may use a chain opener.
+		// New Word (randomWord) mode may use a chain mode or auto repeat opener.
 		// Entered Word (non-randomWord) mode always uses the default random opener.  
 		if (randomWord) {
 			aiSolution = app.solution;
-			if (appSettings.openerMode === OpenerModes["Chain Mode"]) {
-				app.opener = appSettings.prevSolution;
+			switch (appSettings.openerMode) {
+				case OpenerModes["Chain Mode"]:
+					app.opener = appSettings.prevSolution;
+				break;
+				case OpenerModes["Auto Repeat"]:
+					app.opener = appSettings.prevOpener;
+				break;
 			}
 		} 
 
@@ -236,6 +241,8 @@
 			app.mode === GameMode.ai || appSettings.prevSolution === "") {
 			let openersArray = app.openers.split(" ");
 			app.opener = randomSample(openersArray);
+		} else if (appSettings.openerMode === OpenerModes["Auto Repeat"]) {
+			app.opener = appSettings.prevOpener;
 		} else app.opener = appSettings.prevSolution; // Chain mode opener.
 
 		// Use auto opener rules...

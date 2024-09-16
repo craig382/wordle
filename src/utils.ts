@@ -345,6 +345,7 @@ export class GameState extends Storable {
 			this.aiMaxGroupsEasy = [];
 			this.aiMinSumOfSquaresHard = [];
 			this.aiMinSumOfSquaresEasy = [];
+			appSettings.prevOpener = app.board.guesses[0];
 			calculateBotTree(app.board.guesses[0], app.guessGroupIds[0]);
 			this.human.push(botRoot);
 			this.aiMaxGroupsHard.push(botRoot);
@@ -477,6 +478,7 @@ export class Settings extends Storable {
 	public hard = new Array(modeData.modes.length).fill(false);
 	public aiMode: aiModes = aiModes["Max % Groups Easy"];
 	public openerMode: OpenerModes = OpenerModes["Random NYT WordleBot"];
+	public prevOpener: string = "slate";
 	public prevSolution: string = "happy";
 	public dark = true;
 	public colorblind = false;
@@ -491,6 +493,7 @@ export class Settings extends Storable {
 			this.hard = parsed.hard;
 			this.aiMode = parsed.aiMode;
 			this.openerMode = parsed.openerMode;
+			this.prevOpener = parsed.prevOpener;
 			this.prevSolution = parsed.prevSolution;
 			this.dark = parsed.dark;
 			this.colorblind = parsed.colorblind;
@@ -864,6 +867,7 @@ export enum OpenerModes {
 	"Manual",
 	"Random NYT WordleBot",
 	"Chain Mode",
+	"Auto Repeat",
 }
 
 export function botNodeInfo (botNode: BotNode, guessId = "") {
