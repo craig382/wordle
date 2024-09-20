@@ -25,6 +25,9 @@
 	let isHard = false;
 	let guessHint = "";
 	let tiles: Tile[] = [];
+	let h0: BotNodeTuple;
+	let h1: BotNodeTuple;
+	let b1: BotNodeTuple;
 
 	const MAX_DOUBLE_CLICK_INTERVAL = 400;
 	let lastTouch = 0;
@@ -48,6 +51,16 @@
 			showRowHint = $showRowHints;
 			showGuessHint = false;
 			complete = true;
+			if (ri === (ng - 1) && app.guesses[ng] === "") {
+				console.log(`Row/app.nGuesses: ${ng}, guess[${ri}]: ${app.guesses[ri]}, next row guess: "${app.guesses[ng]}", human.length: ${app.human.length}`);
+				h1 = botNodeInfo(app.human[ri], app.guessGroupIds[ri]);
+				if (ri > 0) {
+					h0 = botNodeInfo(app.human[ri-1], app.guessGroupIds[ri-1]);
+					if (h0 !== null) b1 = botNodeInfo(h0[12], "");
+					else console.log(`WARNING: Row.svelte. ${h1[0]} parent h0 is null.`);
+					// b1 = botNodeInfo(h1[18], "");
+				}
+			}
 		} else {
 			showRowHint = false;			
 			if (ng === ri) {
@@ -98,11 +111,8 @@
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<section on:click|self={() => {$showRowHints = !$showRowHints;}}>
 		{#if showRowHint }
-			{@const h1 = botNodeInfo(app.human[ri], app.guessGroupIds[ri])}
 			{h1[14]}%{h1[6][0]}
 			{#if ri > 0 }
-				{@const h0 = botNodeInfo(app.human[ri-1], app.guessGroupIds[ri-1])}
-				{@const b1 = botNodeInfo(h0[12], "")}
 				<br />{b1[14]}%{b1[6][0]}
 			{:else}
 				<br />{h1[14]}%{h1[6][0]}

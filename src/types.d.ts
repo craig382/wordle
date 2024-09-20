@@ -94,7 +94,8 @@ type GangTuple = [
 	maxGroupsKidHard: BotNode, 
 	maxGroupsKidEasy: BotNode,
 	minSumOfSquaresKidHard: BotNode,
-	minSumOfSquaresKidEasy: BotNode
+	minSumOfSquaresKidEasy: BotNode,
+	groupNode: Array<BotNode>
 ];
 
 type ParentTuple = [
@@ -129,4 +130,7 @@ type BotNodeTuple = [
 	largestGroup: number, // 15
 	largestGroupPercent: number, // 16
 	eliminatedPercent: number, // 17
+
+	/** maxGroupsSibEasy (sibling) is the maxGroupsKidEasy of this node's parent */
+	maxGroupsSibEasy: BotNode, // 18
 ]
