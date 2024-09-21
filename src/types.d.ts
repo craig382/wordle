@@ -95,14 +95,9 @@ type GangTuple = [
 	maxGroupsKidEasy: BotNode,
 	minSumOfSquaresKidHard: BotNode,
 	minSumOfSquaresKidEasy: BotNode,
-	groupNode: Array<BotNode>
+	groupNode: Array<BotNode>,
+	kids: KidTuple
 ];
-
-type ParentTuple = [
-	node: BotNode,
-	gangId: string,
-	gang: GangTuple
-]
 
 type KidTuple = [
 	hasKids: boolean,

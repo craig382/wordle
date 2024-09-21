@@ -417,7 +417,7 @@ export class GameState extends Storable {
 					app.status = GameStatus.lost; // Abort the game.
 					throw e; 		
 				}
-				this.human.push(new BotNode( [this.human[ri-1], this.guessGroupIds[ri-1], pGang], ri, guess, gangs, pGroup.length));
+				this.human.push(new BotNode( this.human[ri-1], this.guessGroupIds[ri-1], ri, guess, gangs, pGroup.length));
 				createKids(this.human[ri]);
 			} else {
 				this.human.push(bnExisting);
@@ -636,14 +636,15 @@ export function createKids(pNode: BotNode) {
 	else pNode.hasKids = true;
 
 	let kid: BotNode;
+	let kids: KidTuple;
 
 	pNode.gangs.forEach((pGang, pGroupId) => {
-		let [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy, pGroupNode] = pGang;
+		let [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy, pGroupNode, kids] = pGang;
 
 		// Create hard mode kids.
 		for (let gi = 0; gi < pGroup.length; gi++) {
 			let gangs = calculateGroups(pGroup[gi], pGroup);
-			kid = new BotNode([pNode, pGroupId, pGang], pNode.ri + 1, pGroup[gi], gangs, pGroup.length, true);
+			kid = new BotNode(pNode, pGroupId, pNode.ri + 1, pGroup[gi], gangs, pGroup.length, true);
 			if (pPerfectKid === false) {
 				if (kid.nGroups === pGroup.length) {
 					pPerfectKid = true; // hard mode perfect kid
@@ -674,7 +675,7 @@ export function createKids(pNode: BotNode) {
 		if ( pPerfectKid === false && (pNode.ri < (ROWS - 2)) ) {
 			for (let gi = 0; gi < app.easyGroup.length; gi++) {
 				let gangs = calculateGroups(app.easyGroup[gi], pGroup);
-				kid = new BotNode([pNode, pGroupId, pGang], pNode.ri + 1, app.easyGroup[gi], gangs, pGroup.length);
+				kid = new BotNode(pNode, pGroupId, pNode.ri + 1, app.easyGroup[gi], gangs, pGroup.length);
 				if ( pPerfectKid === false && kid.nGroups === pGroup.length) {
 					pPerfectKid = true; // easy mode perfect kid
 					pMgKidEasy = kid;
@@ -697,7 +698,8 @@ export function createKids(pNode: BotNode) {
 		}
 
 		// Update pGang.
-		pGang = [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy, pGroupNode ];
+		kids = [ true, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ];
+		pGang = [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy, pGroupNode, kids ];
 		pNode.gangs.set(pGroupId, pGang);
 
 	});
@@ -711,7 +713,7 @@ export function calculateBotTree(rootGuess: string, rootGuessId: string) {
 	// it contains the correct nGroups and sumOfSquares values.
 	gangs = calculateGroups(rootGuess, words.answers);
 	let rootGang = gangs.get(rootGuessId);
-	botRoot = new BotNode([null, "", null], 0, rootGuess, gangs, words.answers.length);
+	botRoot = new BotNode(null, "", 0, rootGuess, gangs, words.answers.length);
 
 	// To reduce the BotTree size and calculation time,
 	// reduce the botRoot gangs map down to 1 or 2 groups. 
@@ -766,18 +768,18 @@ export function calculateGroups(guess: string, pg: Array<string>) {
 		if (group === undefined) {
 			group = new Array<string>;
 			group.push(pg[a]);
-			gangs.set(gid, [group, false, null, null, null, null, []]);
+			gangs.set(gid, [group, false, null, null, null, null, [], null]);
 		}
 		else group.push(pg[a]);
 	}
 	return gangs;
 }
 
-export class ParentTupleClass {
-	private _gang: GangTuple;
-	private _kids: KidTuple;
+export class ParentTuple {
 	node: BotNode;
 	groupId: string;
+	private _gang: GangTuple;
+	private _kids: KidTuple;
 
 	constructor(node:BotNode, groupId: string)
 	{
@@ -791,7 +793,7 @@ export class ParentTupleClass {
 	}
 
 	get kids(): KidTuple {
-		this._kids = this.gang["kids"];
+		this._kids = this.gang[7];
 		return this._kids;
 	}
 
@@ -817,9 +819,9 @@ export class BotNode // extends TreeNode
 	/** gang<groupId, GangTuple > */
 	public gangs: Gangs;
  
-	constructor(parent:ParentTuple, ri: number, guess: string, gangs: Gangs, nWordsBefore: number, linkToParent = false )
+	constructor(parentNode: BotNode, parentGroupId: string, ri: number, guess: string, gangs: Gangs, nWordsBefore: number, linkToParent = false )
 	{ 
-		this.parent = parent;
+		this.parent = new ParentTuple(parentNode, parentGroupId);
 		this.hasKids = false;
 		this.ri = ri;
 		this.guess = guess;
@@ -832,9 +834,10 @@ export class BotNode // extends TreeNode
 			this.sumOfSquares += group.length ** 2; 
 			if (group.length > this.largestGroup) this.largestGroup = group.length;
 		});
-		if (linkToParent && this.parent[0] !== null) {
-			if (this.parent[2][6] === null) this.parent[2][6] = [this];
-			else this.parent[2][6].push(this);
+		if (linkToParent) {
+			let parentGroupNode = this.parent.gang[6];
+			if (parentGroupNode === null) parentGroupNode = [this];
+			else parentGroupNode.push(this);
 		}
 		app.nNodesCreated++;
 		app.botTree[ri].push(this); // for debugging, save every BotNode
@@ -947,13 +950,13 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 		info[4] = wordsBefore.join(", "); // wordListBefore
 		if (countOfAinB(botNode.guess, info[4]) > 0) info[6] = "Hard"; // easyOrHard
 		else info[6] = "Easy"; // easyOrHard
-		info[18] = botNode.parent[2][3] ; // maxGroupsSibEasy
+		info[18] = botNode.parent.kids[3] ; // maxGroupsSibEasy
 	}
 
 	info[9] = botNode.nWordsBefore - info[11]; // nWordsEliminated = nWordsBefore - nWordsAfter
 	info[17] = Math.round(100 * info[9] / botNode.nWordsBefore); // eliminatedPercent
 
-	// logInfo(); // console.log()
+	logInfo(); // console.log()
 
 	return info;
 
@@ -965,16 +968,16 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 		console.log("botNodeInfo/logInfo/botNode:");
 		console.log(botNode);
 		if (botNode.ri > 0) {
-			if (botNode.parent[2][2] === null)
-				console.log(`${botNode.guess} parentTuple ${botNode.parent[0].guess} (hasKids = ${botNode.parent[0].hasKids}) has no kids.`); 
+			if (botNode.parent.kids[2] === null)
+				console.log(`${botNode.guess} parent ${botNode.parent.node.guess} (hasKids = ${botNode.parent.kids[0]}) has no kids.`); 
 			else {
-				console.log(`${botNode.guess} parentTuple ${botNode.parent[0].guess} has kids: ${botNode.parent[2][2].guess}, ${botNode.parent[2][3].guess}, ${botNode.parent[2][4].guess}, ${botNode.parent[2][5].guess}`);
+				console.log(`${botNode.guess} parent ${botNode.parent.node.guess} has kids: ${botNode.parent.kids[2].guess}, ${botNode.parent.kids[3].guess}, ${botNode.parent.kids[4].guess}, ${botNode.parent.kids[5].guess}`);
 				console.log(`${botNode.guess} maxGroupsSibEasy: ${info[18].guess}.`, info[18]);
 			}
 		}
 		console.log (`${info[11]} words after: ${info[10]}`);
 		console.log (`${info[5]} words before: ${info[4]}`);
-		if (botNode.ri > 0) console.log (`${botNode.parent[2][0].length} words before (from parentTuple): ${botNode.parent[2][0].join(" ")}`);
+		if (botNode.ri > 0) console.log (`${botNode.parent.gang[0].length} words before (from parent): ${botNode.parent.gang[0].join(" ")}`);
 		console.log("");	
 	}
 }
