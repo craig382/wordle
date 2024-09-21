@@ -52,14 +52,10 @@
 			showGuessHint = false;
 			complete = true;
 			if (ri === (ng - 1) && app.guesses[ng] === "") {
-				console.log(`Row/app.nGuesses: ${ng}, guess[${ri}]: ${app.guesses[ri]}, next row guess: "${app.guesses[ng]}", human.length: ${app.human.length}`);
+				// console.log(`Row/app.nGuesses: ${ng}, guess[${ri}]: ${app.guesses[ri]}, next row guess: "${app.guesses[ng]}", human.length: ${app.human.length}`);
 				h1 = botNodeInfo(app.human[ri], app.guessGroupIds[ri]);
 				if (ri > 0) {
-					h0 = botNodeInfo(app.human[ri-1], app.guessGroupIds[ri-1]);
-					// if (h0 !== null) b1 = botNodeInfo(h0[12], "");
-					// else console.log(`WARNING: Row.svelte. ${h1[0]} parent h0 is null.`);
-					if (h1[18] !== null) b1 = botNodeInfo(h1[18], "");
-					else console.log(`WARNING: Row.svelte. ${h1[0]}[18 = maxGroupsSibEasy] is null.`);
+					b1 = botNodeInfo(h1[18], "");
 				}
 			}
 		} else {

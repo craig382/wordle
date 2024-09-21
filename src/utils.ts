@@ -982,12 +982,8 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 	}
 }
 
-/** Calculates and returns botInfoArray based on app.botLeft/RightMode.  */
 export function calculateBotInfoArray(botSide : "left" | "right" ) {
 	let botMode: BotMode;
-	let botRowArray: Array<BotNode> = [];
-	let tuple: GangTuple;
-	let botInfoArray: Array<BotNodeTuple> = [];
 
 	switch (botSide) {
 		case "left": botMode = app.botLeftMode; break;
@@ -998,7 +994,16 @@ export function calculateBotInfoArray(botSide : "left" | "right" ) {
 			throw e; 
 	}
 
-	console.log(`calculateBotInfoArray/botMode: ${namesOf(BotMode)[botMode]}`);
+	return calculateBotInfoArray2(botMode);
+}
+
+/** Calculates and returns botInfoArray based on app.botLeft/RightMode.  */
+export function calculateBotInfoArray2(botMode: BotMode) {
+	let botRowArray: Array<BotNode> = [];
+	let tuple: GangTuple;
+	let botInfoArray: Array<BotNodeTuple> = [];
+
+	// console.log(`calculateBotInfoArray/botMode: ${namesOf(BotMode)[botMode]}`);
 
 	botRowArray.push(botRoot);
 	switch (botMode) {
@@ -1042,8 +1047,6 @@ export function calculateBotInfoArray(botSide : "left" | "right" ) {
 			botRowArray = app.aiMinSumOfSquaresEasy;
 		break;
 	}
-
-	console.log(botRowArray, "calculateBotInfoArray.botRowArray");
 
 	botRowArray.forEach((node) => {	
 		if (node === null) {

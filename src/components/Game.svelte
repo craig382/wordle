@@ -36,7 +36,7 @@
 		words,
 		Stats,
         groupIdFromColors,
-        calculateBotInfoArray,
+        calculateBotInfoArray2,
         BotMode,
         namesOf,
         appSettings,
@@ -62,8 +62,6 @@
 	let showHistorical = false;
 	let showRefresh = false;
 	let aiSolution = "";
-	let infoL: Array<BotNodeTuple>;
-	let infoR: Array<BotNodeTuple>;
 
 	let board: Board;
 	let timer: Timer;
@@ -364,8 +362,8 @@
 	{/if}
 
 	{#if showStats && app.nGuesses > 0 }
-		{@const LL = (infoL = calculateBotInfoArray("left"))}
-		{@const RR = (infoR = calculateBotInfoArray("right"))}
+		{@const LL = calculateBotInfoArray2(app.botLeftMode)}
+		{@const RR = calculateBotInfoArray2(app.botRightMode)}
 		{@const modes = namesOf(BotMode)}
 		<br /><h3>Bot Results {#if !app.active && $mode !== GameMode.solver}For Solution "{app.solution}"{/if}</h3>
 		{#if app.status === GameStatus.lost && $mode !== GameMode.solver}
