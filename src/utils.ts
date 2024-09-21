@@ -956,7 +956,7 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 	info[9] = botNode.nWordsBefore - info[11]; // nWordsEliminated = nWordsBefore - nWordsAfter
 	info[17] = Math.round(100 * info[9] / botNode.nWordsBefore); // eliminatedPercent
 
-	logInfo(); // console.log()
+	// logInfo(); // console.log()
 
 	return info;
 
