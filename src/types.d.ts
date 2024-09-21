@@ -104,6 +104,15 @@ type ParentTuple = [
 	gang: GangTuple
 ]
 
+type KidTuple = [
+	hasKids: boolean,
+	perfectKid: boolean,
+	maxGroupsKidHard: BotNode, 
+	maxGroupsKidEasy: BotNode,
+	minSumOfSquaresKidHard: BotNode,
+	minSumOfSquaresKidEasy: BotNode
+]
+
 //** Map< groupId, BotMapTuple > */
 type Gangs = Map< string, GangTuple >;
 

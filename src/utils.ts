@@ -633,7 +633,6 @@ export function createKids(pNode: BotNode) {
 	// Prevent a pNode from creating kids 
 	// if there are no more guesses left.
 	if (pNode.ri > (ROWS-2)) return;
-	// if (pNode.ri > (ROWS-1)) return;
 	else pNode.hasKids = true;
 
 	let kid: BotNode;
@@ -702,6 +701,7 @@ export function createKids(pNode: BotNode) {
 		pNode.gangs.set(pGroupId, pGang);
 
 	});
+
 }
 
 export function calculateBotTree(rootGuess: string, rootGuessId: string) {
@@ -771,6 +771,30 @@ export function calculateGroups(guess: string, pg: Array<string>) {
 		else group.push(pg[a]);
 	}
 	return gangs;
+}
+
+export class ParentTupleClass {
+	private _gang: GangTuple;
+	private _kids: KidTuple;
+	node: BotNode;
+	groupId: string;
+
+	constructor(node:BotNode, groupId: string)
+	{
+		this.node = node;
+		this.groupId = groupId;
+	}
+
+	get gang(): GangTuple {
+		this._gang = this.node.gangs.get(this.groupId);
+		return this._gang;
+	}
+
+	get kids(): KidTuple {
+		this._kids = this.gang["kids"];
+		return this._kids;
+	}
+
 }
 
 /** A BotNode represents a guess before it gets its colors. */	
