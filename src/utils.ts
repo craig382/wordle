@@ -354,37 +354,37 @@ export class GameState extends Storable {
 				let gang: GangTuple;
 				if ( app.mode === GameMode.solver ) {
 					gang = this.human[0].gangs.get(app.guessGroupIds[0]);
-					this.aiMaxGroupsHard.push(gang[2]);
-					this.aiMaxGroupsEasy.push(gang[3]);
-					this.aiMinSumOfSquaresHard.push(gang[4]);
-					this.aiMinSumOfSquaresEasy.push(gang[5]);
+					this.aiMaxGroupsHard.push(gang[1][1]);
+					this.aiMaxGroupsEasy.push(gang[1][2]);
+					this.aiMinSumOfSquaresHard.push(gang[1][3]);
+					this.aiMinSumOfSquaresEasy.push(gang[1][4]);
 				} else {
 					let i = 0;
 					while (true) {
 						gang = this.aiMaxGroupsHard[i].gangs.get(calculateGroupId(this.solution, this.aiMaxGroupsHard[i].guess));
-						if (gang[2] === null) break;
-						else this.aiMaxGroupsHard.push(gang[2]);
+						if (gang[1][1] === null) break;
+						else this.aiMaxGroupsHard.push(gang[1][1]);
 						i++;
 					}
 					i = 0;
 					while (true) {
 						gang = this.aiMaxGroupsEasy[i].gangs.get(calculateGroupId(this.solution, this.aiMaxGroupsEasy[i].guess));
-						if (gang[3] === null) break;
-						else this.aiMaxGroupsEasy.push(gang[3]);
+						if (gang[1][2] === null) break;
+						else this.aiMaxGroupsEasy.push(gang[1][2]);
 						i++;
 					}
 					i = 0;
 					while (true) {
 						gang = this.aiMinSumOfSquaresHard[i].gangs.get(calculateGroupId(this.solution, this.aiMinSumOfSquaresHard[i].guess));
-						if (gang[4] === null) break;
-						else this.aiMinSumOfSquaresHard.push(gang[4]);
+						if (gang[1][3] === null) break;
+						else this.aiMinSumOfSquaresHard.push(gang[1][3]);
 						i++;
 					}
 					i = 0;
 					while (true) {
 						gang = this.aiMinSumOfSquaresEasy[i].gangs.get(calculateGroupId(this.solution, this.aiMinSumOfSquaresEasy[i].guess));
-						if (gang[5] === null) break;
-						else this.aiMinSumOfSquaresEasy.push(gang[5]);
+						if (gang[1][4] === null) break;
+						else this.aiMinSumOfSquaresEasy.push(gang[1][4]);
 						i++;
 					}
 				}	
@@ -401,7 +401,7 @@ export class GameState extends Storable {
 					app.status = GameStatus.lost; // Abort the game.
 					throw e; 		
 			}
-			let bnExisting = pGang[6].find((bn) => bn.guess === guess);
+			let bnExisting = pGang[2].find((bn) => bn.guess === guess);
 			if (bnExisting === undefined) {
 				// Existing Guess BotNode not found.
 				// Thus create new BotNode for the guess 
@@ -639,7 +639,8 @@ export function createKids(pNode: BotNode) {
 	let kids: KidTuple;
 
 	pNode.gangs.forEach((pGang, pGroupId) => {
-		let [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy, pGroupNode, kids] = pGang;
+		let [ pGroup, kids, pGroupNode ] = pGang;
+		let [ pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ] = kids;
 
 		// Create hard mode kids.
 		for (let gi = 0; gi < pGroup.length; gi++) {
@@ -698,8 +699,8 @@ export function createKids(pNode: BotNode) {
 		}
 
 		// Update pGang.
-		kids = [ true, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ];
-		pGang = [ pGroup, pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy, pGroupNode, kids ];
+		kids = [ pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ];
+		pGang = [ pGroup, kids, pGroupNode ];
 		pNode.gangs.set(pGroupId, pGang);
 
 	});
@@ -768,7 +769,7 @@ export function calculateGroups(guess: string, pg: Array<string>) {
 		if (group === undefined) {
 			group = new Array<string>;
 			group.push(pg[a]);
-			gangs.set(gid, [group, false, null, null, null, null, [], null]);
+			gangs.set(gid, [group, [ false, null, null, null, null ], [] ]);
 		}
 		else group.push(pg[a]);
 	}
@@ -793,7 +794,7 @@ export class ParentTuple {
 	}
 
 	get kids(): KidTuple {
-		this._kids = this.gang[7];
+		this._kids = this.gang[1];
 		return this._kids;
 	}
 
@@ -835,7 +836,7 @@ export class BotNode // extends TreeNode
 			if (group.length > this.largestGroup) this.largestGroup = group.length;
 		});
 		if (linkToParent) {
-			let parentGroupNode = this.parent.gang[6];
+			let parentGroupNode = this.parent.gang[2];
 			if (parentGroupNode === null) parentGroupNode = [this];
 			else parentGroupNode.push(this);
 		}
@@ -892,7 +893,7 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 		throw e;
 	}
 
-	let info: BotNodeTuple = [,,,,,,,,,,,,,,,,,,,]; // Initialize a multi element empty tuple.
+	let info: BotNodeTuple = [,,,,,,,,,,,,,,,,,,,,,]; // Initialize a multi element empty tuple.
 
 	info[0] = ""; // guess
 	info[1] = 0; // ri
@@ -912,6 +913,8 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 	info[15] = 0; // largestGroup
 	info[16] = 0; // largestGroupPercent
 	info[18] = null; // maxGroupsSibEasy
+	info[19] = ""; // wordListAfterOld
+	info[20] = ""; // statWordListAfterOld
 
 	if (guessId === "" && app.solution !== "") {
 		guessId = calculateGroupId(app.solution, botNode.guess);
@@ -936,9 +939,13 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 			info[8] = colorString(guessId);
 			if (guessId !== "#####") { // nWordsAfter is 0 for the solution
 				info[11] = pGroup.length; // nWordsAfter
+				info[12] = pGang[1][2]; // maxGroupsKidEasy	
+
 				info[10] = pGroup.join(" "); // wordListAfter
 				info[13] = pGroup.slice(0, appSettings.maxStatWords).join(" "); // statWordListAfter
-				info[12] = pGang[3]; // maxGroupsKidEasy	
+
+				info[19] = pGroup.join(" "); // wordListAfterOld
+				info[20] = pGroup.slice(0, appSettings.maxStatWords).join(" "); // statWordListAfterOld
 			}
 		}	
 	});
@@ -969,13 +976,16 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 		console.log(botNode);
 		if (botNode.ri > 0) {
 			if (botNode.parent.kids[2] === null)
-				console.log(`${botNode.guess} parent ${botNode.parent.node.guess} (hasKids = ${botNode.parent.kids[0]}) has no kids.`); 
+				console.log(`${botNode.guess} parent ${botNode.parent.node.guess} (hasKids = ${botNode.parent.node.hasKids}) has no kids.`); 
 			else {
-				console.log(`${botNode.guess} parent ${botNode.parent.node.guess} has kids: ${botNode.parent.kids[2].guess}, ${botNode.parent.kids[3].guess}, ${botNode.parent.kids[4].guess}, ${botNode.parent.kids[5].guess}`);
+				console.log(`${botNode.guess} parent ${botNode.parent.node.guess} has kids: ${botNode.parent.kids[1].guess}, ${botNode.parent.kids[2].guess}, ${botNode.parent.kids[3].guess}, ${botNode.parent.kids[4].guess}`);
 				console.log(`${botNode.guess} maxGroupsSibEasy: ${info[18].guess}.`, info[18]);
 			}
 		}
 		console.log (`${info[11]} words after: ${info[10]}`);
+		console.log (`${info[11]} words after [OLD]: ${info[19]}`);
+		console.log (`${info[11]} first ${appSettings.maxStatWords} words after: ${info[13]}`);
+		console.log (`${info[11]} first ${appSettings.maxStatWords} words after [OLD]: ${info[20]}`);
 		console.log (`${info[5]} words before: ${info[4]}`);
 		if (botNode.ri > 0) console.log (`${botNode.parent.gang[0].length} words before (from parent): ${botNode.parent.gang[0].join(" ")}`);
 		console.log("");	
@@ -1003,7 +1013,7 @@ export function calculateBotInfoArray2(botMode: BotMode) {
 	let tuple: GangTuple;
 	let botInfoArray: Array<BotNodeTuple> = [];
 
-	// console.log(`calculateBotInfoArray/botMode: ${namesOf(BotMode)[botMode]}`);
+	console.log(`calculateBotInfoArray/botMode: ${namesOf(BotMode)[botMode]}`);
 
 	botRowArray.push(botRoot);
 	switch (botMode) {
@@ -1013,25 +1023,25 @@ export function calculateBotInfoArray2(botMode: BotMode) {
 		case BotMode["Bot Max % Groups Hard"]:
 			for (let ri = 0; ri < (app.nGuesses - (app.active ? 0 : 1)); ri++) {
 				tuple = app.human[ri].gangs.get(app.guessGroupIds[ri]);
-				botRowArray.push(tuple[2]);
+				botRowArray.push(tuple[1][1]);
 			}
 		break;
 		case BotMode["Bot Max % Groups Easy"]:
 			for (let ri = 0; ri < (app.nGuesses - (app.active ? 0 : 1)); ri++) {
 				tuple = app.human[ri].gangs.get(app.guessGroupIds[ri]);
-				botRowArray.push(tuple[3]);
+				botRowArray.push(tuple[1][2]);
 			}
 		break;
 		case BotMode["Bot Min Sum of Squares Hard"]:
 			for (let ri = 0; ri < (app.nGuesses - (app.active ? 0 : 1)); ri++) {
 				let tuple = app.human[ri].gangs.get(app.guessGroupIds[ri]);
-				botRowArray.push(tuple[4]);
+				botRowArray.push(tuple[1][3]);
 			}
 		break;
 		case BotMode["Bot Min Sum of Squares Easy"]:
 			for (let ri = 0; ri < (app.nGuesses - (app.active ? 0 : 1)); ri++) {
 				let tuple = app.human[ri].gangs.get(app.guessGroupIds[ri]);
-				botRowArray.push(tuple[5]);
+				botRowArray.push(tuple[1][4]);
 			}
 		break;
 		case BotMode["AI Max % Groups Hard"]:

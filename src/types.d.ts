@@ -90,17 +90,11 @@ type Swipe = CustomEvent<{ direction: Direction; }>;
 
 type GangTuple = [
 	group: Array<string>, 
-	perfectKid: boolean,
-	maxGroupsKidHard: BotNode, 
-	maxGroupsKidEasy: BotNode,
-	minSumOfSquaresKidHard: BotNode,
-	minSumOfSquaresKidEasy: BotNode,
+	kids: KidTuple,
 	groupNode: Array<BotNode>,
-	kids: KidTuple
 ];
 
 type KidTuple = [
-	hasKids: boolean,
 	perfectKid: boolean,
 	maxGroupsKidHard: BotNode, 
 	maxGroupsKidEasy: BotNode,
@@ -137,4 +131,8 @@ type BotNodeTuple = [
 
 	/** maxGroupsSibEasy (sibling) is the maxGroupsKidEasy of this node's parent */
 	maxGroupsSibEasy: BotNode, // 18
+
+	wordListAfterOld: string, // 19
+	/** truncated list of words left after for stat screen */
+	statWordListAfterOld: string, // 20
 ]
