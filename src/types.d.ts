@@ -91,7 +91,7 @@ type Swipe = CustomEvent<{ direction: Direction; }>;
 type GangTuple = [
 	group: Array<string>, 
 	kids: KidTuple,
-	groupNode: Array<BotNode>,
+	groupNodes: Array<BotNode>,
 ];
 
 type KidTuple = [

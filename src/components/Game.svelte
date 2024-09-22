@@ -495,7 +495,7 @@
 		A "Hard" algorithm must select each guess from  
 		the "words left" list of the previous guess.<br /><br />
 
-		An "Easy" algorithm is  allowed to use any word in its
+		An "Easy" algorithm is allowed to use any word in its
 		Wordle solution dictionary as a guess.<br /><br />
 
 		A "Bot" algorithm selects each guess based on "human" history
@@ -507,23 +507,20 @@
 		A "perfect" (100%) guess is one that creates as many groups as 
 		there were remaining answers before the guess.<br /><br />
 		
-		If the algorithm finds a perfect guess, it immediately ends its 
-		searching.<br /><br />
-
 		The algorithm starts by searching through the "words left" list
 		of the prior guess. If the algoritm finds
-		a perfect Hard guess, its search is finished.<br /><br />
+		a perfect Hard guess, it skips the next step.<br /><br />
 
-		If the Hard guess was not perfect, an Easy algoritm will 
+		Otherwise the algoritm will 
 		continue searching through a portion 
 		of the Wordle solution dictionary for a 
-		possible better Easy guess.
+		possibly better Easy guess.
 	</div>
 	<div class="row">
 		The Max % Groups Algorithms.<br /><br />
 		
-		For guesses 2 to 5, the algorithm selects the first
-		guess it finds that creates the maximum number of groups,
+		For guesses 2 to 5, the algorithm selects a
+		guess that maximizes number of groups,
 		which also maximizes the % groups because<br />
 		%groups = 100 * nGroups / nWordsLeftBeforeGuess.
 	</div>
@@ -532,8 +529,8 @@
 
 		In the table above, "SoS" stands for "Sum of Squares".<br /><br />
 		
-		For guesses 2 to 5, the algorithm selects the first
-		guess it finds that produces the minimum sum of squares.<br /><br />
+		For guesses 2 to 5, the algorithm selects a
+		guess that minimizes sum of squares.<br /><br />
 
 		The sum of squares is calculated by accumulating (summing) 
 		the square of each group size. For example, if the guess
@@ -547,6 +544,15 @@
 		Each word in a group of 2 is penalized 2 points. Each word in a 
 		group of 3 is penalized 3 points. And so forth. The larger the 
 		group, the more each of its words is penalized.
+	</div>
+	<div class="row">
+		The "words left" list is sorted first into subsets by 
+		the number of groups each of the remaining words produces.
+		The number of groups for the subset is shown at the 
+		beginning of the subset.<br /><br />
+
+		Each subset is sorted in ascending order by the "Sum of Squares"
+		produced by each word.
 	</div>
 
 </Modal>

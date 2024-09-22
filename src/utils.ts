@@ -808,11 +808,11 @@ export class BotNode // extends TreeNode
 	/** guess divides nWordsBefore  
 	 * into nGroups. nGroups = gangs.size. */
 	public nGroups: number;
-	/** number of words left before this guess */
-	public largestGroup: number;
-	public nWordsBefore: number;
 	/** sum of each group.length^2 */
 	public sumOfSquares: number;
+	public largestGroup: number;
+	/** number of words left before this guess */
+	public nWordsBefore: number;
 	/** Tuple [groupWordListArray, groupId] */
 	public parent: ParentTuple;
 	public hasKids: boolean;
@@ -932,20 +932,38 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 	info[16] = Math.round(100 * botNode.largestGroup / botNode.nWordsBefore); // largestGroupPercent
 
 	let wordsBefore: Array<string> = [];
-	botNode.gangs.forEach((pGang, pGroupId) => {
-		let pGroup = pGang[0];
-		wordsBefore.push(pGroup.join(" "));
-		if (guessId === pGroupId) {
+	botNode.gangs.forEach((gang, groupId) => {
+		let group = gang[0];
+		wordsBefore.push(group.join(" "));
+		if (guessId === groupId) {
 			info[8] = colorString(guessId);
 			if (guessId !== "#####") { // nWordsAfter is 0 for the solution
-				info[11] = pGroup.length; // nWordsAfter
-				info[12] = pGang[1][2]; // maxGroupsKidEasy	
+				info[11] = group.length; // nWordsAfter
+				info[12] = gang[1][2]; // maxGroupsKidEasy	
 
-				info[10] = pGroup.join(" "); // wordListAfter
-				info[13] = pGroup.slice(0, appSettings.maxStatWords).join(" "); // statWordListAfter
+				// Sort gang.groupNodes 1st by max nGroups and 2nd by min sum Of Squares.
+				gang[2].sort((a, b) => {
+					if (a.nGroups > b.nGroups) return -1;
+					else if (a.nGroups < b.nGroups) return +1;
+					else if (a.sumOfSquares < b.sumOfSquares) return -1;
+					else return 0;
+				});
+				let nGroupsNow = gang[2][0].nGroups;
 
-				info[19] = pGroup.join(" "); // wordListAfterOld
-				info[20] = pGroup.slice(0, appSettings.maxStatWords).join(" "); // statWordListAfterOld
+				// Build info[13] (statWordListAfter) string
+				// of the truncated sorted list of remaining words.
+				info[13] = `${gang[2][0].nGroups}:`;
+				for (let bni = 0; bni < gang[2].slice(0, appSettings.maxStatWords).length; bni++) {
+					let g = gang[2][bni].nGroups;
+					if (g !== nGroupsNow) {
+						info[13] += `, ${g}:`
+						nGroupsNow = g;
+					}
+					info[13] += ` ${gang[2][bni].guess}`;
+				}
+
+				// info[19] = group.join(" "); // wordListAfterOld
+				// info[20] = group.slice(0, appSettings.maxStatWords).join(" "); // statWordListAfterOld
 			}
 		}	
 	});
