@@ -1010,6 +1010,7 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 	}
 }
 
+/** Calculates and returns botInfoArray based on botSide = app.botLeft/RightMode.  */
 export function calculateBotInfoArray(botSide : "left" | "right" ) {
 	let botMode: BotMode;
 
@@ -1025,7 +1026,7 @@ export function calculateBotInfoArray(botSide : "left" | "right" ) {
 	return calculateBotInfoArray2(botMode);
 }
 
-/** Calculates and returns botInfoArray based on app.botLeft/RightMode.  */
+/** Calculates and returns botInfoArray based on botMode.  */
 export function calculateBotInfoArray2(botMode: BotMode) {
 	let botRowArray: Array<BotNode> = [];
 	let tuple: GangTuple;
