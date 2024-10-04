@@ -939,31 +939,35 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 			info[8] = colorString(guessId);
 			if (guessId !== "#####") { // nWordsAfter is 0 for the solution
 				info[11] = group.length; // nWordsAfter
-				info[12] = gang[1][2]; // maxGroupsKidEasy	
 
-				// Sort gang.groupNodes 1st by max nGroups and 2nd by min sum Of Squares.
-				gang[2].sort((a, b) => {
-					if (a.nGroups > b.nGroups) return -1;
-					else if (a.nGroups < b.nGroups) return +1;
-					else if (a.sumOfSquares < b.sumOfSquares) return -1;
-					else return 0;
-				});
-				let nGroupsNow = gang[2][0].nGroups;
+				if (botNode.hasKids) {
+					info[12] = gang[1][2]; // maxGroupsKidEasy	
 
-				// Build info[13] (statWordListAfter) string
-				// of the truncated sorted list of remaining words.
-				info[13] = `${gang[2][0].nGroups}:`;
-				for (let bni = 0; bni < gang[2].slice(0, appSettings.maxStatWords).length; bni++) {
-					let g = gang[2][bni].nGroups;
-					if (g !== nGroupsNow) {
-						info[13] += `, ${g}:`
-						nGroupsNow = g;
+					// Sort gang.groupNodes 1st by max nGroups and 2nd by min sum Of Squares.
+					gang[2].sort((a, b) => {
+						if (a.nGroups > b.nGroups) return -1;
+						else if (a.nGroups < b.nGroups) return +1;
+						else if (a.sumOfSquares < b.sumOfSquares) return -1;
+						else return 0;
+					});
+
+					// Build info[13] (statWordListAfter) string
+					// of the truncated sorted list of remaining words.
+					let nGroupsNow = gang[2][0].nGroups;
+					info[13] = `${gang[2][0].nGroups}:`;
+					for (let bni = 0; bni < gang[2].slice(0, appSettings.maxStatWords).length; bni++) {
+						let g = gang[2][bni].nGroups;
+						if (g !== nGroupsNow) {
+							info[13] += `, ${g}:`
+							nGroupsNow = g;
+						}
+						info[13] += ` ${gang[2][bni].guess}`;
 					}
-					info[13] += ` ${gang[2][bni].guess}`;
+				} else if (!botNode.hasKids) {
+					// info[19] = group.join(" "); // wordListAfterOld
+					info[20] = group.slice(0, appSettings.maxStatWords).join(" "); // statWordListAfterOld
+					info[13] = info[20]; // statWordListAfter
 				}
-
-				// info[19] = group.join(" "); // wordListAfterOld
-				// info[20] = group.slice(0, appSettings.maxStatWords).join(" "); // statWordListAfterOld
 			}
 		}	
 	});
