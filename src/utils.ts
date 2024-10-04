@@ -272,8 +272,8 @@ export class GameState extends Storable {
 	
 	/** guesses[rowIndex]. 
 	 * Array of each row's guess. 
-	 * guesses is an alias for board.words. */
-	public guesses = Array<string>(ROWS+1).fill("");
+	 * guesses is an alias for board.guesses. */
+	public guesses: Array<string>;
 	/** guessGroupIds[rowIndex]. 
 	 * GroupId of the row's guess. */
 	public guessGroupIds = Array<string>(ROWS+1).fill("");
@@ -290,7 +290,7 @@ export class GameState extends Storable {
 		let solutionIndex = seededRandomInt(0, words.answers.length, this.time);
 		this.solution = words.answers[solutionIndex];
 		this.board = {
-			guesses: Array(ROWS).fill(""),
+			guesses: Array(ROWS+1).fill(""),
 			state: Array.from({ length: ROWS }, () => (Array(COLS).fill("🔳"))),
 		};
 
@@ -975,7 +975,7 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 		info[4] = wordsBefore.join(", "); // wordListBefore
 		if (countOfAinB(botNode.guess, info[4]) > 0) info[6] = "Hard"; // easyOrHard
 		else info[6] = "Easy"; // easyOrHard
-		info[18] = botNode.parent.kids[3] ; // maxGroupsSibEasy
+		info[18] = botNode.parent.kids[2] ; // maxGroupsSibEasy
 	}
 
 	info[9] = botNode.nWordsBefore - info[11]; // nWordsEliminated = nWordsBefore - nWordsAfter

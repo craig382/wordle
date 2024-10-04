@@ -4,6 +4,7 @@
 	import { createEventDispatcher } from "svelte";
 	import { scale } from "svelte/transition";
 	import type { GameState } from "../../utils";
+	import { ROWS } from "../../utils";
 
 	export let app: GameState;
 	export let rows: Row[] = [];
@@ -78,12 +79,14 @@
 
 <div class="board" on:touchstart={swipeStart} on:touchend={swipeEnd} on:touchmove|preventDefault>
 	{#each app.guesses as guess, ri}
-		<Row
-			ri={ri}
-			bind:this={rows[ri]}
-			bind:app={app}
-			on:ctx={(e) => context(e.detail.x, e.detail.y, ri, guess)}
-		/>
+		{#if ri < ROWS}
+			<Row
+				ri={ri}
+				bind:this={rows[ri]}
+				bind:app={app}
+				on:ctx={(e) => context(e.detail.x, e.detail.y, ri, guess)}
+			/>
+		{/if}
 	{/each}
 	{#if icon}
 		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
