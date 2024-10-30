@@ -441,7 +441,6 @@ export class GameState extends Storable {
 				appSettings.prevSolution = this.solution;
 			}
 			
-			console.log(`easyGroup.length: ${this.easyGroup.length}.`);
 			this.human.forEach ( (bn, bni) => {
 				console.log("human:", this.guessGroupIds[bni], bn);
 				// if (bni > 0) console.log(`${bn.guess} parent ${bn.parent[0].guess} with kids: ${bn.parent[2][2].guess}, ${bn.parent[2][3].guess}, ${bn.parent[2][4].guess}, ${bn.parent[2][5].guess}`);
@@ -630,15 +629,14 @@ export function timeRemaining(m: Mode) {
 
 export function createKids(pNode: BotNode) {
 
-	// Prevent a pNode from creating kids 
-	// if there are no more guesses left.
+	// Prevent pNode from creating kids if there are no more guesses left.
 	if (pNode.ri > (ROWS-2)) return;
-	else pNode.hasKids = true;
 
 	let kid: BotNode;
-	let kids: KidTuple;
 
 	pNode.gangs.forEach((pGang, pGroupId) => {
+		if (pGroupId === "#####") return; // skip to next forEach iteration
+		pNode.hasKids = true;
 		let [ pGroup, kids, pGroupNode ] = pGang;
 		let [ pPerfectKid, pMgKidHard, pMgKidEasy, pSosKidHard, pSosKidEasy ] = kids;
 

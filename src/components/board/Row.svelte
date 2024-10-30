@@ -52,7 +52,7 @@
 			showGuessHint = false;
 			complete = true;
 			if (ri === (ng - 1) && app.guesses[ng] === "") {
-				// console.log(`Row/app.nGuesses: ${ng}, guess[${ri}]: ${app.guesses[ri]}, next row guess: "${app.guesses[ng]}", human.length: ${app.human.length}`);
+				console.log(`Row/app.nGuesses: ${ng}, guess[${ri}]: ${app.guesses[ri]}, next row guess: "${app.guesses[ng]}", human.length: ${app.human.length}`);
 				h1 = botNodeInfo(app.human[ri], app.guessGroupIds[ri]);
 				if (ri > 0) {
 					b1 = botNodeInfo(h1[18], "");
