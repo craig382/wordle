@@ -20,6 +20,10 @@ export function countOfAinB(a: string, b: string): number {
 	return b.split(a).length - 1;
 }
 
+export async function pause(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 /** Given anEnumDef, this function returns a string array
  * containing all the names of the enum.
  */
@@ -425,7 +429,7 @@ export class GameState extends Storable {
 			} 			
 		}
 
-		console.log(`human[${ri}]`, this.human[ri]);
+		console.log(`${this.human[ri].guess}[${ri}]:`, this.guessGroupIds[ri], this.human[ri]);
 
 		if (this.guessGroupIds[ri] === "#####") {
 			this.status = GameStatus.won;
@@ -441,10 +445,6 @@ export class GameState extends Storable {
 				appSettings.prevSolution = this.solution;
 			}
 			
-			this.human.forEach ( (bn, bni) => {
-				console.log("human:", this.guessGroupIds[bni], bn);
-				// if (bni > 0) console.log(`${bn.guess} parent ${bn.parent[0].guess} with kids: ${bn.parent[2][2].guess}, ${bn.parent[2][3].guess}, ${bn.parent[2][4].guess}, ${bn.parent[2][5].guess}`);
-			});
 			console.log("GameState:", this);
 			console.log("botRoot:", botRoot);
 		}

@@ -41,6 +41,7 @@
         namesOf,
         appSettings,
         OpenerModes,
+		pause,
 	} from "../utils";
 	import { letterStates, settings, mode, showRowHints } from "../stores";
     import { GameMode } from "../enums";
@@ -160,11 +161,11 @@
 		lose();
 	}
 
-	function playAiGame(randomWord: boolean = false) {
+	async function playAiGame(randomWord: boolean = false) {
 
 		// newGame() clears the board and
 		// creates a new random solution and a default random opener.
-		newGame();
+		await newGame();
 
 		// New Word (randomWord) mode may use a chain mode or auto repeat opener.
 		// Entered Word (non-randomWord) mode always uses the default random opener.  
@@ -226,7 +227,7 @@
 		
 	});
 
-	function newGame() {
+	async function newGame() {
 		modeData.modes[$mode].historical = false;
 		modeData.modes[$mode].seed = newSeed($mode);
 		app = new GameState($mode);
@@ -251,13 +252,15 @@
 		if (app.mode === GameMode.solver || app.mode === GameMode.ai) 
 			autoOpener = false;
 		else autoOpener = (appSettings.openerMode !== OpenerModes.Manual);
+
+		await pause(500);
+
 		if (autoOpener) {
 			app.board.guesses[0] = app.opener;
 			processValidGuess(); 
 		}
 
 		console.log("newGame:", app);
-
 	}
 
 	function setShowStatsTrue() {

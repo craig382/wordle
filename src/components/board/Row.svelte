@@ -19,13 +19,13 @@
 	let animation = "";
 	let complete = false;
 	let showRowHint = false;
+	let rowHintCalculated = false;
 	let showGuessHint = false;
 	let guess = "";
 	let inDictionary = false;
 	let isHard = false;
 	let guessHint = "";
 	let tiles: Tile[] = [];
-	let h0: BotNodeTuple;
 	let h1: BotNodeTuple;
 	let b1: BotNodeTuple;
 
@@ -47,19 +47,22 @@
 
 	$: {
 		let ng = app.nGuesses;
+		// console.log(`Row.svelte nGuesses ${ng}, "${app.guesses[ri]}"[${ri}]`);
+		if (ng === 0) rowHintCalculated = false;
 		if (ng > ri) {
 			showRowHint = $showRowHints;
 			showGuessHint = false;
 			complete = true;
-			if (ri === (ng - 1) && app.guesses[ng] === "") {
-				console.log(`Row/app.nGuesses: ${ng}, guess[${ri}]: ${app.guesses[ri]}, next row guess: "${app.guesses[ng]}", human.length: ${app.human.length}`);
+			if (!rowHintCalculated) {
+				console.log(`Row.svelte. Calculate ${app.guesses[ri]}[${ri}] row hint.`);
 				h1 = botNodeInfo(app.human[ri], app.guessGroupIds[ri]);
 				if (ri > 0) {
 					b1 = botNodeInfo(h1[18], "");
 				}
+				rowHintCalculated = true;
 			}
 		} else {
-			showRowHint = false;			
+			showRowHint = false;
 			if (ng === ri) {
 				if (app.mode === GameMode.solver) complete = true;
 				if (app.board.guesses[ri][4] !== undefined) {
