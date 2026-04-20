@@ -10,7 +10,7 @@
 
 	function copyStats() {
 		navigator.clipboard.writeText(
-			`${modeData.modes[$mode].name} Wordle+ #${game.solutionNumber} ${
+			`${modeData.modes[$mode].name} Wordle+ #${game.solutionIndex} ${
 				(game.status !== GameStatus.won) ? "X" : game.nGuesses
 			}/${game.board.guesses.length}\n\n    ${game.board.state
 				.slice(0, game.nGuesses)

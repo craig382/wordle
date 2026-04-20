@@ -33,7 +33,6 @@
 		BotNode,
 		GameState,
 		LetterStates,
-		words,
 		Stats,
         groupIdFromColors,
         calculateBotInfoArray2,
@@ -45,6 +44,8 @@
 	} from "../utils";
 	import { letterStates, settings, mode, showRowHints } from "../stores";
     import { GameMode } from "../enums";
+	import {words} from "../words_5";
+
 
 	export let stats: Stats;
 	export let app: GameState;
@@ -237,7 +238,7 @@
 		timer.reset($mode);
 
 		if (appSettings.openerMode === OpenerModes["Random NYT WordleBot"] || 
-			app.mode === GameMode.ai || appSettings.prevSolution === "") {
+			app.gameMode === GameMode.ai || appSettings.prevSolution === "") {
 			let openersArray = app.openers.split(" ");
 			app.opener = randomSample(openersArray);
 		} else if (appSettings.openerMode === OpenerModes["Auto Repeat"]) {
@@ -249,7 +250,7 @@
 		// 2) Solver mode never uses auto opener.
 		// 3) All other modes use auto opener if openerMode is not manual.
 		let autoOpener: boolean = false;
-		if (app.mode === GameMode.solver || app.mode === GameMode.ai) 
+		if (app.gameMode === GameMode.solver || app.gameMode === GameMode.ai) 
 			autoOpener = false;
 		else autoOpener = (appSettings.openerMode !== OpenerModes.Manual);
 
@@ -462,7 +463,7 @@
 		/>
 		<Share slot="2" game={app} />
 	</Separator>
-	<ShareGame solutionNumber={app.solutionNumber} />
+	<ShareGame solutionIndex={app.solutionIndex} />
 	<br />
 
 	<div class="row">
@@ -581,7 +582,7 @@
 					toaster.pop("localStorage cleared");
 				}}
 			>
-				{modeData.modes[$mode].name} word #{app.solutionNumber}
+				{modeData.modes[$mode].name} word #{app.solutionIndex}
 			</div>
 		</div>
 	</svelte:fragment>

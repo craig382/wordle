@@ -1,4 +1,7 @@
-const words = {
+export const words = {
+	contains: (word: string) => {
+		return words.answers.includes(word) || words.otherGuesses.includes(word);
+	},
 	"answers": [
 		"cigar",
 		"rebut",
@@ -12976,4 +12979,5 @@ const words = {
 		"zymic"
 	]
 };
-export default words;
+
+export const maxAnswersIndex = words.answers.length - 1;

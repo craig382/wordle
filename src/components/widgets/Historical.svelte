@@ -4,7 +4,8 @@
 	import type { Toaster } from ".";
 	import { GameMode } from "../../enums";
 	import { mode } from "../../stores";
-	import { getWordNumber, modeData, newSeed } from "../../utils";
+	import { GameState, modeData, newSeed } from "../../utils";
+	import {maxAnswersIndex} from "../../words_5";
 
 	export let showSettings: boolean;
 
@@ -25,8 +26,8 @@
 		validNumber = false;
 	}
 
-	function validateNumber(num: number, wordNum: number) {
-		if (!isNaN(num) && num > 0 && num < wordNum) {
+	function validateNumber(num: number, maxNum: number) {
+		if (!isNaN(num) && num >= 0 && num <= maxNum) {
 			newWordNum = num;
 			return true;
 		}
@@ -40,7 +41,7 @@
 			.split("/");
 		if (data.length !== 2) return false;
 		if (!(data[0] in GameMode)) return false;
-		if (!validateNumber(+data[1], getWordNumber(GameMode[data[0]], true))) {
+		if (!validateNumber(+data[1], maxAnswersIndex)) {
 			return false;
 		}
 		linkMode = GameMode[data[0]];
@@ -62,6 +63,7 @@
 		e.currentTarget.dispatchEvent(custom_event("close", null, { bubbles: true }));
 		showSettings = false;
 		toaster.pop(`${GameMode[$mode]} wordle #${newWordNum}`, 2);
+		new GameState(newMode, newWordNum);
 		reset();
 	}
 	mode.subscribe(() => {
@@ -101,7 +103,7 @@
 			bind:value={numValue}
 			placeholder="Example: 1"
 			class:valid={validNumber}
-			on:input={() => (validNumber = validateNumber(+numValue, getWordNumber($mode, true)))}
+			on:input={() => (validNumber = validateNumber(+numValue, maxAnswersIndex))}
 			on:keydown={onInput}
 		/>
 	</form>
@@ -111,7 +113,7 @@
 		{/each}
 	</select>
 </div>
-<div>Enter a game number between 1 and {getWordNumber($mode, true) - 1}</div>
+<div>Enter a word index between 0 and {maxAnswersIndex}</div>
 <div
 	class:disabled={!validLink && !validNumber}
 	class="button"

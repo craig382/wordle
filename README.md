@@ -99,3 +99,17 @@ Have fun :)
 - Add a case for that mode in the newSeed function in `utils.ts`
 - Add a ModeData object to the modeData modes array in `utils.ts`
 </details>
+
+http://localhost:5173/wordle/#infinite/134194081
+goody
+
+
+GameState.solutionNumber:
+- was an ugly number returned by getWordNumber(mode)
+- experiment with changing it to solutionIndex which is simple the numbered value of the word in the word list.
+- http://localhost:5173/wordle/#infinite/810
+- "range"
+- http://localhost:5173/wordle/#infinite/226
+- "light"
+- http://localhost:5173/wordle/#infinite/196
+- "rebus"

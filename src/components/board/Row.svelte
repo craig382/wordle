@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { createEventDispatcher } from "svelte";
-	import { COLS, GameState, botNodeInfo, words, } from "../../utils";
+	import { COLS, GameState, botNodeInfo} from "../../utils";
 	import Tile from "./Tile.svelte";
 	import { showRowHints } from "../../stores";
 	import { GameMode } from "../../enums";
-
+	import {words} from "../../words_5";
 
 	/** Row Index.*/
 	export let ri: number;
@@ -64,7 +64,7 @@
 		} else {
 			showRowHint = false;
 			if (ng === ri) {
-				if (app.mode === GameMode.solver) complete = true;
+				if (app.gameMode === GameMode.solver) complete = true;
 				if (app.board.guesses[ri][4] !== undefined) {
 					showGuessHint = $showRowHints;
 					if (showGuessHint) {

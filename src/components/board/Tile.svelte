@@ -35,7 +35,7 @@
 	onDestroy(unsub);
 
 	function enterColor(ri: number, ci: number) {
-		if ( app.mode === GameMode.solver && ri === app.nGuesses ) {
+		if ( app.gameMode === GameMode.solver && ri === app.nGuesses ) {
 			let rs = app.board.state[ri]; // rowState[ci] array.
 			switch (rs[ci]) {
 				case "🔳": rs[ci]= "⬛"; break;

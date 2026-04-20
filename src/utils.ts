@@ -1,6 +1,6 @@
 import seedRandom from "seedrandom";
 import { GameMode, ms } from "./enums";
-import wordList from "./words_5";
+import {maxAnswersIndex, words} from "./words_5";
 
 export const ROWS: number = 6;
 export const COLS: number = 5;
@@ -8,14 +8,6 @@ export let app: GameState;
 export let botRoot: BotNode;
 
 export let appSettings: Settings;
-
-export const words = {
-	...wordList,
-	contains: (word: string) => {
-		return wordList.answers.includes(word) || wordList.otherGuesses.includes(word);
-	},
-};
-
 export function countOfAinB(a: string, b: string): number {
 	return b.split(a).length - 1;
 }
@@ -135,14 +127,6 @@ export const modeData: ModeData = {
 			seed: newSeed(GameMode.infinite),
 			historical: false,
 		},
-		// {
-		// 	name: "Minutely",
-		// 	unit: ms.MINUTE,
-		// 	start: 1642528800000,	// 18/01/2022 8:00pm
-		// 	seed: newSeed(GameMode.minutely),
-		// 	historical: false,
-		// 	icon: "m7,200v-200l93,100l93,-100v200",
-		// },
 	]
 };
 /**
@@ -246,7 +230,7 @@ export class GameState extends Storable {
 	public nGuesses: number;
 	public validHard: boolean;
 	public time: number;
-	public solutionNumber: number;
+	public solutionIndex: number;
 	public solution: string;
 	public board: GameBoard;
 	public opener: string;
@@ -263,7 +247,7 @@ export class GameState extends Storable {
 	public nNodesCreated: number = 0;
 	public easyGroup: Array<string>;
 
-	mode: GameMode;
+	gameMode: GameMode;
 
 	/** These are the Bot Row Arrays and their modes. */
 	public human: Array<BotNode>;
@@ -282,17 +266,21 @@ export class GameState extends Storable {
 	 * GroupId of the row's guess. */
 	public guessGroupIds = Array<string>(ROWS+1).fill("");
 
-	constructor(mode: GameMode) {
+	constructor(gameMode: GameMode, aSolutionIndex?: number) {
 		super();
-		this.mode = mode;
-		
+		this.gameMode = gameMode;
 		this.status = GameStatus.active;
 		this.nGuesses = 0;
 		this.validHard = true;
-		this.time = modeData.modes[mode].seed;
-		this.solutionNumber = getWordNumber(mode);
-		let solutionIndex = seededRandomInt(0, words.answers.length, this.time);
-		this.solution = words.answers[solutionIndex];
+		this.time = modeData.modes[gameMode].seed;
+		console.log("aSolutionIndex:", aSolutionIndex);
+		if (typeof aSolutionIndex !== 'undefined') {
+			this.solutionIndex = aSolutionIndex;
+		} else {
+		this.solutionIndex = seededRandomInt(0, maxAnswersIndex, this.time);
+		}
+
+		this.solution = words.answers[this.solutionIndex];
 		this.board = {
 			guesses: Array(ROWS+1).fill(""),
 			state: Array.from({ length: ROWS }, () => (Array(COLS).fill("🔳"))),
@@ -300,7 +288,7 @@ export class GameState extends Storable {
 
 		this.guesses = this.board.guesses;
 
-		if (mode === GameMode.solver) {
+		if (gameMode === GameMode.solver) {
 			this.board.state[0].fill("⬛");
 			this.solution = "";
 		}
@@ -313,11 +301,12 @@ export class GameState extends Storable {
 		this.aiMaxGroupsEasy = [];
 		this.aiMinSumOfSquaresHard = [];
 		this.aiMinSumOfSquaresEasy = [];
-	
+		window.location.hash = `${GameMode[this.gameMode]}/${this.solutionIndex}`;
+
 		app = this; // tell svelte to react to change in app
 		
-		// console.log("app = new GameState:", app);
-		// console.log(new Error(`GameState.constructor() stack. No Error.`));
+		console.log("app = new GameState:", app);
+		console.log(new Error(`GameState.constructor() stack. No Error.`));
 	}
 
 	get latestWord() { return this.board.guesses[this.nGuesses]; }
@@ -336,7 +325,7 @@ export class GameState extends Storable {
 		let guess = this.guesses[ri];
 
 		// Initialize guessGroupIds[ri]
-		if ( this.mode !== GameMode.solver) {
+		if ( this.gameMode !== GameMode.solver) {
 			this.guessGroupIds[ri] = calculateGroupId(this.solution, guess);
 		}
 
@@ -356,7 +345,7 @@ export class GameState extends Storable {
 			this.aiMinSumOfSquaresEasy.push(botRoot);
 			if (this.guessGroupIds[0] !== "#####") {
 				let gang: GangTuple;
-				if ( app.mode === GameMode.solver ) {
+				if ( app.gameMode === GameMode.solver ) {
 					gang = this.human[0].gangs.get(app.guessGroupIds[0]);
 					this.aiMaxGroupsHard.push(gang[1][1]);
 					this.aiMaxGroupsEasy.push(gang[1][2]);
@@ -438,9 +427,9 @@ export class GameState extends Storable {
 
 		if (!this.active) {
 
-			if (this.status === GameStatus.won || this.mode !== GameMode.solver ) {
+			if (this.status === GameStatus.won || this.gameMode !== GameMode.solver ) {
 				if (this.solution === appSettings.prevSolution) {
-					modeData.modes[this.mode].historical = true;
+					modeData.modes[this.gameMode].historical = true;
 				}
 				appSettings.prevSolution = this.solution;
 			}
