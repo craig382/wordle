@@ -63,8 +63,18 @@
 		e.currentTarget.dispatchEvent(custom_event("close", null, { bubbles: true }));
 		showSettings = false;
 		toaster.pop(`${GameMode[$mode]} wordle #${newWordNum}`, 2);
-		new GameState(newMode, newWordNum);
-		reset();
+
+		// Add the solutionIndex to the end of the url to tell
+		// wordle to play a specific game next time instead of a random game.
+		window.location.hash = `${GameMode[newMode]}/${newWordNum}`;
+
+		reset(); // Reset the state of this module so that it works correctly next time.
+
+		// Reload the wordle url so that it plays this specific solutionIndex.
+		window.location.reload();
+	
+		// new GameState(newMode, newWordNum);
+		// newGame(false);
 	}
 	mode.subscribe(() => {
 		if (!showSettings) {

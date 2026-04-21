@@ -1,16 +1,27 @@
 <script lang="ts">
 	import { getContext } from "svelte";
 	import { GameMode } from "../../enums";
-	import { modeData, app } from "../../utils";
+	import { modeData, appFromUtilsTs, GameState } from "../../utils";
 	import GameIcon from "../GameIcon.svelte";
 	import type Toaster from "./Toaster.svelte";
+
+	export let appFromShareGameSvelte: GameState;
 
 	const toaster: Toaster = getContext("toaster");
 
 	function share() {
 		toaster.pop("Copied");
-		window.location.hash = `${GameMode[app.gameMode]}/${app.solutionIndex}`;
-		navigator.clipboard.writeText(`${window.location.href}`);
+
+		// Create and copy to the clipboard
+		// a wordle url for sharing that includes
+		// the wordle gameMode and solutionIndex.
+		// Do not update this window's url with shared url,
+		// because if you did, wordle may play the same game
+		// next time instead of a random game.
+		// window.location.hash = `${GameMode[appFromUtilsTs.gameMode]}/${appFromUtilsTs.solutionIndex}`;
+		navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}#${GameMode[appFromShareGameSvelte.gameMode]}/${appFromShareGameSvelte.solutionIndex}`);
+		
+		// console.log(`window.location "href" "origin" "pathname" "hash": "${window.location.href}" "${window.location.origin}" "${window.location.pathname}" "${window.location.hash}"`);
 	}
 </script>
 
@@ -20,7 +31,7 @@
 			d="M4.167 4.167c-1.381 1.381-1.381 3.619 0 5L6.5 11.5a1.18 1.18 0 0 1 0 1.667 1.18 1.18 0 0 1-1.667 0L2.5 10.833C.199 8.532.199 4.801 2.5 2.5s6.032-2.301 8.333 0l3.333 3.333c2.301 2.301 2.301 6.032 0 8.333a1.18 1.18 0 0 1-1.667 0 1.18 1.18 0 0 1 0-1.667c1.381-1.381 1.381-3.619 0-5L9.167 4.167c-1.381-1.381-3.619-1.381-5 0zm5.667 14c-2.301-2.301-2.301-6.032 0-8.333a1.18 1.18 0 0 1 1.667 0 1.18 1.18 0 0 1 0 1.667c-1.381 1.381-1.381 3.619 0 5l3.333 3.333c1.381 1.381 3.619 1.381 5 0s1.381-3.619 0-5L17.5 12.5a1.18 1.18 0 0 1 0-1.667 1.18 1.18 0 0 1 1.667 0l2.333 2.333c2.301 2.301 2.301 6.032 0 8.333s-6.032 2.301-8.333 0l-3.333-3.333z"
 		/>
 	</GameIcon>
-	Copy link to this game ({modeData.modes[app.gameMode].name} #{app.solutionIndex})
+	Copy link to this game ({modeData.modes[appFromShareGameSvelte.gameMode].name} #{appFromShareGameSvelte.solutionIndex})
 </div>
 
 <style>

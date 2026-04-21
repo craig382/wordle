@@ -21,7 +21,7 @@
 <script lang="ts">
 	export let version: string;
 	console.log(`Wordle version ${version} restarted`);
-	let app: GameState;
+	let appFromAppSvelte: GameState;
 	setContext("version", version);
 	localStorage.setItem("version", version);
 	let stats: Stats;
@@ -41,17 +41,17 @@
 		stats = new Stats(localStorage.getItem(`stats-${m}`) || m);
 		console.log("2:", hash);
 		if (!isNaN(+hash[1]) && +hash[1] <= maxAnswersIndex && +hash[1] >= 0) {
-			// modeData.modes[modeVal].historical = true;
-			app = new GameState(m, +hash[1]);
+			modeData.modes[modeVal].historical = true;
+			appFromAppSvelte = new GameState(m, +hash[1]);
 		} else {
-			app = new GameState(m);
+			appFromAppSvelte = new GameState(m);
 		}
-		letterStates.set(new LetterStates(app.board));
+		letterStates.set(new LetterStates(appFromAppSvelte.board));
 	});
 
 </script>
 
 <Toaster bind:this={toaster} />
 {#if toaster}
-	<Game {stats} bind:app={app} {toaster} />
+	<Game {stats} bind:appFromGameSvelte={appFromAppSvelte} {toaster} />
 {/if}
