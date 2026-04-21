@@ -4,7 +4,7 @@
 	import type { Toaster } from ".";
 	import { GameMode } from "../../enums";
 	import { mode } from "../../stores";
-	import { GameState, modeData, newSeed } from "../../utils";
+	import { modeData, newSeed } from "../../utils";
 	import {maxAnswersIndex} from "../../words_5";
 
 	export let showSettings: boolean;
@@ -53,7 +53,7 @@
 		const newMode = validNumber ? $mode : linkMode;
 		const currentModeData = modeData.modes[newMode];
 
-		currentModeData.historical = true;
+		// currentModeData.historical = true;
 		currentModeData.seed = newSeed(
 			$mode,
 			(newWordNum - 1) * currentModeData.unit + currentModeData.start
@@ -72,9 +72,6 @@
 
 		// Reload the wordle url so that it plays this specific solutionIndex.
 		window.location.reload();
-	
-		// new GameState(newMode, newWordNum);
-		// newGame(false);
 	}
 	mode.subscribe(() => {
 		if (!showSettings) {

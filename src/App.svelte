@@ -31,21 +31,17 @@
 	settings.subscribe((s) => localStorage.setItem("settings", JSON.stringify(s)));
 
 	const hash = window.location.hash.slice(1).split("/");
-	console.log("1:", hash);
 	const modeVal: GameMode = !isNaN(GameMode[hash[0]])
 		? GameMode[hash[0]]
 		: +localStorage.getItem("mode") || modeData.default;
+	if (!isNaN(+hash[1]) && +hash[1] <= maxAnswersIndex && +hash[1] >= 0) {
+		modeData.modes[modeVal].historical = true;
+	} 
 	mode.set(modeVal);
 	mode.subscribe((m) => {
 		localStorage.setItem("mode", `${m}`);
 		stats = new Stats(localStorage.getItem(`stats-${m}`) || m);
-		console.log("2:", hash);
-		if (!isNaN(+hash[1]) && +hash[1] <= maxAnswersIndex && +hash[1] >= 0) {
-			modeData.modes[modeVal].historical = true;
-			appFromAppSvelte = new GameState(m, +hash[1]);
-		} else {
-			appFromAppSvelte = new GameState(m);
-		}
+		appFromAppSvelte = new GameState(m);
 		letterStates.set(new LetterStates(appFromAppSvelte.board));
 	});
 

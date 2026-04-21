@@ -100,9 +100,6 @@ Have fun :)
 - Add a ModeData object to the modeData modes array in `utils.ts`
 </details>
 
-http://localhost:5173/wordle/#infinite/134194081
-goody
-
 
 GameState.solutionNumber:
 - was an ugly number returned by getWordNumber(mode)

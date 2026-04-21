@@ -68,9 +68,7 @@
 	let board: Board;
 	let timer: Timer;
 
-	export function getApp() {
-		return appFromGameSvelte;
-	}
+	// newGame();
 
 	window.addEventListener('popstate', function() {
 		window.history.pushState({}, '')
@@ -166,11 +164,11 @@
 		lose();
 	}
 
-	function playAiGame(randomWord: boolean = false) {
+	async function playAiGame(randomWord: boolean = false) {
 
 		// newGame() clears the board and
 		// creates a new random solution and a default random opener.
-		newGame();
+		await newGame();
 
 		// New Word (randomWord) mode may use a chain mode or auto repeat opener.
 		// Entered Word (non-randomWord) mode always uses the default random opener.  
@@ -228,11 +226,10 @@
 
 	onMount(() => {
 		if (!appFromGameSvelte.active) setTimeout(setShowStatsTrue, delay);
-		else newGame();
-		
+		// else newGame();
 	});
 
-	function newGame() {
+	async function newGame() {
 		modeData.modes[$mode].historical = false;
 		modeData.modes[$mode].seed = newSeed($mode);
 		appFromGameSvelte = new GameState($mode);
@@ -258,7 +255,7 @@
 			autoOpener = false;
 		else autoOpener = (appSettings.openerMode !== OpenerModes.Manual);
 
-		// await pause(500);
+		await pause(500);
 
 		if (autoOpener) {
 			appFromGameSvelte.board.guesses[0] = appFromGameSvelte.opener;

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getContext } from "svelte";
 	import { GameMode } from "../../enums";
-	import { modeData, appFromUtilsTs, GameState } from "../../utils";
+	import { modeData, GameState } from "../../utils";
 	import GameIcon from "../GameIcon.svelte";
 	import type Toaster from "./Toaster.svelte";
 
@@ -18,7 +18,6 @@
 		// Do not update this window's url with shared url,
 		// because if you did, wordle may play the same game
 		// next time instead of a random game.
-		// window.location.hash = `${GameMode[appFromUtilsTs.gameMode]}/${appFromUtilsTs.solutionIndex}`;
 		navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}#${GameMode[appFromShareGameSvelte.gameMode]}/${appFromShareGameSvelte.solutionIndex}`);
 		
 		// console.log(`window.location "href" "origin" "pathname" "hash": "${window.location.href}" "${window.location.origin}" "${window.location.pathname}" "${window.location.hash}"`);

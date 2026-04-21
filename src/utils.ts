@@ -266,19 +266,28 @@ export class GameState extends Storable {
 	 * GroupId of the row's guess. */
 	public guessGroupIds = Array<string>(ROWS+1).fill("");
 
-	constructor(gameMode: GameMode, aSolutionIndex?: number) {
+	constructor(gameMode: GameMode) {
 		super();
-		this.gameMode = gameMode;
+
+		// Play the solutionIndex game in the url if available
+		// else play a random solutionIndex game.
+		const hash = window.location.hash.slice(1).split("/");
+		const modeVal: GameMode = !isNaN(GameMode[hash[0]])
+			? GameMode[hash[0]]
+			: gameMode;
+		if (!isNaN(+hash[1]) && +hash[1] <= maxAnswersIndex && +hash[1] >= 0) {
+			// modeData.modes[modeVal].historical = true;
+			this.gameMode = modeVal;
+			this.solutionIndex = +hash[1];
+		} else {
+			this.gameMode = gameMode;
+			this.solutionIndex = seededRandomInt(0, maxAnswersIndex, modeData.modes[gameMode].seed);
+		}
+		console.log(`new GameState: ${modeData.modes[this.gameMode].name} mode game #${this.solutionIndex}`);
+
 		this.status = GameStatus.active;
 		this.nGuesses = 0;
 		this.validHard = true;
-		this.time = modeData.modes[gameMode].seed;
-		console.log("aSolutionIndex:", aSolutionIndex);
-		if (typeof aSolutionIndex !== 'undefined') {
-			this.solutionIndex = aSolutionIndex;
-		} else {
-		this.solutionIndex = seededRandomInt(0, maxAnswersIndex, this.time);
-		}
 
 		this.solution = words.answers[this.solutionIndex];
 		this.board = {
