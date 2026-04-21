@@ -224,7 +224,6 @@ export class GameState extends Storable {
 	/** Number of completely crunched guesses. */
 	public nGuesses: number;
 	public validHard: boolean;
-	public time: number;
 	public solutionIndex: number;
 	public solution: string;
 	public board: GameBoard;
@@ -277,7 +276,7 @@ export class GameState extends Storable {
 			this.gameMode = gameMode;
 			this.solutionIndex = seededRandomInt(0, maxAnswersIndex, modeData.modes[gameMode].seed);
 		}
-		console.log(`new GameState: ${modeData.modes[this.gameMode].name} mode game #${this.solutionIndex}`);
+		// console.log(`new GameState: ${modeData.modes[this.gameMode].name} mode game #${this.solutionIndex}`);
 
 		this.status = GameStatus.active;
 		this.nGuesses = 0;
@@ -311,8 +310,8 @@ export class GameState extends Storable {
 
 		appFromUtilsTs = this; // tell svelte to react to change in app
 		
-		console.log("app = new GameState:", appFromUtilsTs);
-		console.log(new Error(`GameState.constructor() stack. No Error.`));
+		// console.log("app = new GameState:", appFromUtilsTs);
+		// console.log(new Error(`GameState.constructor() stack. No Error.`));
 	}
 
 	get latestWord() { return this.board.guesses[this.nGuesses]; }
