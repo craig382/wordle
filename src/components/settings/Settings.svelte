@@ -73,9 +73,9 @@
 		</Setting>
 		<!-- svelte-ignore a11y-click-events-have-key-events -->
 		<Setting type="custom" bind:value={$mode}>
-			<svelte:fragment slot="title">Play Historical Game</svelte:fragment>
+			<svelte:fragment slot="title">Play Specific Game</svelte:fragment>
 			<svelte:fragment slot="desc">
-				Play a previous word by pasting in a link or setting the date number
+				Play a specific game by pasting in a link or entering the game number
 			</svelte:fragment>
 			<svelte:fragment slot="custom">
 				<svg

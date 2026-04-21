@@ -16,8 +16,6 @@
 		"The refresh button (in the uppler left corner) looks like a circular arrow when a new word is ready and like an hourglass when you have to wait for a new word.",
 		"Everyone has the same wordle at the same time. Your word #73 is the same as everyone elses #73.",
 		"There are more valid guesses than possible solutions, ie. not all 5 letter words can be selected as an answer by the game.",
-		"Historical games don't count towards your stats. Historical games are when you follow a link to a specific game number.",
-		"Only the data for latest historical game is saved for each game mode.",
 		'To run the hidden, dangerous "Reset Your Stats" function... After clicking on the "Settings" icon (the gear icon in the upper right corner), hover your mouse over the words "Infinite word #xyz" in the bottom right corner and the following message will pop up: "double click to reset your stats". After you double click, you will briefly see the "localStorage cleared" message and all your stats will be erased.',
 	];
 </script>

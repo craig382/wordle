@@ -141,21 +141,17 @@
 			DELAY_INCREMENT * COLS + DELAY_INCREMENT
 		);
 		setTimeout(setShowStatsTrue, delay * 1.4);
-		if (!modeData.modes[$mode].historical) {
-			stats.addWin(appFromGameSvelte.nGuesses);
-			stats = stats; // tell svelte to react to change in stats
-			localStorage.setItem(`stats-${$mode}`, stats.toString());
-		}
+		stats.addWin(appFromGameSvelte.nGuesses);
+		stats = stats; // tell svelte to react to change in stats
+		localStorage.setItem(`stats-${$mode}`, stats.toString());
 	}
 
 	function lose() {
 		appFromGameSvelte.status = GameStatus.lost;
 		setTimeout(setShowStatsTrue, delay);
-		if (!modeData.modes[$mode].historical) {
-			stats.addLoss();
-			stats = stats; // tell svelte to react to change in stats
-			localStorage.setItem(`stats-${$mode}`, stats.toString());
-		}
+		stats.addLoss();
+		stats = stats; // tell svelte to react to change in stats
+		localStorage.setItem(`stats-${$mode}`, stats.toString());
 	}
 
 	function concede() {
@@ -230,7 +226,6 @@
 	});
 
 	async function newGame() {
-		modeData.modes[$mode].historical = false;
 		modeData.modes[$mode].seed = newSeed($mode);
 		appFromGameSvelte = new GameState($mode);
 		$letterStates = new LetterStates();
@@ -289,7 +284,7 @@
 		bind:showRefresh
 		tutorial={$settings.tutorial === 2}
 		on:closeTutPopUp|once={() => ($settings.tutorial = 1)}
-		showStats={stats.played > 0 || (modeData.modes[$mode].historical && !appFromGameSvelte.active)}
+		showStats={stats.played > 0}
 		on:stats={() => (showStats = true)}
 		on:tutorial={() => (showTutorial = true)}
 		on:settings={() => (showSettings = true)}
@@ -348,9 +343,6 @@
 	<h3>Statistics ({modeData.modes[$mode].name})</h3>
 	<h3>{stats.played} Played, {stats.guesses.fail} Lost</h3>
 
-	{#if modeData.modes[$mode].historical}
-		<h3 class="historical">Statistics not updated for historical games</h3>
-	{/if}
 	<Statistics data={stats} />
 	<Distribution distribution={stats.guesses} app={appFromGameSvelte} />
 

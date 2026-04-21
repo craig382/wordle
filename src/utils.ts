@@ -96,7 +96,6 @@ export const modeData: ModeData = {
 			unit: ms.DAY,
 			start: 1642370400000,	// 17/01/2022 UTC+2
 			seed: newSeed(GameMode.daily),
-			historical: false,
 			useTimeZone: true,
 		},
 		{
@@ -104,28 +103,24 @@ export const modeData: ModeData = {
 			unit: ms.HOUR,
 			start: 1642528800000,	// 18/01/2022 8:00pm UTC+2
 			seed: newSeed(GameMode.hourly),
-			historical: false,
 		},
 		{
 			name: "Infinite",
 			unit: ms.SECOND,
 			start: 1642428600000,	// 17/01/2022 4:10:00pm UTC+2
 			seed: newSeed(GameMode.infinite),
-			historical: false,
 		},
 		{
 			name: "AI",
 			unit: ms.SECOND,
 			start: 1642428600000,	// 17/01/2022 4:10:00pm UTC+2
 			seed: newSeed(GameMode.infinite),
-			historical: false,
 		},
 		{
 			name: "Solver",
 			unit: ms.SECOND,
 			start: 1642428600000,	// 17/01/2022 4:10:00pm UTC+2
 			seed: newSeed(GameMode.infinite),
-			historical: false,
 		},
 	]
 };
@@ -276,7 +271,6 @@ export class GameState extends Storable {
 			? GameMode[hash[0]]
 			: gameMode;
 		if (!isNaN(+hash[1]) && +hash[1] <= maxAnswersIndex && +hash[1] >= 0) {
-			// modeData.modes[modeVal].historical = true;
 			this.gameMode = modeVal;
 			this.solutionIndex = +hash[1];
 		} else {
@@ -440,9 +434,6 @@ export class GameState extends Storable {
 		if (!this.active) {
 
 			if (this.status === GameStatus.won || this.gameMode !== GameMode.solver ) {
-				if (this.solution === appSettings.prevSolution) {
-					modeData.modes[this.gameMode].historical = true;
-				}
 				appSettings.prevSolution = this.solution;
 			}
 			

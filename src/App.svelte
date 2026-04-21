@@ -34,9 +34,6 @@
 	const modeVal: GameMode = !isNaN(GameMode[hash[0]])
 		? GameMode[hash[0]]
 		: +localStorage.getItem("mode") || modeData.default;
-	if (!isNaN(+hash[1]) && +hash[1] <= maxAnswersIndex && +hash[1] >= 0) {
-		modeData.modes[modeVal].historical = true;
-	} 
 	mode.set(modeVal);
 	mode.subscribe((m) => {
 		localStorage.setItem("mode", `${m}`);

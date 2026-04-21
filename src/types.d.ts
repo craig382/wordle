@@ -70,7 +70,6 @@ type Mode = {
 	unit: number,
 	start: number,
 	seed: number,
-	historical: boolean,
 	icon?: string,
 	streak?: boolean,
 	useTimeZone?: boolean,

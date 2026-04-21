@@ -53,7 +53,6 @@
 		const newMode = validNumber ? $mode : linkMode;
 		const currentModeData = modeData.modes[newMode];
 
-		// currentModeData.historical = true;
 		currentModeData.seed = newSeed(
 			$mode,
 			(newWordNum - 1) * currentModeData.unit + currentModeData.start
@@ -88,7 +87,7 @@
 	}
 </script>
 
-<h3>Play a historical game</h3>
+<h3>Play a specific game</h3>
 {#key $mode}
 	<form>
 		<input
