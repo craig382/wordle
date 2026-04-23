@@ -6,7 +6,7 @@
 	import type { GameState } from "../../utils";
 	import { ROWS } from "../../utils";
 
-	export let app: GameState;
+	export let appB: GameState;
 	export let rows: Row[] = [];
 	export let icon: string;
 	export let tutorial: boolean;
@@ -38,7 +38,7 @@
 
 	function context(cx: number, cy: number, ri: number, val: string) {
 		// console.log("nGuesses:", guesses, "rowIndex:", ri);
-		if (app.nGuesses > ri) {
+		if (appB.nGuesses > ri) {
 			x = cx;
 			y = cy;
 			showCtx = true;
@@ -74,16 +74,16 @@
 </script>
 
 {#if showCtx}
-	<ContextMenu {x} {y} {word} ri={rowIndex} />
+	<ContextMenu appCM={appB} {x} {y} {word} ri={rowIndex} />
 {/if}
 
 <div class="board" on:touchstart={swipeStart} on:touchend={swipeEnd} on:touchmove|preventDefault>
-	{#each app.guesses as guess, ri}
+	{#each appB.guesses as guess, ri}
 		{#if ri < ROWS}
 			<Row
 				ri={ri}
 				bind:this={rows[ri]}
-				bind:app={app}
+				bind:appR={appB}
 				on:ctx={(e) => context(e.detail.x, e.detail.y, ri, guess)}
 			/>
 		{/if}

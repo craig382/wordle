@@ -8,7 +8,7 @@
 
 	/** Row Index.*/
 	export let ri: number;
-	export let app: GameState;
+	export let appR: GameState;
 	export function shake() {
 		animation = "shake";
 	}
@@ -46,7 +46,7 @@
 	}
 
 	$: {
-		let ng = app.nGuesses;
+		let ng = appR.nGuesses;
 		// console.log(`Row.svelte nGuesses ${ng}, "${app.guesses[ri]}"[${ri}]`);
 		if (ng === 0) rowHintCalculated = false;
 		if (ng > ri) {
@@ -54,8 +54,8 @@
 			showGuessHint = false;
 			complete = true;
 			if (!rowHintCalculated) {
-				console.log(`Row.svelte. Calculate ${app.guesses[ri]}[${ri}] row hint.`);
-				h1 = botNodeInfo(app.human[ri], app.guessGroupIds[ri]);
+				console.log(`Row.svelte. Calculate ${appR.guesses[ri]}[${ri}] row hint.`);
+				h1 = botNodeInfo(appR.human[ri], appR.guessGroupIds[ri]);
 				if (ri > 0) {
 					b1 = botNodeInfo(h1[18], "");
 				}
@@ -64,13 +64,13 @@
 		} else {
 			showRowHint = false;
 			if (ng === ri) {
-				if (app.gameMode === GameMode.solver) complete = true;
-				if (app.board.guesses[ri][4] !== undefined) {
+				if (appR.gameMode === GameMode.solver) complete = true;
+				if (appR.board.guesses[ri][4] !== undefined) {
 					showGuessHint = $showRowHints;
 					if (showGuessHint) {
-						guess = app.board.guesses[ri];
+						guess = appR.board.guesses[ri];
 						if (ri > 0) {
-							isHard = app.human[ri-1].gangs.get(app.guessGroupIds[ri-1])[0].includes(guess);
+							isHard = appR.human[ri-1].gangs.get(appR.guessGroupIds[ri-1])[0].includes(guess);
 							if (isHard) guessHint = `\u{2713}\u{2713}`;
 							else {
 								inDictionary = words.answers.includes(guess)
@@ -105,7 +105,7 @@
 	class:complete={complete}
 >
 	{#each Array(COLS) as _, ci}
-		<Tile bind:this={tiles[ci]} bind:app={app} bind:state={app.board.state[ri][ci]} value={app.board.guesses[ri].charAt(ci)} 
+		<Tile bind:this={tiles[ci]} bind:appT={appR} bind:state={appR.board.state[ri][ci]} value={appR.board.guesses[ri].charAt(ci)} 
 			ri={ri} ci={ci} />
 	{/each}
 	<!-- svelte-ignore a11y-click-events-have-key-events -->

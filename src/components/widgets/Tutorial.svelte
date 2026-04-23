@@ -2,7 +2,7 @@
 	import { COLS, ROWS, GameState } from "../../utils";
 	import { Tile } from "../board";
 
-	export let app: GameState;
+	export let appTut: GameState;
 	export let visible: boolean;
 </script>
 
@@ -16,27 +16,27 @@
 <div class:complete={visible} class="examples">
 	<div><strong>Examples</strong></div>
 	<div class="row">
-		<Tile value="w" state="🟩" app={app} />
-		<Tile value="e" state="🔳" app={app} />
-		<Tile value="a" state="🔳" app={app} />
-		<Tile value="r" state="🔳" app={app} />
-		<Tile value="y" state="🔳" app={app} />
+		<Tile value="w" state="🟩" appT={appTut} />
+		<Tile value="e" state="🔳" appT={appTut} />
+		<Tile value="a" state="🔳" appT={appTut} />
+		<Tile value="r" state="🔳" appT={appTut} />
+		<Tile value="y" state="🔳" appT={appTut} />
 	</div>
 	<div>The letter <strong>W</strong> is in the word and in the correct spot.</div>
 	<div class="row">
-		<Tile value="p" state="🔳" app={app} />
-		<Tile value="i" state="🟨" app={app} />
-		<Tile value="l" state="🔳" app={app} />
-		<Tile value="l" state="🔳" app={app} />
-		<Tile value="s" state="🔳" app={app} />
+		<Tile value="p" state="🔳" appT={appTut} />
+		<Tile value="i" state="🟨" appT={appTut} />
+		<Tile value="l" state="🔳" appT={appTut} />
+		<Tile value="l" state="🔳" appT={appTut} />
+		<Tile value="s" state="🔳" appT={appTut} />
 	</div>
 	<div>The letter <strong>I</strong> is in the word but in the wrong spot.</div>
 	<div class="row">
-		<Tile value="v" state="🔳" app={app} />
-		<Tile value="a" state="🔳" app={app} />
-		<Tile value="g" state="🔳" app={app} />
-		<Tile value="u" state="⬛" app={app} />
-		<Tile value="e" state="🔳" app={app} />
+		<Tile value="v" state="🔳" appT={appTut} />
+		<Tile value="a" state="🔳" appT={appTut} />
+		<Tile value="g" state="🔳" appT={appTut} />
+		<Tile value="u" state="⬛" appT={appTut} />
+		<Tile value="e" state="🔳" appT={appTut} />
 	</div>
 	<div>The letter <strong>U</strong> is not in the word in any spot.</div>
 </div>

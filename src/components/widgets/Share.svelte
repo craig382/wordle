@@ -6,18 +6,18 @@
 	import { namesOf, modeData, GameState, GameStatus } from "../../utils";
 	import { getContext } from "svelte";
 
-	export let game: GameState;
+	export let appSh: GameState;
 	const toaster = getContext<Toaster>("toaster");
 
 	function copyStats() {
 		navigator.clipboard.writeText(
-			`Wordle+ ${modeData.modes[$mode].name} #${game.solutionIndex} ${
-			namesOf(GameStatus)[game.status]	
-			} after ${game.nGuesses} guesses.\n    ${
-			game.board.state.slice(0, game.nGuesses).map((r) => r.join(""))
+			`Wordle+ ${modeData.modes[$mode].name} #${appSh.solutionIndex} ${
+			namesOf(GameStatus)[appSh.status]	
+			} after ${appSh.nGuesses} guesses.\n    ${
+			appSh.board.state.slice(0, appSh.nGuesses).map((r) => r.join(""))
 			.join("\n    ")
 			}\n${window.location.origin}${window.location.pathname}#${
-			GameMode[game.gameMode]}/${game.solutionIndex}`
+			GameMode[appSh.gameMode]}/${appSh.solutionIndex}`
 		);
 		toaster.pop("Copied");
 	}

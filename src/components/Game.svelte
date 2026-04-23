@@ -48,7 +48,7 @@
 
 
 	export let stats: Stats;
-	export let appFromGameSvelte: GameState;
+	export let appG: GameState;
 	export let toaster: Toaster;
 
 	setContext("toaster", toaster);
@@ -87,67 +87,67 @@
 			if ($mode === GameMode.solver) {
 				let errorIndex: number = 0;
 				let gid = "";
-				[ gid, errorIndex ] = groupIdFromColors(appFromGameSvelte.nGuesses);
-				appFromGameSvelte.guessGroupIds[appFromGameSvelte.nGuesses] = gid;
-				if (gid === "#####") appFromGameSvelte.solution = appFromGameSvelte.board.guesses[appFromGameSvelte.nGuesses];
-				else if (appFromGameSvelte.nGuesses < (ROWS - 1)) appFromGameSvelte.board.state[appFromGameSvelte.nGuesses + 1].fill("⬛");
-			} else appFromGameSvelte.board.state[appFromGameSvelte.nGuesses] = appFromGameSvelte.guess(appFromGameSvelte.solution);
+				[ gid, errorIndex ] = groupIdFromColors(appG.nGuesses);
+				appG.guessGroupIds[appG.nGuesses] = gid;
+				if (gid === "#####") appG.solution = appG.board.guesses[appG.nGuesses];
+				else if (appG.nGuesses < (ROWS - 1)) appG.board.state[appG.nGuesses + 1].fill("⬛");
+			} else appG.board.state[appG.nGuesses] = appG.guess(appG.solution);
 			try {
-				appFromGameSvelte.updateBot();
-				if (appFromGameSvelte.status === GameStatus.won) win();
-				else if (appFromGameSvelte.status === GameStatus.lost) lose();
+				appG.updateBot();
+				if (appG.status === GameStatus.won) win();
+				else if (appG.status === GameStatus.lost) lose();
 				$showRowHints = $showRowHints;
-				$letterStates.update(appFromGameSvelte.lastState, appFromGameSvelte.lastWord);
+				$letterStates.update(appG.lastState, appG.lastWord);
 				$letterStates = $letterStates;
 			} catch (e) { console.log(e); }
 	}
 
 	function submitWord() {
-		if (appFromGameSvelte.latestWord.length !== COLS) {
+		if (appG.latestWord.length !== COLS) {
 			toaster.pop("Not enough letters");
-			board.shake(appFromGameSvelte.nGuesses);
-		} else if (words.contains(appFromGameSvelte.latestWord)) {
-			if (appFromGameSvelte.nGuesses > 0) {
+			board.shake(appG.nGuesses);
+		} else if (words.contains(appG.latestWord)) {
+			if (appG.nGuesses > 0) {
 				// In Solver mode, user enters guessId here.
-				const hm = appFromGameSvelte.checkHardMode();
+				const hm = appG.checkHardMode();
 				if ($settings.hard[$mode]) {
 					if (hm.type === "🟩") {
 						toaster.pop(
 							`${contractNum(hm.pos + 1)} letter must be ${hm.char.toUpperCase()}`
 						);
-						board.shake(appFromGameSvelte.nGuesses);
+						board.shake(appG.nGuesses);
 						return;
 					} else if (hm.type === "🟨") {
 						toaster.pop(`Guess must contain ${hm.char.toUpperCase()}`);
-						board.shake(appFromGameSvelte.nGuesses);
+						board.shake(appG.nGuesses);
 						return;
 					}
 				} else if (hm.type !== "⬛") {
-					appFromGameSvelte.validHard = false;
+					appG.validHard = false;
 				}
 			}
 			processValidGuess();
 		} else {
 			toaster.pop("Not in word list");
-			board.shake(appFromGameSvelte.nGuesses);
+			board.shake(appG.nGuesses);
 		}
 	}
 
 	function win() {
-		board.bounce(appFromGameSvelte.nGuesses - 1);
-		appFromGameSvelte.status = GameStatus.won;
+		board.bounce(appG.nGuesses - 1);
+		appG.status = GameStatus.won;
 		setTimeout(
-			() => toaster.pop(PRAISE[appFromGameSvelte.nGuesses - 1]),
+			() => toaster.pop(PRAISE[appG.nGuesses - 1]),
 			DELAY_INCREMENT * COLS + DELAY_INCREMENT
 		);
 		setTimeout(setShowStatsTrue, delay * 1.4);
-		stats.addWin(appFromGameSvelte.nGuesses);
+		stats.addWin(appG.nGuesses);
 		stats = stats; // tell svelte to react to change in stats
 		localStorage.setItem(`stats-${$mode}`, stats.toString());
 	}
 
 	function lose() {
-		appFromGameSvelte.status = GameStatus.lost;
+		appG.status = GameStatus.lost;
 		setTimeout(setShowStatsTrue, delay);
 		stats.addLoss();
 		stats = stats; // tell svelte to react to change in stats
@@ -169,51 +169,51 @@
 		// New Word (randomWord) mode may use a chain mode or auto repeat opener.
 		// Entered Word (non-randomWord) mode always uses the default random opener.  
 		if (randomWord) {
-			aiSolution = appFromGameSvelte.solution;
+			aiSolution = appG.solution;
 			switch (appSettings.openerMode) {
 				case OpenerModes["Chain Mode"]:
-					appFromGameSvelte.opener = appSettings.prevSolution;
+					appG.opener = appSettings.prevSolution;
 				break;
 				case OpenerModes["Auto Repeat"]:
-					appFromGameSvelte.opener = appSettings.prevOpener;
+					appG.opener = appSettings.prevOpener;
 				break;
 			}
 		} 
 
 		let ais = aiSolution.toLowerCase();
 		let aiBot: Array<BotNode>;
-		if (words.answers.includes(ais)) appFromGameSvelte.solution = ais;
-		else aiSolution = appFromGameSvelte.solution;
+		if (words.answers.includes(ais)) appG.solution = ais;
+		else aiSolution = appG.solution;
 
 		// Processing the opener calculates the bot tree and ai row arrays.
-		appFromGameSvelte.board.guesses[0] = appFromGameSvelte.opener;
+		appG.board.guesses[0] = appG.opener;
 		processValidGuess(); 
 
 		switch ($settings.aiMode) {
 			case aiModes["Max % Groups Hard"]: 
-				aiBot = appFromGameSvelte.aiMaxGroupsHard;
-				appFromGameSvelte.botLeftMode = BotMode["AI Max % Groups Hard"];
-				appFromGameSvelte.botRightMode = BotMode["AI Min Sum of Squares Hard"]; 
+				aiBot = appG.aiMaxGroupsHard;
+				appG.botLeftMode = BotMode["AI Max % Groups Hard"];
+				appG.botRightMode = BotMode["AI Min Sum of Squares Hard"]; 
 			break;
 			case aiModes["Max % Groups Easy"]: 
-				aiBot = appFromGameSvelte.aiMaxGroupsEasy; 
-				appFromGameSvelte.botLeftMode = BotMode["AI Max % Groups Easy"];
-				appFromGameSvelte.botRightMode = BotMode["AI Min Sum of Squares Easy"]; 
+				aiBot = appG.aiMaxGroupsEasy; 
+				appG.botLeftMode = BotMode["AI Max % Groups Easy"];
+				appG.botRightMode = BotMode["AI Min Sum of Squares Easy"]; 
 			break;
 			case aiModes["Min Sum of Squares Hard"]: 
-				aiBot = appFromGameSvelte.aiMinSumOfSquaresHard; 
-				appFromGameSvelte.botLeftMode = BotMode["AI Min Sum of Squares Hard"];
-				appFromGameSvelte.botRightMode = BotMode["AI Max % Groups Hard"]; 
+				aiBot = appG.aiMinSumOfSquaresHard; 
+				appG.botLeftMode = BotMode["AI Min Sum of Squares Hard"];
+				appG.botRightMode = BotMode["AI Max % Groups Hard"]; 
 			break;
 			case aiModes["Min Sum of Squares Easy"]: 
-				aiBot = appFromGameSvelte.aiMinSumOfSquaresEasy; 
-				appFromGameSvelte.botLeftMode = BotMode["AI Min Sum of Squares Easy"];
-				appFromGameSvelte.botRightMode = BotMode["AI Max % Groups Easy"]; 
+				aiBot = appG.aiMinSumOfSquaresEasy; 
+				appG.botLeftMode = BotMode["AI Min Sum of Squares Easy"];
+				appG.botRightMode = BotMode["AI Max % Groups Easy"]; 
 			break;
 		}
 
 		for (let ri = 1; ri < aiBot.length; ri++) {
-			appFromGameSvelte.board.guesses[ri] = aiBot[ri].guess;
+			appG.board.guesses[ri] = aiBot[ri].guess;
 			processValidGuess();
 		}
 
@@ -221,47 +221,47 @@
 	}
 
 	onMount(() => {
-		if (!appFromGameSvelte.active) setTimeout(setShowStatsTrue, delay);
+		if (!appG.active) setTimeout(setShowStatsTrue, delay);
 		// else newGame();
 	});
 
 	async function newGame() {
 		modeData.modes[$mode].seed = newSeed($mode);
-		appFromGameSvelte = new GameState($mode);
+		appG = new GameState($mode);
 		$letterStates = new LetterStates();
 		showStats = false;
 		showRefresh = false;
 		timer.reset($mode);
 
 		if (appSettings.openerMode === OpenerModes["Random NYT WordleBot"] || 
-			appFromGameSvelte.gameMode === GameMode.ai || appSettings.prevSolution === "") {
-			let openersArray = appFromGameSvelte.openers.split(" ");
-			appFromGameSvelte.opener = randomSample(openersArray);
+			appG.gameMode === GameMode.ai || appSettings.prevSolution === "") {
+			let openersArray = appG.openers.split(" ");
+			appG.opener = randomSample(openersArray);
 		} else if (appSettings.openerMode === OpenerModes["Auto Repeat"]) {
-			appFromGameSvelte.opener = appSettings.prevOpener;
-		} else appFromGameSvelte.opener = appSettings.prevSolution; // Chain mode opener.
+			appG.opener = appSettings.prevOpener;
+		} else appG.opener = appSettings.prevSolution; // Chain mode opener.
 
 		// Use auto opener rules...
 		// 1) AI mode uses playAiGame() to set and process the opener.
 		// 2) Solver mode never uses auto opener.
 		// 3) All other modes use auto opener if openerMode is not manual.
 		let autoOpener: boolean = false;
-		if (appFromGameSvelte.gameMode === GameMode.solver || appFromGameSvelte.gameMode === GameMode.ai) 
+		if (appG.gameMode === GameMode.solver || appG.gameMode === GameMode.ai) 
 			autoOpener = false;
 		else autoOpener = (appSettings.openerMode !== OpenerModes.Manual);
 
 		await pause(500);
 
 		if (autoOpener) {
-			appFromGameSvelte.board.guesses[0] = appFromGameSvelte.opener;
+			appG.board.guesses[0] = appG.opener;
 			processValidGuess(); 
 		}
 
-		console.log("newGame:", appFromGameSvelte);
+		console.log("newGame:", appG);
 	}
 
 	function setShowStatsTrue() {
-		if (!appFromGameSvelte.active) showStats = true;
+		if (!appG.active) showStats = true;
 	}
 
 	function onSwipe(e: Swipe) {
@@ -279,7 +279,7 @@
 
 <svelte:body on:click={board.hideCtx} on:contextmenu={board.hideCtx} />
 
-<main class:guesses={appFromGameSvelte.nGuesses !== 0} style="--rows: {ROWS}; --cols: {COLS}">
+<main class:guesses={appG.nGuesses !== 0} style="--rows: {ROWS}; --cols: {COLS}">
 	<Header
 		bind:showRefresh
 		tutorial={$settings.tutorial === 2}
@@ -303,13 +303,13 @@
 			click on each letter as needed to change its color.
 		{/if}
 		<br />
-		{#if appFromGameSvelte.errorString !== ""}
-			<br /><br />{appFromGameSvelte.errorString}
+		{#if appG.errorString !== ""}
+			<br /><br />{appG.errorString}
 		{/if}	
 	</p>
 	<Board
 		bind:this={board}
-		bind:app={appFromGameSvelte}
+		bind:appB={appG}
 		tutorial={$settings.tutorial === 1}
 		on:closeTutPopUp|once={() => ($settings.tutorial = 0)}
 		icon={modeData.modes[$mode].icon}
@@ -320,14 +320,14 @@
 			if ($settings.tutorial) $settings.tutorial = 0;
 			board.hideCtx();
 		}}
-		bind:value={appFromGameSvelte.board.guesses[appFromGameSvelte.nGuesses === ROWS ? 0 : appFromGameSvelte.nGuesses]}
+		bind:value={appG.board.guesses[appG.nGuesses === ROWS ? 0 : appG.nGuesses]}
 		on:submitWord={submitWord}
 		on:esc={() => {
 			showTutorial = false;
 			showStats = false;
 			showSettings = false;
 		}}
-		disabled={!appFromGameSvelte.active || $settings.tutorial === 3 || showHistorical}
+		disabled={!appG.active || $settings.tutorial === 3 || showHistorical}
 	/>
 </main>
 
@@ -336,7 +336,7 @@
 	on:close|once={() => $settings.tutorial === 3 && --$settings.tutorial}
 	fullscreen={$settings.tutorial === 0}
 >
-	<Tutorial visible={showTutorial} app={appFromGameSvelte} />
+	<Tutorial visible={showTutorial} appTut={appG} />
 </Modal>
 
 <Modal bind:visible={showStats}>
@@ -344,9 +344,9 @@
 	<h3>{stats.played} Played, {stats.guesses.fail} Lost</h3>
 
 	<Statistics data={stats} />
-	<Distribution distribution={stats.guesses} app={appFromGameSvelte} />
+	<Distribution distribution={stats.guesses} appD={appG} />
 
-	{#if appFromGameSvelte.active}
+	{#if appG.active}
 		<!-- Fade with delay is to prevent a bright red button from appearing as soon as refresh is pressed -->
 		<div
 			in:fade={{ delay: 300 }}
@@ -358,13 +358,13 @@
 		</div>
 	{/if}
 
-	{#if showStats && appFromGameSvelte.nGuesses > 0 }
-		{@const LL = calculateBotInfoArray2(appFromGameSvelte.botLeftMode)}
-		{@const RR = calculateBotInfoArray2(appFromGameSvelte.botRightMode)}
+	{#if showStats && appG.nGuesses > 0 }
+		{@const LL = calculateBotInfoArray2(appG.botLeftMode)}
+		{@const RR = calculateBotInfoArray2(appG.botRightMode)}
 		{@const modes = namesOf(BotMode)}
-		<br /><h3>Bot Results {#if !appFromGameSvelte.active && $mode !== GameMode.solver}For Solution "{appFromGameSvelte.solution}"{/if}</h3>
-		{#if appFromGameSvelte.status === GameStatus.lost && $mode !== GameMode.solver}
-			<Definition word={appFromGameSvelte.solution} alternates={0} />
+		<br /><h3>Bot Results {#if !appG.active && $mode !== GameMode.solver}For Solution "{appG.solution}"{/if}</h3>
+		{#if appG.status === GameStatus.lost && $mode !== GameMode.solver}
+			<Definition word={appG.solution} alternates={0} />
 		{/if}
 		{#each Array(Math.max(LL.length, RR.length)) as _, ri}
 			<h1>Guess # {(ri + 1)}</h1>
@@ -377,13 +377,13 @@
 						<!-- svelte-ignore a11y-click-events-have-key-events -->
 						<h4
 							on:click|self={() => {
-								appFromGameSvelte.botLeftMode = (appFromGameSvelte.botLeftMode + 1) % modes.length;
+								appG.botLeftMode = (appG.botLeftMode + 1) % modes.length;
 							}}
 							on:contextmenu|preventDefault|self={() => {
-								appFromGameSvelte.botLeftMode = (appFromGameSvelte.botLeftMode - 1 + modes.length) % modes.length;
+								appG.botLeftMode = (appG.botLeftMode - 1 + modes.length) % modes.length;
 							}}
 						>
-							{modes[appFromGameSvelte.botLeftMode]}<br />
+							{modes[appG.botLeftMode]}<br />
 						</h4>
 					{/if}
 				</section>
@@ -392,13 +392,13 @@
 						<!-- svelte-ignore a11y-click-events-have-key-events -->
 						<h4
 							on:click|self={() => {
-								appFromGameSvelte.botRightMode = (appFromGameSvelte.botRightMode + 1) % modes.length;
+								appG.botRightMode = (appG.botRightMode + 1) % modes.length;
 							}}
 							on:contextmenu|preventDefault|self={() => {
-								appFromGameSvelte.botRightMode = (appFromGameSvelte.botRightMode - 1 + modes.length) % modes.length;
+								appG.botRightMode = (appG.botRightMode - 1 + modes.length) % modes.length;
 							}}
 						>
-							{modes[appFromGameSvelte.botRightMode]}<br />
+							{modes[appG.botRightMode]}<br />
 						</h4>
 					{/if}
 				</section>
@@ -415,7 +415,7 @@
 							{LL[ri][17]}% eliminated<br />
 							({LL[ri][9]}/{LL[ri][5]} words)<br />
 							{LL[ri][11]}  words left
-							{#if LL[ri][0].toLowerCase() !== appFromGameSvelte.solution}
+							{#if LL[ri][0].toLowerCase() !== appG.solution}
 								<br /><br />{LL[ri][13]}<br />
 							{/if}
 						{/if}
@@ -436,7 +436,7 @@
 							{RR[ri][17]}% eliminated<br />
 							({RR[ri][9]}/{RR[ri][5]} words)<br />
 							{RR[ri][11]} words left
-							{#if RR[ri][0].toLowerCase() !== appFromGameSvelte.solution}
+							{#if RR[ri][0].toLowerCase() !== appG.solution}
 								<br /><br />{RR[ri][13]}<br />
 							{/if}
 						{/if}
@@ -447,16 +447,16 @@
 	{/if}
 
 	<br />
-	<Separator visible={!appFromGameSvelte.active}>
+	<Separator visible={!appG.active}>
 		<Timer
 			slot="1"
 			bind:this={timer}
 			on:timeup={() => (showRefresh = true)}
 			on:reload={newGame}
 		/>
-		<Share slot="2" game={appFromGameSvelte} />
+		<Share slot="2" appSh={appG} />
 	</Separator>
-	<ShareGame appFromShareGameSvelte={appFromGameSvelte} />
+	<ShareGame appShG={appG} />
 	<br />
 
 	<div class="row">
@@ -477,7 +477,7 @@
 	</div>
 	<div class="row">
 		Top NYT WordleBot openers (each 
-		with 97+ NYT WordleBot score): {appFromGameSvelte.openers}.
+		with 97+ NYT WordleBot score): {appG.openers}.
 	</div>
 	<div class="row">
 		All Bot and AI Algorithms...<br /><br />
@@ -555,8 +555,8 @@
 </Modal>
 
 <Modal fullscreen={true} bind:visible={showSettings}>
-	<Settings app={appFromGameSvelte} on:historical={() => (showHistorical = true)} />
-	{#if appFromGameSvelte.active}
+	<Settings appS={appG} on:historical={() => (showHistorical = true)} />
+	{#if appG.active}
 		<div class="button concede" on:click={concede} on:keydown={concede}>give up</div>
 	{/if}
 	<Tips change={showSettings} />
@@ -575,7 +575,7 @@
 					toaster.pop("localStorage cleared");
 				}}
 			>
-				{modeData.modes[$mode].name} word #{appFromGameSvelte.solutionIndex}
+				{modeData.modes[$mode].name} word #{appG.solutionIndex}
 			</div>
 		</div>
 	</svelte:fragment>

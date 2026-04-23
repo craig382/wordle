@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { GameState, GameStatus } from "../../../utils";
 
-	export let app: GameState;
+	export let appD: GameState;
 	export let distribution: Guesses;
 
 	$: max = Object.entries(distribution).reduce((p, c) => {
@@ -19,7 +19,7 @@
 				<span class="guess">{guess[0]}</span>
 				<div
 					class="bar"
-					class:this={g === app.nGuesses && app.status === GameStatus.won}
+					class:this={g === appD.nGuesses && appD.status === GameStatus.won}
 					style="width: {(guess[1] / max) * 100}%;"
 				>
 					{guess[1]}

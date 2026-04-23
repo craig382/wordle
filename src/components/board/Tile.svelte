@@ -7,7 +7,7 @@
 
 	import { GameMode } from "../../enums";
 
-	export let app: GameState;
+	export let appT: GameState;
 	export let value = "";
 	export let state: LetterState;
 	export let ri = 0;
@@ -35,8 +35,8 @@
 	onDestroy(unsub);
 
 	function enterColor(ri: number, ci: number) {
-		if ( app.gameMode === GameMode.solver && ri === app.nGuesses ) {
-			let rs = app.board.state[ri]; // rowState[ci] array.
+		if ( appT.gameMode === GameMode.solver && ri === appT.nGuesses ) {
+			let rs = appT.board.state[ri]; // rowState[ci] array.
 			switch (rs[ci]) {
 				case "🔳": rs[ci]= "⬛"; break;
 				case "⬛": rs[ci] = "🟨"; break;

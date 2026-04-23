@@ -5,7 +5,7 @@
 	import GameIcon from "../GameIcon.svelte";
 	import type Toaster from "./Toaster.svelte";
 
-	export let appFromShareGameSvelte: GameState;
+	export let appShG: GameState;
 
 	const toaster: Toaster = getContext("toaster");
 
@@ -18,7 +18,7 @@
 		// Do not update this window's url with shared url,
 		// because if you did, wordle may play the same game
 		// next time instead of a random game.
-		navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}#${GameMode[appFromShareGameSvelte.gameMode]}/${appFromShareGameSvelte.solutionIndex}`);
+		navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}#${GameMode[appShG.gameMode]}/${appShG.solutionIndex}`);
 		
 		// console.log(`window.location "href" "origin" "pathname" "hash": "${window.location.href}" "${window.location.origin}" "${window.location.pathname}" "${window.location.hash}"`);
 	}
@@ -30,7 +30,7 @@
 			d="M4.167 4.167c-1.381 1.381-1.381 3.619 0 5L6.5 11.5a1.18 1.18 0 0 1 0 1.667 1.18 1.18 0 0 1-1.667 0L2.5 10.833C.199 8.532.199 4.801 2.5 2.5s6.032-2.301 8.333 0l3.333 3.333c2.301 2.301 2.301 6.032 0 8.333a1.18 1.18 0 0 1-1.667 0 1.18 1.18 0 0 1 0-1.667c1.381-1.381 1.381-3.619 0-5L9.167 4.167c-1.381-1.381-3.619-1.381-5 0zm5.667 14c-2.301-2.301-2.301-6.032 0-8.333a1.18 1.18 0 0 1 1.667 0 1.18 1.18 0 0 1 0 1.667c-1.381 1.381-1.381 3.619 0 5l3.333 3.333c1.381 1.381 3.619 1.381 5 0s1.381-3.619 0-5L17.5 12.5a1.18 1.18 0 0 1 0-1.667 1.18 1.18 0 0 1 1.667 0l2.333 2.333c2.301 2.301 2.301 6.032 0 8.333s-6.032 2.301-8.333 0l-3.333-3.333z"
 		/>
 	</GameIcon>
-	Copy link to this game ({modeData.modes[appFromShareGameSvelte.gameMode].name} #{appFromShareGameSvelte.solutionIndex})
+	Copy link to this game ({modeData.modes[appShG.gameMode].name} #{appShG.solutionIndex})
 </div>
 
 <style>

@@ -11,8 +11,6 @@
 	import { GameMode } from "./enums";
 	import { Toaster } from "./components/widgets";
 	import { setContext } from "svelte";
-	import {maxAnswersIndex} from "./words_5";
-
 
 	document.title = "Wordle+ | An unlimited word guessing game";
 
@@ -21,7 +19,7 @@
 <script lang="ts">
 	export let version: string;
 	console.log(`Wordle version ${version} restarted`);
-	let appFromAppSvelte: GameState;
+	let appA: GameState;
 	setContext("version", version);
 	localStorage.setItem("version", version);
 	let stats: Stats;
@@ -38,13 +36,13 @@
 	mode.subscribe((m) => {
 		localStorage.setItem("mode", `${m}`);
 		stats = new Stats(localStorage.getItem(`stats-${m}`) || m);
-		appFromAppSvelte = new GameState(m);
-		letterStates.set(new LetterStates(appFromAppSvelte.board));
+		appA = new GameState(m);
+		letterStates.set(new LetterStates(appA.board));
 	});
 
 </script>
 
 <Toaster bind:this={toaster} />
 {#if toaster}
-	<Game {stats} bind:appFromGameSvelte={appFromAppSvelte} {toaster} />
+	<Game {stats} bind:appG={appA} {toaster} />
 {/if}
