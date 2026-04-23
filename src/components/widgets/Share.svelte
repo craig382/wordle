@@ -2,7 +2,8 @@
 	import type Toaster from "./Toaster.svelte";
 
 	import { mode } from "../../stores";
-	import { modeData, GameState, GameStatus } from "../../utils";
+	import { GameMode } from "../../enums";
+	import { namesOf, modeData, GameState, GameStatus } from "../../utils";
 	import { getContext } from "svelte";
 
 	export let game: GameState;
@@ -10,12 +11,13 @@
 
 	function copyStats() {
 		navigator.clipboard.writeText(
-			`${modeData.modes[$mode].name} Wordle+ #${game.solutionIndex} ${
-				(game.status !== GameStatus.won) ? "X" : game.nGuesses
-			}/${game.board.guesses.length}\n\n    ${game.board.state
-				.slice(0, game.nGuesses)
-				.map((r) => r.join(""))
-				.join("\n    ")}\ncraig382.github.io/wordle`
+			`Wordle+ ${modeData.modes[$mode].name} #${game.solutionIndex} ${
+			namesOf(GameStatus)[game.status]	
+			} after ${game.nGuesses} guesses.\n    ${
+			game.board.state.slice(0, game.nGuesses).map((r) => r.join(""))
+			.join("\n    ")
+			}\n${window.location.origin}${window.location.pathname}#${
+			GameMode[game.gameMode]}/${game.solutionIndex}`
 		);
 		toaster.pop("Copied");
 	}

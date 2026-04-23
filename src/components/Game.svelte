@@ -456,7 +456,7 @@
 		/>
 		<Share slot="2" game={appFromGameSvelte} />
 	</Separator>
-	<ShareGame bind:appFromShareGameSvelte={appFromGameSvelte} />
+	<ShareGame appFromShareGameSvelte={appFromGameSvelte} />
 	<br />
 
 	<div class="row">
