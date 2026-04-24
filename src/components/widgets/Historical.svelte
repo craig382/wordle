@@ -93,7 +93,7 @@
 		<input
 			type="text"
 			bind:value={linkValue}
-			placeholder="Example: {window.location}/1"
+			placeholder={`Example: ${window.location.origin}${window.location.pathname}#infinite/57`}
 			class:valid={validLink}
 			on:input={() => (validLink = validateLink())}
 			on:keydown={onInput}

@@ -306,11 +306,15 @@ export class GameState extends Storable {
 
 		// Set the url to have no solutionIndex at its end to tell wordle
 		// to play a random game next time (even if this was a specific game).
-		window.location.hash = `${GameMode[this.gameMode]}`;
+		// This is a strange work around because I could not figure out a way
+		// to run newGame() without first running this GameState constructor.
+		if (hash.length === 2) {
+			window.location.hash = `${hash[0]}/${hash[1]}/shared`;
+	 	} else window.location.hash = `${GameMode[this.gameMode]}`;
 
 		appU = this; // tell svelte to react to change in app
 		
-		// console.log("app = new GameState:", appFromUtilsTs);
+		// console.log("app = new GameState:", appU);
 		// console.log(new Error(`GameState.constructor() stack. No Error.`));
 	}
 
@@ -498,6 +502,8 @@ export class Settings extends Storable {
 			this.maxStatWords = parsed.maxStatWords;
 		}
 		appSettings = this;
+		// console.log("appSettings:", appSettings);
+		// console.log(new Error(`Settings.constructor() stack. No Error.`));
 	}
 }
 
