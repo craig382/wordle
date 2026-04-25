@@ -47,7 +47,6 @@
 
 	$: {
 		let ng = appR.nGuesses;
-		// console.log(`Row.svelte nGuesses ${ng}, "${app.guesses[ri]}"[${ri}]`);
 		if (ng === 0) rowHintCalculated = false;
 		if (ng > ri) {
 			showRowHint = $showRowHints;

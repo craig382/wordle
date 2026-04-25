@@ -40,6 +40,7 @@
         namesOf,
         appSettings,
         OpenerModes,
+        pause,
 	} from "../utils";
 	import { letterStates, settings, mode, showRowHints } from "../stores";
     import { GameMode } from "../enums";
@@ -66,8 +67,6 @@
 
 	let board: Board;
 	let timer: Timer;
-
-//	newGame();
 
 	window.addEventListener('popstate', function() {
 		window.history.pushState({}, '')
@@ -159,11 +158,11 @@
 		lose();
 	}
 
-	async function playAiGame(randomWord: boolean = false) {
+	function playAiGame(randomWord: boolean = false) {
 
 		// newGame() clears the board and
 		// creates a new random solution and a default random opener.
-		newGame();
+		awaitNewGame();
 
 		// New Word (randomWord) mode may use a chain mode or auto repeat opener.
 		// Entered Word (non-randomWord) mode always uses the default random opener.  
@@ -220,10 +219,14 @@
 	}
 
 	onMount(() => {
-		newGame();
+		awaitNewGame();
 	});
 
-	function newGame() {
+	async function awaitNewGame() {
+		await newGame();
+	}
+
+	async function newGame() {
 		// console.log("Game newGame $mode", $mode);
 		modeData.modes[$mode].seed = newSeed($mode);
 		appG = new GameState($mode);
@@ -248,6 +251,7 @@
 		if (appG.gameMode === GameMode.solver || appG.gameMode === GameMode.ai) 
 			autoOpener = false;
 		else autoOpener = (appSettings.openerMode !== OpenerModes.Manual);
+		await pause(500);
 		if (autoOpener) {
 			appG.board.guesses[0] = appG.opener;
 			processValidGuess(); 
@@ -299,7 +303,7 @@
 			click on each letter as needed to change its color.
 		{/if}
 		<br />
-		{#if appG && appG.errorString !== ""}
+		{#if appG.errorString !== ""}
 			<br /><br />{appG.errorString}
 		{/if}	
 	</p>

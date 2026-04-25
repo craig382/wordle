@@ -16,8 +16,8 @@
 
 ### To run a svelte app...
 - Open a terminal in the app's root folder.
-- npm install // one time install of svelte dependencies
-- npm run dev // gives link to run and debug app in html browser
+- __npm install__ // one time install of svelte dependencies
+- __npm run dev__ // gives link to run and debug app in html browser
 - In Brave, select menu "More tools > Development tools Ctrl+Shift+I" to open the Development tools panel, which can be floating or docked to the right side. Use the "Console" tab to see "console.log(variable)".
 
 ### To publish a svelte app to github...
@@ -27,7 +27,7 @@
 - One time. In vite.config.js, add the "outDir: './docs'," line and comment out the "dir: './dist'," line.
 - One time. In the GitHub wordle repro, open "Settings", select "Pages" from the side bar, in the "Build and deployment" section, ensure (change as needed) "Source" is "Deploy from Branch", "Branch" is "main" with folder "/docs" and click the "Save" button next to "/docs".
 - Every time. Update the version number in package.json.
-- Every time. run "npm run build" in the Code - OSS (open source vs code) terminal. This updates the compiled code in the /docs folder.
+- Every time. run __npm run build__ in the Code - OSS (open source vs code) terminal. This updates the compiled code in the /docs folder.
 - Everytime a change to the "main" branch is pushed to (synchronized with) the GitHub repro, the app is re-built and re-deployed. It takes a few minutes to build and deploy, and you can watch the build and deploy progress in the GitHub "Actions" tab.
 
 ### To run the hidden "Reset your stats" function...

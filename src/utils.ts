@@ -313,7 +313,7 @@ export class GameState extends Storable {
 	 	} else window.location.hash = `${GameMode[this.gameMode]}`;
 
 		appU = this; // tell svelte to react to change in app
-		
+
 		// console.log("app = new GameState:", appU);
 		// console.log(new Error(`GameState.constructor() stack. No Error.`));
 	}
