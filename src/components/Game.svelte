@@ -467,12 +467,14 @@
 		proper nouns, plural nouns that end in S or ES, 
 		and past tense verbs that end in ED.<br /><br />
 
-		If row hints are ON, after you have typed the 5 letters of
-		your guess but before you hit "ENTER", the Row Hint shows an
-		"x" if your guess is not in the Wordle solution dictionary, 
-		a single check "&check;" if your guess is in the Wordle
-		solution dictionay, and a double check "&check;&check;"
-		if your guess is one of the words left after the prior guess.
+		If row hints are ON, after you have typed all 5 letters of
+		your guess but before you hit "ENTER", the Row Hint shows: an
+		"x" for an invalid guess, "&check;" for a valid guess not in 
+		the Wordle solution dictionary, 
+		"&check;&check;" for a guess in the Wordle 
+		solution dictionay, and "&check;&check;&check;" 
+		if the guess is one of the possible solutions left after 
+		the prior guess.
 	</div>
 	<div class="row">
 		Top NYT WordleBot openers (each 
@@ -595,12 +597,6 @@
 		margin: auto;
 		position: relative;
 		overflow-y: auto;
-	}
-	.historical {
-		text-align: center;
-		margin-top: 10px;
-		padding: 0 20px;
-		text-transform: uppercase;
 	}
 	.concede {
 		background-color: var(--red);
