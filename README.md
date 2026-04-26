@@ -95,7 +95,7 @@ Have fun :)
 <details>
 <summary>How to create a new mode</summary>
 
-- Add the mode name to the **end** of the GameMode enum in `enums.ts`
+- Add the mode name to the **end** of the GameMode enum in `utils.ts`
 - Add a case for that mode in the newSeed function in `utils.ts`
 - Add a ModeData object to the modeData modes array in `utils.ts`
 </details>

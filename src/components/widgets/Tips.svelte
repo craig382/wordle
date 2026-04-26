@@ -1,4 +1,9 @@
 <script context="module" lang="ts">
+
+	import { GuessType, guessHints} from "../../utils";
+	let gh = guessHints;
+	let gt = GuessType;
+
 	const tips = [
 		"You can change the gamemode by clicking WORDLE+ or swiping the board left or right.",
 		'In AI Mode, the Bot makes the "Human\'s" choices.',
@@ -8,7 +13,7 @@
 		"Double tap or right click a guess on the board to see its definition and to see the Bot's hints and recommendations.",
 		'Click on "Row Hints" to toggle the row hints ON and OFF.',
 		'Each Row Hint shows the % groups created by the human H (hard) or E (easy) guess over the % groups created by the bot, and W words remaining after the human guess.',
-		'If row hints are ON, after you have typed the 5 letters of your guess but before you hit "ENTER"... The Row Hint shows an "x" if your guess is not in the Wordle solution dictionary, a single check "\u{2713}" if your guess is in the Wordle solution dictionay, and a double check "\u{2713}\u{2713}" if your guess is one of the words left after the prior guess.',
+		'If row hints are ON, after you have typed all 5 letters of your guess but before you hit "ENTER"... The Row Hint shows: "x" for an invalid guess, "\u{2713}" for a valid guess not in the Wordle solution dictionary, "\u{2713}\u{2713}" for guess in the Wordle solution dictionay, and "\u{2713}\u{2713}\u{2713}" if the guess is one of the possilbe solutions left after the prior guess.',
 		'Click on the column algorithm title (e.g. "Human" or "Bot Max % Groups Easy") in the Stats screen BOT RESULTS table to change the results in that column to another algorithm.',
 		"Hard mode is game mode specific. Turning it on in one game mode won't change it on the others.",
 		"Hard mode can be enabled during a game if you haven't violated the hard mode rules yet.",

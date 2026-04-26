@@ -1,11 +1,7 @@
 <script lang="ts">
 	import { onDestroy } from "svelte";
-
 	import { mode } from "../../stores";
-
-	import { DELAY_INCREMENT, ROWS, GameState } from "../../utils";
-
-	import { GameMode } from "../../enums";
+	import { DELAY_INCREMENT, ROWS, GameState, GameMode } from "../../utils";
 
 	export let appT: GameState;
 	export let value = "";

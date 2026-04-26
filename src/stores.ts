@@ -1,6 +1,5 @@
 import { writable } from "svelte/store";
-import type { GameMode } from "./enums";
-import { Settings, LetterStates } from "./utils";
+import { GameMode, Settings, LetterStates } from "./utils";
 
 /**
  * A writable store identical in functionality to the Svelte writable store with an extra parameter

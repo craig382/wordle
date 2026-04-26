@@ -2,9 +2,8 @@
 	import { getContext } from "svelte";
 	import { custom_event } from "svelte/internal";
 	import type { Toaster } from ".";
-	import { GameMode } from "../../enums";
 	import { mode } from "../../stores";
-	import { modeData, newSeed } from "../../utils";
+	import { GameMode, modeData, newSeed } from "../../utils";
 	import {maxAnswersIndex} from "../../words_5";
 
 	export let showSettings: boolean;

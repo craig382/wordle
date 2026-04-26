@@ -3,12 +3,12 @@
 		modeData,
 		Stats,
 		GameState,
+		GameMode,
 		Settings,
 		LetterStates,
 	} from "./utils";
 	import Game from "./components/Game.svelte";
 	import { letterStates, settings, mode } from "./stores";
-	import { GameMode } from "./enums";
 	import { Toaster } from "./components/widgets";
 	import { setContext } from "svelte";
 

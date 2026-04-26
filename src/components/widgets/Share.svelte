@@ -2,8 +2,7 @@
 	import type Toaster from "./Toaster.svelte";
 
 	import { mode } from "../../stores";
-	import { GameMode } from "../../enums";
-	import { namesOf, modeData, GameState, GameStatus } from "../../utils";
+	import { namesOf, modeData, GameMode, GameState, GameStatus } from "../../utils";
 	import { getContext } from "svelte";
 
 	export let appSh: GameState;

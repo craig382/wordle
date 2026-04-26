@@ -27,6 +27,7 @@
 		aiModes,
 		modeData,
 		GameStatus,
+		GameMode,
 		ROWS,
 		COLS,
 		newSeed,
@@ -34,18 +35,16 @@
 		GameState,
 		LetterStates,
 		Stats,
-        groupIdFromColors,
-        calculateBotInfoArray2,
-        BotMode,
-        namesOf,
-        appSettings,
-        OpenerModes,
-        pause,
+		groupIdFromColors,
+		calculateBotInfoArray2,
+		BotMode,
+		namesOf,
+		appSettings,
+		OpenerModes,
+		pause,
 	} from "../utils";
 	import { letterStates, settings, mode, showRowHints } from "../stores";
-    import { GameMode } from "../enums";
 	import {words} from "../words_5";
-
 
 	export let stats: Stats;
 	export let appG: GameState;

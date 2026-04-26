@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { getContext } from "svelte";
-	import { GameMode } from "../../enums";
-	import { modeData, GameState } from "../../utils";
+	import { modeData, GameState, GameMode } from "../../utils";
 	import GameIcon from "../GameIcon.svelte";
 	import type Toaster from "./Toaster.svelte";
 

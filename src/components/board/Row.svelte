@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { createEventDispatcher } from "svelte";
-	import { COLS, GameState, botNodeInfo} from "../../utils";
+	import { COLS, GameState, GameMode, GuessType, guessHints, botNodeInfo} from "../../utils";
 	import Tile from "./Tile.svelte";
 	import { showRowHints } from "../../stores";
-	import { GameMode } from "../../enums";
 	import {words} from "../../words_5";
 
 	/** Row Index.*/
@@ -22,8 +21,7 @@
 	let rowHintCalculated = false;
 	let showGuessHint = false;
 	let guess = "";
-	let inDictionary = false;
-	let isHard = false;
+	let gt: GuessType;
 	let guessHint = "";
 	let tiles: Tile[] = [];
 	let h1: BotNodeTuple;
@@ -68,21 +66,17 @@
 					showGuessHint = $showRowHints;
 					if (showGuessHint) {
 						guess = appR.board.guesses[ri];
-						if (ri > 0) {
-							isHard = appR.human[ri-1].gangs.get(appR.guessGroupIds[ri-1])[0].includes(guess);
-							if (isHard) guessHint = `\u{2713}\u{2713}`;
-							else {
-								inDictionary = words.answers.includes(guess)
-								if (inDictionary) guessHint = `\u{2713}`;
-								else guessHint = "x";
-							}
-						} else {
-							inDictionary = words.answers.includes(guess)
-							if (inDictionary) guessHint = `\u{2713}\u{2713}`;
-							else guessHint = "x";
+						gt = GuessType.invalid;
+						if (ri > 0 && appR.human[ri-1].gangs.get(appR.guessGroupIds[ri-1])[0].includes(guess))
+							gt = GuessType.hard;
+						else if (ri === 0 && words.answers.includes(guess))
+							gt = GuessType.hard;
+						if (gt === GuessType.invalid) {
+							if (words.answers.includes(guess)) gt = GuessType.inAnswers;
+							else if (words.otherGuesses.includes(guess)) gt = GuessType.valid;
 						}
+						guessHint = guessHints[gt];
 					}
-
 				}
 				else showGuessHint = false;
 			} else {

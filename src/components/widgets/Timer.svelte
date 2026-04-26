@@ -1,10 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from "svelte";
-
-	import type { GameMode } from "../../enums";
-	import { ms as MS } from "../../enums";
 	import { mode } from "../../stores";
-	import { modeData, timeRemaining } from "../../utils";
+	import { GameMode, MS, modeData, timeRemaining } from "../../utils";
 
 	const dispatch = createEventDispatcher();
 

@@ -1,13 +1,30 @@
 import seedRandom from "seedrandom";
-import { GameMode, ms } from "./enums";
 import {maxAnswersIndex, words} from "./words_5";
+
+export enum GuessType {"unknown", "hard", "inAnswers", "valid", "invalid",};
+export enum GameMode {"daily", "hourly", "infinite", "ai", "solver"};
+export const enum MS {
+	SECOND = 1000,
+	MINUTE = 1000 * 60,
+	HOUR = 1000 * 60 * 60,
+	DAY = 1000 * 60 * 60 * 24,
+};
+
+export const guessHints = [
+	'???',
+	'\u{2713}\u{2713}\u{2713}',
+	'\u{2713}\u{2713}',
+	'\u{2713}',
+	'x',
+];
 
 export const ROWS: number = 6;
 export const COLS: number = 5;
 export let appU: GameState;
 export let botRoot: BotNode;
-
 export let appSettings: Settings;
+
+
 export function countOfAinB(a: string, b: string): number {
 	return b.split(a).length - 1;
 }
@@ -76,15 +93,15 @@ export function newSeed(mode: GameMode, time?: number) {
 		case GameMode.daily:
 			// Adds time zone offset to UTC time, calculates how many days that falls after 1/1/1970
 			// and returns the unix time for the beginning of that day.
-			return Date.UTC(1970, 0, 1 + Math.floor((now - (new Date().getTimezoneOffset() * ms.MINUTE)) / ms.DAY));
+			return Date.UTC(1970, 0, 1 + Math.floor((now - (new Date().getTimezoneOffset() * MS.MINUTE)) / MS.DAY));
 		case GameMode.hourly:
-			return now - (now % ms.HOUR);
+			return now - (now % MS.HOUR);
 		// case GameMode.minutely:
 		// 	return now - (now % ms.MINUTE);
 		case GameMode.infinite:
-			return now - (now % ms.SECOND);
+			return now - (now % MS.SECOND);
 		case GameMode.ai:
-			return now - (now % ms.SECOND);
+			return now - (now % MS.SECOND);
 		}
 }
 
@@ -93,32 +110,32 @@ export const modeData: ModeData = {
 	modes: [
 		{
 			name: "Daily",
-			unit: ms.DAY,
+			unit: MS.DAY,
 			start: 1642370400000,	// 17/01/2022 UTC+2
 			seed: newSeed(GameMode.daily),
 			useTimeZone: true,
 		},
 		{
 			name: "Hourly",
-			unit: ms.HOUR,
+			unit: MS.HOUR,
 			start: 1642528800000,	// 18/01/2022 8:00pm UTC+2
 			seed: newSeed(GameMode.hourly),
 		},
 		{
 			name: "Infinite",
-			unit: ms.SECOND,
+			unit: MS.SECOND,
 			start: 1642428600000,	// 17/01/2022 4:10:00pm UTC+2
 			seed: newSeed(GameMode.infinite),
 		},
 		{
 			name: "AI",
-			unit: ms.SECOND,
+			unit: MS.SECOND,
 			start: 1642428600000,	// 17/01/2022 4:10:00pm UTC+2
 			seed: newSeed(GameMode.infinite),
 		},
 		{
 			name: "Solver",
-			unit: ms.SECOND,
+			unit: MS.SECOND,
 			start: 1642428600000,	// 17/01/2022 4:10:00pm UTC+2
 			seed: newSeed(GameMode.infinite),
 		},
@@ -619,7 +636,7 @@ export const colorIndex = {
 
 export function timeRemaining(m: Mode) {
 	if (m.useTimeZone) {
-		return m.unit - (Date.now() - (m.seed + new Date().getTimezoneOffset() * ms.MINUTE));
+		return m.unit - (Date.now() - (m.seed + new Date().getTimezoneOffset() * MS.MINUTE));
 	}
 	return m.unit - (Date.now() - m.seed);
 }
