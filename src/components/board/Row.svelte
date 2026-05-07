@@ -25,7 +25,6 @@
 	let guessHint = "";
 	let tiles: Tile[] = [];
 	let h1: BotNodeTuple;
-	let b1: BotNodeTuple;
 
 	const MAX_DOUBLE_CLICK_INTERVAL = 400;
 	let lastTouch = 0;
@@ -53,9 +52,7 @@
 			if (!rowHintCalculated) {
 				console.log(`Row.svelte. Calculate ${appR.guesses[ri]}[${ri}] row hint.`);
 				h1 = botNodeInfo(appR.human[ri], appR.guessGroupIds[ri]);
-				if (ri > 0) {
-					b1 = botNodeInfo(h1[18], "");
-				}
+				// console.log(h1);
 				rowHintCalculated = true;
 			}
 		} else {
@@ -104,12 +101,8 @@
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<section on:click|self={() => {$showRowHints = !$showRowHints;}}>
 		{#if showRowHint }
-			{h1[14]}%{h1[6][0]}
-			{#if ri > 0 }
-				<br />{b1[14]}%{b1[6][0]}
-			{:else}
-				<br />{h1[14]}%{h1[6][0]}
-			{/if}
+			{h1[20]}%{h1[21]}
+			<br />{h1[14]}%{h1[6][0]}
 			<br />{h1[11]}W
 		{:else if showGuessHint}
 			{guessHint}

@@ -247,9 +247,9 @@ export class GameState extends Storable {
 	public opener: string;
 	/** Space separated list of top 12 New York Times 
 	 * WordleBot openers (each with 97+ NYT WordleBot score). */
-	public openers = "trace crane slate crate plate saint least stare stale snare plane place";
-	// Bot scores: trace 2165, crane 2173, slate 2168, crate 2167, plate 2184,
-	// saint 2186, least 2175, stare 2182, stale 2173, snare 2183, plane 2183, place 2187
+	public openers = "trace crate slate crane stale least stare plane snare plate saint place";
+	// nGroups: trace 150, crate 148, slate 147, crane 142, stale 142, least 140,
+	// stare 133, plane 132, snare 132, plate 131, saint 129, place 128
 	public errorString: string = "";
 	public botTree: Array<Array<BotNode>> = Array(COLS + 1).fill(null).map(() => []);
 	/** Incremented each time a new BotNode is created.
@@ -905,7 +905,9 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 		throw e;
 	}
 
-	let info: BotNodeTuple = [,,,,,,,,,,,,,,,,,,,,,]; // Initialize a multi element empty tuple.
+	let minGradeA = 0;
+	let nGroupsA = 0;
+	let info: BotNodeTuple = [,,,,,,,,,,,,,,,,,,,,,,]; // Initialize a multi element empty tuple.
 
 	info[0] = ""; // guess
 	info[1] = 0; // ri
@@ -925,8 +927,9 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 	info[15] = 0; // largestGroup
 	info[16] = 0; // largestGroupPercent
 	info[18] = null; // maxGroupsSibEasy
-	info[19] = ""; // wordListAfterOld
-	info[20] = ""; // statWordListAfterOld
+	info[19] = null; // maxGroupsSibHard
+	info[20] = 0; // skillPercent
+	info[21] = ""; // skillGrade
 
 	if (guessId === "" && appU.solution !== "") {
 		guessId = calculateGroupId(appU.solution, botNode.guess);
@@ -976,9 +979,7 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 						info[13] += ` ${gang[2][bni].guess}`;
 					}
 				} else if (!botNode.hasKids) {
-					// info[19] = group.join(" "); // wordListAfterOld
-					info[20] = group.slice(0, appSettings.maxStatWords).join(" "); // statWordListAfterOld
-					info[13] = info[20]; // statWordListAfter
+					info[13] = group.slice(0, appSettings.maxStatWords).join(" "); // statWordListAfter (unsorted)
 				}
 			}
 		}	
@@ -987,15 +988,30 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 	if (botNode.ri === 0) {
 		info[4] = ""; // wordListBefore
 		info[6] = "Hard"; // easyOrHard
+		minGradeA = 100;
+		nGroupsA = 128; // "place" (worst auto opener) creates 128 groups
 	} else {
 		info[4] = wordsBefore.join(", "); // wordListBefore
-		if (countOfAinB(botNode.guess, info[4]) > 0) info[6] = "Hard"; // easyOrHard
-		else info[6] = "Easy"; // easyOrHard
+		if (countOfAinB(botNode.guess, info[4]) > 0) {
+			info[6] = "Hard"; // easyOrHard
+			minGradeA = 100;
+		} else { 
+			info[6] = "Easy"; // easyOrHard
+			minGradeA = 101;
+		}
 		info[18] = botNode.parent.kids[2] ; // maxGroupsSibEasy
+		info[19] = botNode.parent.kids[1] ; // maxGroupsSibHard
+		nGroupsA = info[19].nGroups; // max nGroups among siblings is the hard mode sibling nGroups.
 	}
 
 	info[9] = botNode.nWordsBefore - info[11]; // nWordsEliminated = nWordsBefore - nWordsAfter
 	info[17] = Math.round(100 * info[9] / botNode.nWordsBefore); // eliminatedPercent
+
+	info[20] = Math.round(100 * (botNode.nGroups) / nGroupsA); // skillPercent
+	if (info[20] >= minGradeA) info[21] = "A"; // skillGrade
+	else if (info[20] >= 75) info[21] = "B";
+	else if (info[20] >= 50) info[21] = "C";
+	else info[21] = "D";
 
 	// logInfo(); // console.log()
 
@@ -1014,14 +1030,14 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 			else {
 				console.log(`${botNode.guess} parent ${botNode.parent.node.guess} has kids: ${botNode.parent.kids[1].guess}, ${botNode.parent.kids[2].guess}, ${botNode.parent.kids[3].guess}, ${botNode.parent.kids[4].guess}`);
 				console.log(`${botNode.guess} maxGroupsSibEasy: ${info[18].guess}.`, info[18]);
+				console.log(`${botNode.guess} maxGroupsSibHard: ${info[19].guess}.`, info[19]);
 			}
 		}
 		console.log (`${info[11]} words after: ${info[10]}`);
-		console.log (`${info[11]} words after [OLD]: ${info[19]}`);
 		console.log (`${info[11]} first ${appSettings.maxStatWords} words after: ${info[13]}`);
-		console.log (`${info[11]} first ${appSettings.maxStatWords} words after [OLD]: ${info[20]}`);
 		console.log (`${info[5]} words before: ${info[4]}`);
 		if (botNode.ri > 0) console.log (`${botNode.parent.gang[0].length} words before (from parent): ${botNode.parent.gang[0].join(" ")}`);
+		console.log (`${botNode.guess} guess Skill Percent: ${info[20]} and Grade: ${info[21]}`);
 		console.log("");	
 	}
 }

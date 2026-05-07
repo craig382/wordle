@@ -128,10 +128,10 @@ type BotNodeTuple = [
 	largestGroupPercent: number, // 16
 	eliminatedPercent: number, // 17
 
-	/** maxGroupsSibEasy (sibling) is the maxGroupsKidEasy of this node's parent */
+	/** maxGroupsSibEasy/Hard (sibling) is the maxGroupsKidEasy/Hard of this node's parent */
 	maxGroupsSibEasy: BotNode, // 18
+	maxGroupsSibHard: BotNode, // 19
 
-	wordListAfterOld: string, // 19
-	/** truncated list of words left after for stat screen */
-	statWordListAfterOld: string, // 20
+	skillPercent: number, // 20
+	skillGrade: string, // 21
 ]

@@ -12,7 +12,7 @@
 		'In Solver mode, enter the guess letters, then before clicking on "Enter", click on each letter as needed to change the letter\'s color.',
 		"Double tap or right click a guess on the board to see its definition and to see the Bot's hints and recommendations.",
 		'Click on "Row Hints" to toggle the row hints ON and OFF.',
-		'Each Row Hint shows the % groups created by the human H (hard) or E (easy) guess over the % groups created by the bot, and W words remaining after the human guess.',
+		'Each Row Hint shows the skill (percent and grade) of the guess, the % groups of the H (hard) or E (easy) guess, and the  W words remaining after the human guess.',
 		'If row hints are ON, after you have typed all 5 letters of your guess but before you hit "ENTER", the Row Hint shows: "x" for an invalid guess, "\u{2713}" for a valid guess not in the Wordle solution dictionary, "\u{2713}\u{2713}" for guess in the Wordle solution dictionay, and "\u{2713}\u{2713}\u{2713}" if the guess is one of the possilbe solutions left after the prior guess.',
 		'Click on the column algorithm title (e.g. "Human" or "Bot Max % Groups Easy") in the Stats screen BOT RESULTS table to change the results in that column to another algorithm.',
 		"Hard mode is game mode specific. Turning it on in one game mode won't change it on the others.",

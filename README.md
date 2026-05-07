@@ -53,7 +53,7 @@
 
 ### Row Hints
 - Click on "Row Hints" to toggle the row hints ON and OFF.
-- Each Row Hint shows the % groups created by the human H (hard) or E (easy) guess over the % groups created by the bot, and W words remaining after the human guess.
+- Each Row Hint shows the skill (percent and grade) of the guess, the % groups of the H (hard) or E (easy) guess, and the W words remaining after the guess.
 
 ### BOT RESULTS Table on the Stats Screen
 - Click on the column algorithm title (e.g. "Human" or "Bot Max % Groups Easy") in the Stats screen BOT RESULTS table to change the results in that column to another algorithm.

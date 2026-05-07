@@ -406,6 +406,7 @@
 					{#if ri < LL.length}
 						{LL[ri][0]}<br />
 						{LL[ri][6]} Guess<br />
+						{LL[ri][20]}% skill, grade {LL[ri][21]}<br />
 						{LL[ri][14]}% groups ({LL[ri][2]}/{LL[ri][5]})<br />
 						{LL[ri][15]} largest group<br />
 						{LL[ri][3].toLocaleString()} SoS<br /><br />
@@ -427,6 +428,7 @@
 					{:else if ri < RR.length && ri > 0}
 						{RR[ri][0]}<br />
 						{RR[ri][6]} Guess<br />
+						{RR[ri][20]}% skill, grade {RR[ri][21]}<br />
 						{RR[ri][14]}% groups ({RR[ri][2]}/{RR[ri][5]})<br />
 						{RR[ri][15]} largest group<br />
 						{RR[ri][3].toLocaleString()} SoS<br /><br />
