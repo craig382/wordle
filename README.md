@@ -18,7 +18,9 @@
 - Open a terminal in the app's root folder.
 - __npm install__ // one time install of svelte dependencies
 - __npm run dev__ // gives link to run and debug app in html browser
-- In Brave, select menu "More tools > Development tools Ctrl+Shift+I" to open the Development tools panel, which can be floating or docked to the right side. Use the "Console" tab to see "console.log(variable)".
+- Then in VS Code: "View > Run Ctrl+Shift+D", then ensure the drop down at the top of the "Run and Debug" pane is set to "Launch Brave to Vite", then select "Start Debugging (F5)" (greeen play triangle icon).
+- You can see "console.log(message, variables, etc.)" in the Code OSS "Debug Console" tab at the bottom of the Code - OSS screen.
+- Alternately, in Brave, select menu "More tools > Development tools Ctrl+Shift+I" to open the Development tools panel, which can be floating or docked to the right side. Use the "Console" tab to see "console.log(message, variables, etc.)".
 
 ### To publish a svelte app to github...
 - The original publish.yml .github workflow was not working.
