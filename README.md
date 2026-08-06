@@ -17,9 +17,10 @@
 ### To run a svelte app...
 - Open a terminal in the app's root folder.
 - __npm install__ // one time install of svelte dependencies
-- __npm run dev__ // gives link to run and debug app in html browser
-- Then in VS Code: "View > Run Ctrl+Shift+D", then ensure the drop down at the top of the "Run and Debug" pane is set to "Launch Brave to Vite", then select "Start Debugging (F5)" (greeen play triangle icon).
+- In VS Code: "View > Run Ctrl+Shift+D", then ensure the drop down at the top of the "Run and Debug" pane is set to "Run Vite in Brave", then select "Start Debugging (F5)" (greeen play triangle icon).
+- Note that "Run Vite in Brave" starts vite if needed (executes __npm run dev__ as needed, which gives a link to run and debug the app in html browser).
 - You can see "console.log(message, variables, etc.)" in the Code OSS "Debug Console" tab at the bottom of the Code - OSS screen.
+- You can set breakpoints in code - OSS. And when the app stops at a breakpoint, you can see variables in the "Run and Debug" pane.
 - Alternately, in Brave, select menu "More tools > Development tools Ctrl+Shift+I" to open the Development tools panel, which can be floating or docked to the right side. Use the "Console" tab to see "console.log(message, variables, etc.)".
 
 ### To publish a svelte app to github...

@@ -2,9 +2,10 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch Brave to Vite",
-      "type": "pwa-chrome",
+      "name": "Run Vite in Brave",
+      "type": "chrome",
       "request": "launch",
+      "preLaunchTask": "Start Vite if needed",
       "url": "http://localhost:5173/wordle/",
       "webRoot": "${workspaceFolder}/src",
       "runtimeExecutable": "/usr/bin/brave",
@@ -14,12 +15,5 @@
         "--no-default-browser-check"
       ]
     },
-    {
-      "name": "Attach to Running Browser (9222)",
-      "type": "pwa-chrome",
-      "request": "attach",
-      "port": 9222,
-      "webRoot": "${workspaceFolder}/src"
-    }
   ]
 }

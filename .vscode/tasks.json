@@ -1,0 +1,30 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Vite if needed",
+      "type": "shell",
+      "command": "bash",
+      "args": ["-lc", "./.vscode/start-vite-if-needed.sh"],
+      "isBackground": true,
+      "problemMatcher": [
+        {
+          "owner": "vite",
+          "pattern": {
+            "regexp": "Local:.*",
+            "message": 0
+          },
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": "^",
+            "endsPattern": "Local:.*"
+          }
+        }
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    }
+  ]
+}
