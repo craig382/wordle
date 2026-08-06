@@ -33,7 +33,7 @@
 	 * because listening to touch events on Board prevents Row from receiving dblclick events.
 	 */
 	function onTouch(e: TouchEvent) {
-		console.log("onTouch", this)
+		console.log("onTouch", e);
 		if (Date.now() - lastTouch <= MAX_DOUBLE_CLICK_INTERVAL) {
 			e.preventDefault();
 			dispatch("ctx", { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY });
@@ -64,10 +64,14 @@
 					if (showGuessHint) {
 						guess = appR.board.guesses[ri];
 						gt = GuessType.invalid;
-						if (ri > 0 && appR.human[ri-1].gangs.get(appR.guessGroupIds[ri-1])[0].includes(guess))
+						if (ri > 0) {
+							const prevTuple = appR.human[ri-1].gangs.get(appR.guessGroupIds[ri-1]);
+							if (prevTuple && prevTuple[0].includes(guess)) {
+								gt = GuessType.hard;
+							}
+						} else if (ri === 0 && words.answers.includes(guess)) {
 							gt = GuessType.hard;
-						else if (ri === 0 && words.answers.includes(guess))
-							gt = GuessType.hard;
+						}
 						if (gt === GuessType.invalid) {
 							if (words.answers.includes(guess)) gt = GuessType.inAnswers;
 							else if (words.otherGuesses.includes(guess)) gt = GuessType.valid;

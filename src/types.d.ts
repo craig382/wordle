@@ -95,10 +95,10 @@ type GangTuple = [
 
 type KidTuple = [
 	perfectKid: boolean,
-	maxGroupsKidHard: BotNode, 
-	maxGroupsKidEasy: BotNode,
-	minSumOfSquaresKidHard: BotNode,
-	minSumOfSquaresKidEasy: BotNode
+	maxGroupsKidHard: BotNode | null, 
+	maxGroupsKidEasy: BotNode | null,
+	minSumOfSquaresKidHard: BotNode | null,
+	minSumOfSquaresKidEasy: BotNode | null
 ]
 
 //** Map< groupId, BotMapTuple > */
@@ -119,7 +119,7 @@ type BotNodeTuple = [
 	wordListAfter: string, // 10
 	nWordsAfter: number, // 11
 
-	maxGroupsKidEasy: BotNode, // 12
+	maxGroupsKidEasy: BotNode | null, // 12
 
 	/** truncated list of words left after for stat screen */
 	statWordListAfter: string, // 13
@@ -129,8 +129,8 @@ type BotNodeTuple = [
 	eliminatedPercent: number, // 17
 
 	/** maxGroupsSibEasy/Hard (sibling) is the maxGroupsKidEasy/Hard of this node's parent */
-	maxGroupsSibEasy: BotNode, // 18
-	maxGroupsSibHard: BotNode, // 19
+	maxGroupsSibEasy: BotNode | null, // 18
+	maxGroupsSibHard: BotNode | null, // 19
 
 	skillPercent: number, // 20
 	skillGrade: string, // 21

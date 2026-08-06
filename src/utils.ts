@@ -36,7 +36,7 @@ export async function pause(ms: number) {
 /** Given anEnumDef, this function returns a string array
  * containing all the names of the enum.
  */
-export function namesOf(anEnumDef) {
+export function namesOf(anEnumDef: Record<string, unknown>): string[] {
 	return Object.keys(anEnumDef).filter((v) => isNaN(Number(v)));
 }
 
@@ -87,7 +87,7 @@ export const keys = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
  * @param mode - The mode
  * @param time - The time. If omitted current time is used
  */
-export function newSeed(mode: GameMode, time?: number) {
+export function newSeed(mode: GameMode, time?: number): number {
 	const now = time ?? Date.now();
 	switch (mode) {
 		case GameMode.daily:
@@ -102,7 +102,11 @@ export function newSeed(mode: GameMode, time?: number) {
 			return now - (now % MS.SECOND);
 		case GameMode.ai:
 			return now - (now % MS.SECOND);
-		}
+		case GameMode.solver:
+			return now - (now % MS.SECOND);
+		default:
+			return now - (now % MS.SECOND);
+	}
 }
 
 export const modeData: ModeData = {
@@ -244,7 +248,7 @@ export class GameState extends Storable {
 	public solutionIndex: number;
 	public solution: string;
 	public board: GameBoard;
-	public opener: string;
+	public opener: string = "";
 	/** Space separated list of top 12 New York Times 
 	 * WordleBot openers (each with 97+ NYT WordleBot score). */
 	public openers = "trace crate slate crane stale least stare plane snare plate saint place";
@@ -256,16 +260,16 @@ export class GameState extends Storable {
 	 * calculateGroups() is usually performed once per new node.
 	 */
 	public nNodesCreated: number = 0;
-	public easyGroup: Array<string>;
+	public easyGroup: Array<string> = [];
 
 	gameMode: GameMode;
 
 	/** These are the Bot Row Arrays and their modes. */
-	public human: Array<BotNode>;
-	public aiMaxGroupsHard: Array<BotNode>;
-	public aiMaxGroupsEasy: Array<BotNode>;
-	public aiMinSumOfSquaresHard: Array<BotNode>;
-	public aiMinSumOfSquaresEasy: Array<BotNode>;
+	public human: Array<BotNode> = [];
+	public aiMaxGroupsHard: Array<BotNode> = [];
+	public aiMaxGroupsEasy: Array<BotNode> = [];
+	public aiMinSumOfSquaresHard: Array<BotNode> = [];
+	public aiMinSumOfSquaresEasy: Array<BotNode> = [];
 	public botLeftMode: BotMode;
 	public botRightMode: BotMode;
 	
@@ -283,8 +287,9 @@ export class GameState extends Storable {
 		// Play the solutionIndex game in the url if available
 		// else play a random solutionIndex game.
 		const hash = window.location.hash.slice(1).split("/");
-		const modeVal: GameMode = !isNaN(GameMode[hash[0]])
-			? GameMode[hash[0]]
+		const rawMode = GameMode[hash[0] as keyof typeof GameMode];
+		const modeVal: GameMode = typeof rawMode === "number"
+			? rawMode
 			: gameMode;
 		if (!isNaN(+hash[1]) && +hash[1] <= maxAnswersIndex && +hash[1] >= 0) {
 			this.gameMode = modeVal;
@@ -370,47 +375,50 @@ export class GameState extends Storable {
 			this.aiMinSumOfSquaresHard.push(botRoot);
 			this.aiMinSumOfSquaresEasy.push(botRoot);
 			if (this.guessGroupIds[0] !== "#####") {
-				let gang: GangTuple;
+				let gang: GangTuple | undefined;
 				if ( appU.gameMode === GameMode.solver ) {
 					gang = this.human[0].gangs.get(appU.guessGroupIds[0]);
-					this.aiMaxGroupsHard.push(gang[1][1]);
-					this.aiMaxGroupsEasy.push(gang[1][2]);
-					this.aiMinSumOfSquaresHard.push(gang[1][3]);
-					this.aiMinSumOfSquaresEasy.push(gang[1][4]);
+					if (!gang) {
+						throw new Error(`Solver human group not found for ${appU.guessGroupIds[0]}`);
+					}
+					if (gang[1][1]) this.aiMaxGroupsHard.push(gang[1][1]);
+					if (gang[1][2]) this.aiMaxGroupsEasy.push(gang[1][2]);
+					if (gang[1][3]) this.aiMinSumOfSquaresHard.push(gang[1][3]);
+					if (gang[1][4]) this.aiMinSumOfSquaresEasy.push(gang[1][4]);
 				} else {
 					let i = 0;
 					while (true) {
 						gang = this.aiMaxGroupsHard[i].gangs.get(calculateGroupId(this.solution, this.aiMaxGroupsHard[i].guess));
-						if (gang[1][1] === null) break;
-						else this.aiMaxGroupsHard.push(gang[1][1]);
+						if (!gang || gang[1][1] === null) break;
+						this.aiMaxGroupsHard.push(gang[1][1]);
 						i++;
 					}
 					i = 0;
 					while (true) {
 						gang = this.aiMaxGroupsEasy[i].gangs.get(calculateGroupId(this.solution, this.aiMaxGroupsEasy[i].guess));
-						if (gang[1][2] === null) break;
-						else this.aiMaxGroupsEasy.push(gang[1][2]);
+						if (!gang || gang[1][2] === null) break;
+						this.aiMaxGroupsEasy.push(gang[1][2]);
 						i++;
 					}
 					i = 0;
 					while (true) {
 						gang = this.aiMinSumOfSquaresHard[i].gangs.get(calculateGroupId(this.solution, this.aiMinSumOfSquaresHard[i].guess));
-						if (gang[1][3] === null) break;
-						else this.aiMinSumOfSquaresHard.push(gang[1][3]);
+						if (!gang || gang[1][3] === null) break;
+						this.aiMinSumOfSquaresHard.push(gang[1][3]);
 						i++;
 					}
 					i = 0;
 					while (true) {
 						gang = this.aiMinSumOfSquaresEasy[i].gangs.get(calculateGroupId(this.solution, this.aiMinSumOfSquaresEasy[i].guess));
-						if (gang[1][4] === null) break;
-						else this.aiMinSumOfSquaresEasy.push(gang[1][4]);
+						if (!gang || gang[1][4] === null) break;
+						this.aiMinSumOfSquaresEasy.push(gang[1][4]);
 						i++;
 					}
 				}	
 			}
 		} else {
 			// Find or create this human guess in the bot tree.
-			let pGang: GangTuple;
+			let pGang: GangTuple | undefined;
 			pGang = this.human[ri-1].gangs.get(this.guessGroupIds[ri-1]);
 			if (pGang === undefined) {
 				this.errorString =`Previous human[${ri - 1}] guess ` +
@@ -558,7 +566,7 @@ export class Stats extends Storable {
 	}
 	
 	
-	addWin(guesses: number) {
+	addWin(guesses: 1|2|3|4|5|6) {
 		++this.guesses[guesses];
 		++this.played;
 		++this.streak;
@@ -607,10 +615,14 @@ export class LetterStates {
 
 	constructor(board?: GameBoard) {
 		if (board) {
+			const self = this as unknown as Record<Exclude<keyof LetterStates, "update">, LetterState>;
 			for (let row = 0; row < ROWS; ++row) {
 				for (let col = 0; col < board.guesses[row].length; ++col) {
-					if (this[board.guesses[row][col]] === "🔳" || board.state[row][col] === "🟩") {
-						this[board.guesses[row][col]] = board.state[row][col];
+					const key = board.guesses[row][col] as keyof LetterStates;
+					if (key === "update") continue;
+					const letterKey = key as Exclude<keyof LetterStates, "update">;
+					if (self[letterKey] === "🔳" || board.state[row][col] === "🟩") {
+						self[letterKey] = board.state[row][col];
 					}
 				}
 			}
@@ -619,8 +631,9 @@ export class LetterStates {
 
 	update(state: LetterState[], word: string) {
 		state.forEach((e, i) => {
-			const ls: LetterState = this[word[i]];
-			if ( colorIndex[e] > colorIndex[ls] ) this[word[i]] = e;
+			const key = word[i] as keyof LetterStates;
+			const ls: LetterState = this[key] as LetterState;
+			if ( colorIndex[e] > colorIndex[ls] ) (this as any)[key] = e;
 			// console.log("LetterStates.update for word, letter", word, word[i], colorIndex[e], e, "colorIndex[e] > colorIndex[ls] ?", (colorIndex[e] > colorIndex[ls]), colorIndex[ls], ls, "this[word[i]]:", this[word[i]] );
 		});
 
@@ -725,7 +738,10 @@ export function calculateBotTree(rootGuess: string, rootGuessId: string) {
 	// First create the botRoot with the all gangs so that
 	// it contains the correct nGroups and sumOfSquares values.
 	gangs = calculateGroups(rootGuess, words.answers);
-	let rootGang = gangs.get(rootGuessId);
+	const rootGang = gangs.get(rootGuessId);
+	if (!rootGang) {
+		throw new Error(`calculateBotTree: root gang not found for ${rootGuessId}`);
+	}
 	botRoot = new BotNode(null, "", 0, rootGuess, gangs, words.answers.length);
 
 	// To reduce the BotTree size and calculation time,
@@ -740,8 +756,8 @@ export function calculateBotTree(rootGuess: string, rootGuessId: string) {
 	// then use an alternate easyGroup.
 	// Also, add easyGroup to map2 because that group
 	// is a great pool of potential optimal easy mode guesses.
-	let easyGang: GangTuple;
-	let easyGroupId: string;
+	let easyGang: GangTuple | undefined;
+	let easyGroupId = "";
 	if (rootGuessId !== "-----") easyGroupId = "-----";
 	else {
 		// Find a gang pair whose groupId has the most 
@@ -759,6 +775,9 @@ export function calculateBotTree(rootGuess: string, rootGuessId: string) {
 		}
 	}
 	easyGang = gangs.get(easyGroupId);
+	if (!easyGang) {
+		throw new Error(`calculateBotTree: easy gang not found for ${easyGroupId}`);
+	}
 	appU.easyGroup = easyGang[0];
 
 	botRoot.gangs = rootGangs;
@@ -770,14 +789,13 @@ export function calculateBotTree(rootGuess: string, rootGuessId: string) {
  * words remaining before the guess.
  */
 export function calculateGroups(guess: string, pg: Array<string>) {
-	let group: Array<string>;
-	let tuple: GangTuple;
+	let group: Array<string> | undefined;
 	let gangs: Gangs = new Map<string, GangTuple>;
 	let gid: string;
 	for (let a = 0; a < pg.length; a++) {
 		gid = calculateGroupId(pg[a], guess);
-		tuple = gangs.get(gid);
-		(tuple === undefined) ? group = undefined : group = tuple[0];
+		const tuple = gangs.get(gid);
+		group = tuple?.[0];
 		if (group === undefined) {
 			group = new Array<string>;
 			group.push(pg[a]);
@@ -789,19 +807,26 @@ export function calculateGroups(guess: string, pg: Array<string>) {
 }
 
 export class ParentTuple {
-	node: BotNode;
+	node: BotNode | null;
 	groupId: string;
-	private _gang: GangTuple;
-	private _kids: KidTuple;
+	private _gang!: GangTuple;
+	private _kids!: KidTuple;
 
-	constructor(node:BotNode, groupId: string)
+	constructor(node: BotNode | null, groupId: string)
 	{
 		this.node = node;
 		this.groupId = groupId;
 	}
 
 	get gang(): GangTuple {
-		this._gang = this.node.gangs.get(this.groupId);
+		if (!this.node) {
+			throw new Error(`ParentTuple.gang: parent node is null for groupId ${this.groupId}`);
+		}
+		const gang = this.node.gangs.get(this.groupId);
+		if (!gang) {
+			throw new Error(`ParentTuple.gang: gang not found for groupId ${this.groupId}`);
+		}
+		this._gang = gang;
 		return this._gang;
 	}
 
@@ -832,7 +857,7 @@ export class BotNode // extends TreeNode
 	/** gang<groupId, GangTuple > */
 	public gangs: Gangs;
  
-	constructor(parentNode: BotNode, parentGroupId: string, ri: number, guess: string, gangs: Gangs, nWordsBefore: number, linkToParent = false )
+	constructor(parentNode: BotNode | null, parentGroupId: string, ri: number, guess: string, gangs: Gangs, nWordsBefore: number, linkToParent = false )
 	{ 
 		this.parent = new ParentTuple(parentNode, parentGroupId);
 		this.hasKids = false;
@@ -862,7 +887,8 @@ export class BotNode // extends TreeNode
 	 * This function returns true for both types.
 	 */
   	isLeaf() { 
-		let isTrueLeaf = this.sumOfSquares === 1 && this.gangs.entries().next().value[0] === "#####";
+		const firstEntry = this.gangs.entries().next();
+	let isTrueLeaf = this.sumOfSquares === 1 && firstEntry.value !== undefined && firstEntry.value[0] === "#####";
 		return ( isTrueLeaf || this.ri === (ROWS - 1) ); 
 	}
 
@@ -907,7 +933,30 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 
 	let minGradeA = 0;
 	let nGroupsA = 0;
-	let info: BotNodeTuple = [,,,,,,,,,,,,,,,,,,,,,,]; // Initialize a multi element empty tuple.
+	let info: BotNodeTuple = [
+		"",
+		0,
+		0,
+		0,
+		"",
+		0,
+		"",
+		"",
+		"",
+		0,
+		"",
+		0,
+		null,
+		"",
+		0,
+		0,
+		0,
+		0,
+		null,
+		null,
+		0,
+		"",
+	]; // Initialize a fixed tuple.
 
 	info[0] = ""; // guess
 	info[1] = 0; // ri
@@ -1025,11 +1074,16 @@ export function botNodeInfo (botNode: BotNode, guessId = "") {
 		console.log("botNodeInfo/logInfo/botNode:");
 		console.log(botNode);
 		if (botNode.ri > 0) {
-			if (botNode.parent.kids[2] === null)
-				console.log(`${botNode.guess} parent ${botNode.parent.node.guess} (hasKids = ${botNode.parent.node.hasKids}) has no kids.`); 
-			else {
-				console.log(`${botNode.guess} parent ${botNode.parent.node.guess} has kids: ${botNode.parent.kids[1].guess}, ${botNode.parent.kids[2].guess}, ${botNode.parent.kids[3].guess}, ${botNode.parent.kids[4].guess}`);
-				console.log(`${botNode.guess} maxGroupsSibEasy: ${info[18].guess}.`, info[18]);
+			const parentNode = botNode.parent.node;
+			if (botNode.parent.kids[2] === null) {
+				if (parentNode) {
+					console.log(`${botNode.guess} parent ${parentNode.guess} (hasKids = ${parentNode.hasKids}) has no kids.`);
+				}
+			} else {
+				if (parentNode) {
+					console.log(`${botNode.guess} parent ${parentNode.guess} has kids: ${botNode.parent.kids[1]?.guess}, ${botNode.parent.kids[2]?.guess}, ${botNode.parent.kids[3]?.guess}, ${botNode.parent.kids[4]?.guess}`);
+				}
+				console.log(`${botNode.guess} maxGroupsSibEasy: ${info[18]?.guess}.`, info[18]);
 				console.log(`${botNode.guess} maxGroupsSibHard: ${info[19].guess}.`, info[19]);
 			}
 		}
@@ -1061,7 +1115,7 @@ export function calculateBotInfoArray(botSide : "left" | "right" ) {
 /** Calculates and returns botInfoArray based on botMode.  */
 export function calculateBotInfoArray2(botMode: BotMode) {
 	let botRowArray: Array<BotNode> = [];
-	let tuple: GangTuple;
+	let tuple: GangTuple | undefined;
 	let botInfoArray: Array<BotNodeTuple> = [];
 
 	console.log(`calculateBotInfoArray/botMode: ${namesOf(BotMode)[botMode]}`);
@@ -1074,24 +1128,28 @@ export function calculateBotInfoArray2(botMode: BotMode) {
 		case BotMode["Bot Max % Groups Hard"]:
 			for (let ri = 0; ri < (appU.nGuesses - (appU.active ? 0 : 1)); ri++) {
 				tuple = appU.human[ri].gangs.get(appU.guessGroupIds[ri]);
+				if (!tuple) continue;
 				botRowArray.push(tuple[1][1]);
 			}
 		break;
 		case BotMode["Bot Max % Groups Easy"]:
 			for (let ri = 0; ri < (appU.nGuesses - (appU.active ? 0 : 1)); ri++) {
 				tuple = appU.human[ri].gangs.get(appU.guessGroupIds[ri]);
+				if (!tuple) continue;
 				botRowArray.push(tuple[1][2]);
 			}
 		break;
 		case BotMode["Bot Min Sum of Squares Hard"]:
 			for (let ri = 0; ri < (appU.nGuesses - (appU.active ? 0 : 1)); ri++) {
-				let tuple = appU.human[ri].gangs.get(appU.guessGroupIds[ri]);
+				const tuple = appU.human[ri].gangs.get(appU.guessGroupIds[ri]);
+				if (!tuple) continue;
 				botRowArray.push(tuple[1][3]);
 			}
 		break;
 		case BotMode["Bot Min Sum of Squares Easy"]:
 			for (let ri = 0; ri < (appU.nGuesses - (appU.active ? 0 : 1)); ri++) {
-				let tuple = appU.human[ri].gangs.get(appU.guessGroupIds[ri]);
+				const tuple = appU.human[ri].gangs.get(appU.guessGroupIds[ri]);
+				if (!tuple) continue;
 				botRowArray.push(tuple[1][4]);
 			}
 		break;
@@ -1109,9 +1167,9 @@ export function calculateBotInfoArray2(botMode: BotMode) {
 		break;
 	}
 
-	botRowArray.forEach((node) => {	
+	botRowArray.forEach((node) => { 	
 		if (node === null) {
-			this.errorString = botRowArray;
+			appU.errorString = "calculateBotInfoArray: botRowArray contains a null node or is empty.";
 			console.log(botRowArray, "calculateBotInfoArray.botRowArray");
 			let e = new Error('calculateBotInfoArray: botRowArray contains a null node or is empty.');
 			throw e; 		

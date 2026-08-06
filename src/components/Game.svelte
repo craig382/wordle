@@ -311,7 +311,7 @@
 		bind:appB={appG}
 		tutorial={$settings.tutorial === 1}
 		on:closeTutPopUp|once={() => ($settings.tutorial = 0)}
-		icon={modeData.modes[$mode].icon}
+		icon={modeData.modes[$mode].icon ?? ''}
 		on:swipe={onSwipe}
 	/>
 	<Keyboard

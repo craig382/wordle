@@ -6,15 +6,15 @@ import { GameMode, Settings, LetterStates } from "./utils";
  * in the set function.
  */
 class Writable<T> {
-	static subscriber_queue = [];
-	private stop: () => void;
+	static subscriber_queue: any[] = [];
+	private stop: (() => void) | null = null;
 	private start: (set: (val: T) => void) => () => void;
-	private value: T;
+	private value: T | undefined;
 	private subscribers: Set<Subscriber<T>>;
 	constructor(value?: T, start = Writable.noop) {
 		this.subscribers = new Set();
-		this.start = start;
-		this.value = value;
+		this.start = start as any;
+		this.value = value as T | undefined;
 	}
 	/**
 	 * Set value and inform subscribers. If the new value is the same as the old value subscribers
@@ -26,7 +26,7 @@ class Writable<T> {
 	public set(new_value: T, always_update: boolean = false) {
 		if (always_update || Writable.safe_not_equal(this.value, new_value)) {
 			this.value = new_value;
-			if (stop) { // store is ready
+			if (this.stop) { // store is ready
 				const run_queue = !Writable.subscriber_queue.length;
 				for (const subscriber of this.subscribers) {
 					subscriber[1]();
@@ -34,7 +34,7 @@ class Writable<T> {
 				}
 				if (run_queue) {
 					for (let i = 0; i < Writable.subscriber_queue.length; i += 2) {
-						Writable.subscriber_queue[i][0](Writable.subscriber_queue[i + 1]);
+						(Writable.subscriber_queue[i] as Subscriber<T>)[0](Writable.subscriber_queue[i + 1]);
 					}
 					// empty queue
 					Writable.subscriber_queue.length = 0;
@@ -46,7 +46,7 @@ class Writable<T> {
 	 * Update value using callback and inform subscribers.
 	 * @param updater - callback
 	 */
-	public update(updater: (val: T) => T) {
+	public update(updater: (val: T | undefined) => T) {
 		this.set(updater(this.value));
 	}
 	/**
@@ -54,17 +54,17 @@ class Writable<T> {
 	 * @param run - subscription callback
 	 * @param invalidate - cleanup callback
 	 */
-	public subscribe(run: (val: T) => void, invalidate: (val?: T) => void = Writable.noop) {
-		const subscriber: Subscriber<T> = [run, invalidate];
+	public subscribe(run: (val: T | undefined) => void, invalidate: (val?: T) => void = Writable.noop) {
+		const subscriber: Subscriber<T> = [run as any, invalidate];
 		this.subscribers.add(subscriber);
 		if (this.subscribers.size === 1) {
-			this.stop = this.start(this.set) || Writable.noop;
+			this.stop = this.start((v: T) => this.set(v)) || Writable.noop;
 		}
 		run(this.value);
 		return () => {
 			this.subscribers.delete(subscriber);
 			if (this.subscribers.size === 0) {
-				this.stop();
+				this.stop && this.stop();
 				this.stop = null;
 			}
 		};
@@ -78,7 +78,7 @@ class Writable<T> {
 	}
 	/** Dummy function to be used as a default value. */
 	private static noop() {
-		return null;
+		return () => {};
 	}
 }
 
