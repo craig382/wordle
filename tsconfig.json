@@ -11,10 +11,21 @@
      * Note that setting allowJs false does not prevent the use
      * of JS in `.svelte` files.
      */
+    "strictNullChecks": false,
+    "strictPropertyInitialization": false,
+    "noImplicitAny": false,
     "allowJs": true,
     "checkJs": true,
     "isolatedModules": true,
     "ignoreDeprecations": "5.0",
+    "strict": true,
+    "noImplicitThis": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
   },
   "include": [
     "src/**/*.d.ts",

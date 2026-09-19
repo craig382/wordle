@@ -79,7 +79,7 @@
 			meanings,
 		};
 
-		console.log("DictionaryEntry created:", entry);
+		console.log("DictionaryEntry created from internet:", entry);
 
 		return entry;
 	}

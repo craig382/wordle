@@ -565,8 +565,9 @@ export class Stats extends Storable {
 		}
 	}
 	
-	
-	addWin(guesses: 1|2|3|4|5|6) {
+	/** addWin() will fail (throw an uncaught error)
+	 * unless guesses is 1|2|3|4|5|6. */
+	addWin(guesses: number) {
 		++this.guesses[guesses];
 		++this.played;
 		++this.streak;
