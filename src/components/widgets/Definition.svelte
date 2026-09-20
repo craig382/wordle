@@ -1,13 +1,7 @@
 <script context="module" lang="ts">
 	const cache = new Map<string, Promise<DictionaryEntry>>();
-</script>
 
-<script lang="ts">
-	export let word: string;
-	/** The maximum number of alternate definitions to provide*/
-	export let alternates = 9;
-
-	async function getWordData(word: string): Promise<DictionaryEntry> {
+	export async function getWordData(word: string): Promise<DictionaryEntry> {
 		if (!word) {
 			const e = new Error(`getWordData( word: "${word}" ) passed an empty string.`);
 			console.log(e);
@@ -84,6 +78,12 @@
 		return entry;
 	}
 
+</script>
+
+<script lang="ts">
+	export let word: string;
+	/** The maximum number of alternate definitions to provide*/
+	export let alternates = 9;
 </script>
 
 <div class="def">

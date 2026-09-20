@@ -19,6 +19,7 @@
 		Tips,
 		Historical,
 	} from "./widgets";
+	import {getWordData} from "./widgets/Definition.svelte";
 	import {
 		contractNum,
 		randomSample,
@@ -81,6 +82,7 @@
 	 * and updating the GameState (including bot calculations).
 	 */
 	 function processValidGuess() {
+			getWordData(appG.latestWord);
 			if ($mode === GameMode.solver) {
 				let errorIndex: number = 0;
 				let gid = "";
