@@ -12,9 +12,9 @@ node --version
 
 # Set NODE_VERSION equal the "node --version" 
 # command response from an outside terminal.
-NODE_VERSION="v24.15.0"
+NODE_VERSION="v24.21.0"
 echo "NODE_VERESION = ${NODE_VERSION}"
-export PATH=$HOME/.nvm/versions/node/v24.15.0/bin:$PATH
+export PATH=$HOME/.nvm/versions/node/$NODE_VERSION/bin:$PATH
 echo "now bash is using the following node --version:"
 node --version
 
