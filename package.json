@@ -1,6 +1,6 @@
 {
   "name": "wordle",
-  "description": "A remake of Wordle with additional modes and features.",
+  "description": "Wordle with additional modes and features.",
   "version": "4.1",
   "type": "module",
   "private": "true",

@@ -36,16 +36,28 @@
 			throw e;
 		}
 
-		const json = await res.json();
-		return toDictionaryEntry(json, word);
+		return res.text().then(jsonText => {
+			const json = JSON.parse(jsonText);
+			// console.log("fetchWiktionary raw JSON text and JSON data object:", jsonText, json);
+    		return toDictionaryEntry(json, word);
+		});
 	}
 
+	/** Convert htmlToText using regular expressions. */
 	function htmlToText(html: string): string {
 		if (!html) return "";
-		// Decode entities and strip tags using the DOM parser.
-		const doc = new DOMParser().parseFromString(html, "text/html");
-		// Replace link/element content with just its text nodes.
-		return (doc.body.textContent ?? "").replace(/\s+/g, " ").trim();
+		// Remove HTML tags using regular expressions.
+		const text1 = html.replace(/<[^>]*>/g, "");
+		// Replace multiple spaces with a single space.
+		const text2 = text1.replace(/\s+/g, " ");
+		const text3 = text2.trim();
+		console.log(".");
+		console.log(`htmlToText text0:"${text1}".`);
+		if (text2 !== text1) 
+			console.log(`htmlToText text1:"${text2}".`);
+		if (text3 !== text2) 
+			console.log(`htmlToText text2:"${text3}".`);
+		return text3;
 	}
 
 	function toDictionaryEntry(json: any, word: string): DictionaryEntry {
@@ -57,9 +69,9 @@
 			partOfSpeech: sense.partOfSpeech ?? "",
 			definitions: (sense.definitions ?? []).map((d: any): Definition => ({
 				definition: htmlToText(d.definition ?? ""),
-				synonyms: [],          // not provided by this endpoint
-				antonyms: [],          // not provided by this endpoint
-				example: d.example ? htmlToText(d.example) : undefined,    // optional, may be undefined
+				synonyms: [], // not provided by this endpoint
+				antonyms: [], // not provided by this endpoint
+				example: d.example ? htmlToText(d.example) : undefined, // optional, may be undefined
 			}))
 			// Filter out empty or whitespace-only definitions
 			.filter(def => def.definition.length > 0),
@@ -73,7 +85,7 @@
 			meanings,
 		};
 
-		console.log(`DictionaryEntry created for "${word}":`, entry);
+		console.log(`DictionaryEntry created for "${word}".`);
 
 		return entry;
 	}
