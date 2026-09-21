@@ -51,12 +51,7 @@
 		// Replace multiple spaces with a single space.
 		const text2 = text1.replace(/\s+/g, " ");
 		const text3 = text2.trim();
-		console.log(".");
-		console.log(`htmlToText text0:"${text1}".`);
-		if (text2 !== text1) 
-			console.log(`htmlToText text1:"${text2}".`);
-		if (text3 !== text2) 
-			console.log(`htmlToText text2:"${text3}".`);
+		// console.log(`htmlToText text3:"${text3}".`);
 		return text3;
 	}
 
@@ -103,13 +98,9 @@
 		<h4>Fetching definition of "{word}"...</h4>
 	{:then data}
 		<h2>{word}</h2>
-		<em>{data.meanings[0].partOfSpeech}</em>
 		<ol>
-			{#if word !== data.word}
-				<li>variant of {data.word}.</li>
-			{/if}
-			{#each data.meanings[0].definitions.slice(0, 1 + alternates - (word !== data.word ? 1 : 0)) as def}
-				<li>{def.definition}</li>
+			{#each data.meanings.slice(0, alternates + 1) as m}
+				<li><em>{m.partOfSpeech}</em> {m.definitions[0].definition}</li>
 			{/each}
 		</ol>
 	{:catch}
