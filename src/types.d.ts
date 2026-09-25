@@ -42,7 +42,7 @@ type Definition = {
 	definition: string;
 	synonyms: string[];
 	antonyms: any[];
-	example?: string;
+	examples?: string[];
 };
 
 type Phonetic = {

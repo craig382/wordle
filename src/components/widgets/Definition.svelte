@@ -60,16 +60,19 @@
 		// { en: [ { partOfSpeech, language, definitions:[{ definition, example }] }, ... ] }
 		const senses: any[] = Array.isArray(json?.en) ? json.en : [];
 
+		console.log(`toDictionaryEntry.senses: `, senses);
+
 		const meanings: Meaning[] = senses.map(sense => ({
 			partOfSpeech: sense.partOfSpeech ?? "",
 			definitions: (sense.definitions ?? []).map((d: any): Definition => ({
 				definition: htmlToText(d.definition ?? ""),
 				synonyms: [], // not provided by this endpoint
 				antonyms: [], // not provided by this endpoint
-				example: d.example ? htmlToText(d.example) : undefined, // optional, may be undefined
+				examples: (d.examples ?? []).map((ex: any): string => htmlToText(ex))
+				   .filter(ex => ex.length > 1), // filter out short examples
 			}))
 			// Filter out empty or whitespace-only definitions
-			.filter(def => def.definition.length > 0),
+			.filter(d => d.definition.length > 0),
 		}));
 
 		const entry: DictionaryEntry = {
@@ -80,7 +83,7 @@
 			meanings,
 		};
 
-		console.log(`DictionaryEntry created for "${word}".`);
+		console.log(`DictionaryEntry created for "${word}".`, entry);
 
 		return entry;
 	}
