@@ -1,4 +1,6 @@
 <script context="module" lang="ts">
+    import { randomSample } from "../../utils";
+
 	const cache = new Map<string, Promise<DictionaryEntry>>();
 
 	export async function getWordData(word: string): Promise<DictionaryEntry> {
@@ -26,6 +28,8 @@
 		// Wiktionary REST v1 definition endpoint. Supports CORS.
 		// Do NOT use mode:"no-cors",
 		// which returns an opaque response you can't read with .json().
+		// Sandbox Documentation:
+		// https://en.wiktionary.org/w/index.php?api=wmf-rest%2Fv1&title=Special%3ARestSandbox#/Page%20content/get_page_definition__term_
 		const url = `https://en.wiktionary.org/api/rest_v1/page/definition/${encodeURIComponent(word)}`;
 
 		const res = await fetch(url, { headers: { Accept: "application/json" } });
@@ -38,8 +42,99 @@
 
 		return res.text().then(jsonText => {
 			const json = JSON.parse(jsonText);
-			// console.log("fetchWiktionary raw JSON text and JSON data object:", jsonText, json);
-    		return toDictionaryEntry(json, word);
+			console.log("fetchWiktionary raw JSON data object:", json);
+			// console.log("fetchWiktionary raw JSON text:", jsonText);
+			return toDictionaryEntry(json, word);
+		});
+	}
+
+	export async function fetchTest1() {
+		const word = "sound";
+
+		const url = `https://api.wikimedia.org/core/v1/wiktionary/en/page/${encodeURIComponent(word)}`;
+
+		const res = await fetch(url, {
+		headers: {
+			Accept: "application/json",
+			"User-Agent": "MyDictApp/1.0 (contact@example.com)"
+		}
+		});
+
+		const data = await res.json();
+		const json = data.source; // raw wikitext string
+		console.log("fetchTest raw JSON data object:", json);
+	}
+
+	export function fetchTest2(word: string){
+		const url = `https://api.wikimedia.org/core/v1/wiktionary/en/page/`;
+		// var params = "action=query&ailimit=3&format=json";
+		const params = "?action=parse&origin=*";
+		fetch(`${url}${encodeURIComponent(word)}${params}`)
+		// fetch( url + "?" + params )
+		.then(function(r1){
+			console.log("r1:", r1)
+			return r1.json();
+		})
+		.then(function(r2) {
+			console.log("r2:", r2)
+			// return r2.text();
+		})
+		// .then(function(r3){
+		// 	console.log("r3:", r3)
+		// 	return r3.blob();
+		// })
+		.catch(function(e) {
+			console.error("fetchTest3 ERROR.", e);
+		});
+	}
+
+	export function fetchTest3(word: string){
+		const url = `https://en.wiktionary.org/w/rest.php/v1/page/`;
+		const params = "?origin=*";
+		fetch(`${url}${encodeURIComponent(word)}${params}`)
+		.then(function(r1){
+			console.log("r1:", r1)
+			return r1.json();
+		})
+		.then(function(r2) {
+			console.log("r2:", r2);
+			console.log("r2.source:wikitext", r2.source);
+			// return r2.text();
+		})
+		// .then(function(r3){
+		// 	console.log("r3:", r3)
+		// 	return r3.blob();
+		// })
+		.catch(function(e) {
+			console.error("fetchTest3 ERROR.", e);
+		});
+	}
+
+	export function fetchTest4(word: string){
+		// https://www.mediawiki.org/wiki/API:Parsing_wikitext
+		const url = `https://en.wiktionary.org/w/api.php`;
+		const p1 = `?origin=*&action=parse`;
+		const p2 = `&page=${encodeURIComponent(word)}`;
+		const p3 = `&prop=wikitext|parsetree|text|properties&parser=parsoid`;
+		const p4 = `&format=json&formatversion=2`;
+		fetch(`${url}${p1}${p2}${p3}${p4}`)
+		.then(function(r1){
+			console.log("r1:", r1);
+			return r1.json();
+		})
+		.then(function(r2) {
+			console.log("r2:", r2);
+			// console.log("r2.parse.parsetree:", r2.parse.parsetree);
+			// console.log("r2.parse.text:", r2.parse.text);
+			// console.log("r2.source:wikitext", r2.source);
+			// return r2.text();
+		})
+		// .then(function(r3){
+		// 	console.log("r3:", r3)
+		// 	return r3.blob();
+		// })
+		.catch(function(e) {
+			console.error("fetchTest4 ERROR.", e);
 		});
 	}
 

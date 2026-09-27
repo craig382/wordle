@@ -19,7 +19,7 @@
 		Tips,
 		Historical,
 	} from "./widgets";
-	import {getWordData} from "./widgets/Definition.svelte";
+	import {getWordData, fetchTest1, fetchTest2, fetchTest3, fetchTest4} from "./widgets/Definition.svelte";
 	import {
 		contractNum,
 		randomSample,
@@ -257,6 +257,11 @@
 			appG.board.guesses[0] = appG.opener;
 			processValidGuess(); 
 		}
+
+		// fetchTest1(appG.opener);
+		// fetchTest2(appG.opener);
+		// fetchTest3(appG.opener);
+		fetchTest4(appG.opener);
 
 		console.log("newGame:", appG);
 	}
