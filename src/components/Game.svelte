@@ -20,6 +20,7 @@
 		Historical,
 	} from "./widgets";
 	import {getWordData, fetchTest1, fetchTest2, fetchTest3, fetchTest4} from "./widgets/Definition.svelte";
+	import { pruneDictionary } from "../scripts/build-dictionary"
 	import {
 		contractNum,
 		randomSample,
@@ -261,7 +262,9 @@
 		// fetchTest1(appG.opener);
 		// fetchTest2(appG.opener);
 		// fetchTest3(appG.opener);
-		fetchTest4(appG.opener);
+		// fetchTest4(appG.opener);
+
+		pruneDictionary();
 
 		console.log("newGame:", appG);
 	}

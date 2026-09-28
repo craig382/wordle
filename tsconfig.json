@@ -26,7 +26,8 @@
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "types": ["node"],
+    /** Include all node_modules/@types subfolders. */
+    "types": ["node", "pug", "seedrandom"],
   },
   "include": [
     "src/**/*.d.ts",
