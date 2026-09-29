@@ -1,4 +1,10 @@
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 import { createWriteStream } from 'node:fs';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 type PrunedEntry = {
 	word: string;
@@ -18,7 +24,15 @@ type StructuredEntry = {
 /** maps word to StructuredEntry */
 type WordMap = Map<string, StructuredEntry>;
 
+
 export const wordMap : WordMap = new Map<string, StructuredEntry>();
+
+try {
+	// Vite/SvelteKit raw import
+	// import wordMap from './wordMap.json';
+} catch {
+	console.log(e);
+}
 
 export function lookup(word: string): StructuredEntry {
 	return wordMap.get(word.toLowerCase());
@@ -27,14 +41,13 @@ export function lookup(word: string): StructuredEntry {
 // DELETE following line. Placeholder for now.
 const answers = new Set(['saint', 'crane', 'slate', /* ...your word list... */]);
 
-const dictionaryDir = `src/dictionary`;
-
 // Vite/SvelteKit raw import
 // import raw1 from './kaikki.org.dictionary.full.jsonl?raw';
-var raw1: string; // uncomment when import raw1 is commented
+// var raw1: string; // uncomment when import raw1 is commented
 // uncomment import line above and prune line below,
 // then run once, then comment them both out again.
-// pruneDictionary(); // run once then comment out
+
+pruneDictionary(); // run once then comment out
 
 /** pruneDictionary() creates a *.pruned.jsonl 
  * dictionary file from a postprocessed  *.full.jsonl file downloaded
@@ -49,11 +62,13 @@ var raw1: string; // uncomment when import raw1 is commented
  * 3) re-comment pruneDictionary() in the line above.
  * */
 async function pruneDictionary() {
-	const out = createWriteStream(`${dictionaryDir}/kaikki.org.dictionary.pruned.jsonl`);
+	const bigDictionary = readFileSync(join(__dirname, 'kaikki.org.dictionary.pruned.jsonl'), 'utf-8');
+	const out = createWriteStream(`./kaikki.org.dictionary.pruned.jsonl`);
 	let nWrote = 0;
 	let nRead = 0;
 
-	for (const line of raw1.split('\n')) {
+	for (const line of bigDictionary.split('\n')) {
+		console.log(`pruneDictionary line: "\n${line}\n"`);
 		if (!line.trim()) continue;
 		const e = JSON.parse(line);
 		nRead++;
@@ -88,11 +103,7 @@ async function pruneDictionary() {
 	console.log(`Read ${nRead} entries, wrote ${nWrote} entries`);
 }
 
-// Vite/SvelteKit raw import
-import raw2 from './kaikki.org.dictionary.pruned.jsonl?raw';
-// uncomment import line above and build line below,
-// then run once, then comment them both out again.
-buildAndSaveWordMap();
+// buildAndSaveWordMap(); // run once then comment out
 
 /** buildAndSaveWordMap() builds the wordMap 
  * from a *.pruned.jsonl dictionary file
@@ -111,7 +122,9 @@ buildAndSaveWordMap();
  * 4) re-comment buildAndSaveWordMap() in the line above.
  * */
 async function buildAndSaveWordMap() {
-	for (const line of raw2.split('\n')) {
+	const prunedDictionary = readFileSync(join(__dirname, 'kaikki.org.dictionary.pruned.jsonl'), 'utf-8');
+
+	for (const line of prunedDictionary.split('\n')) {
 		if (!line.trim()) continue;
 		const pe: PrunedEntry = JSON.parse(line);
 		var se: StructuredEntry = wordMap.get(pe.word) ||
