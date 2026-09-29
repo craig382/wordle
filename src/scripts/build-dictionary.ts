@@ -34,13 +34,13 @@ export async function pruneDictionary() {
 		const p = {
 			word: e.word,
 			pos: e.pos,
-			// enprs: (e.sounds || []).filter((s: any) => s.enpr)
-			// 	.map((s: any) => (s.enpr)),
 			enprs: (e.sounds || []).filter((s: any) => s.enpr)
 				.map((s: any) => (s.enpr)),
 			defs: (e.senses || [])
 				.reduce((acc: string[], s: any) => acc.concat(s.glosses), []),
-			};
+		};
+
+		if (!p.enprs) delete(p.enprs);
 
 		const pStr = JSON.stringify(p);
 		out.write(pStr + '\n');
