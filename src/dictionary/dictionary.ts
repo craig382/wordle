@@ -3,34 +3,22 @@
 // Vite/SvelteKit raw import
 import raw from './kaikki.org.dictionary.pruned.jsonl?raw';
 
-type Sense = { 
-	qualifier?: string;
-	glosses: string[];
-	examples?: string[]
-};
-
-type Sound = {
-		enpr?: string;
-		ipa?: string;
-		tags?: string[]
-};
-
 type PrunedEntry = {
-	word: string; 
+	word: string;
+	enprs?: string[];
 	pos: string;
-	sounds?: Sound[];
-	senses: Sense[];
+	defs: string[];
 };
 
-/** maps part of speech pos to a senses array */
-type PosMap = Map<string, Sense[]>;
+/** maps part of speech pos to the defs array */
+type PosMap = Map<string, string[]>;
 
 type StructuredEntry = {
-	sounds?: Sound[];
+	enprs?: string[];
 	posMap: PosMap;
 }
 
-/** maps word to PosMap */
+/** maps word to StructuredEntry */
 type WordMap = Map<string, StructuredEntry>;
 
 export const wordMap : WordMap = new Map<string, StructuredEntry>();
@@ -39,15 +27,11 @@ for (const line of raw.split('\n')) {
 	if (!line.trim()) continue;
 	const pe: PrunedEntry = JSON.parse(line);
 	var se: StructuredEntry = wordMap.get(pe.word) ||
-		{ sounds: pe.sounds, posMap: new Map<string, Sense[]>() };
-	// if (!se) {
-	// 	se.sounds = pe.sounds;
-	// 	// se.posMap = new Map<string, Sense[]>([ [pe.pos, pe.senses] ]);
-	// }
-	se.posMap.set(pe.pos, pe.senses);
+		{ enprs: pe.enprs, posMap: new Map<string, string[]>() };
+	se.posMap.set(pe.pos, pe.defs);
 	wordMap.set(pe.word, se);
 }
-console.log(`dictionary map:`, wordMap);
+console.log(`wordMap:`, wordMap);
 
 export function lookup(word: string): StructuredEntry {
 	return wordMap.get(word.toLowerCase());
