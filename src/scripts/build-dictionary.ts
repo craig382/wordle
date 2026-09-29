@@ -36,9 +36,9 @@ export async function pruneDictionary() {
 			pos: e.pos,
 			enprs: (e.sounds || []).filter((s: any) => s.enpr)
 				.map((s: any) => (s.enpr)),
-			defs: (e.senses || []).map((s: any) => (s.glosses)),
+			defs: (e.senses || []).reduce((acc: string[], s: any) => {
+				(s.glosses || []).map((d: string) => acc.push(d)); return acc;}, []),
 		};
-
 
 		const pStr = JSON.stringify(p);
 		out.write(pStr + '\n');
