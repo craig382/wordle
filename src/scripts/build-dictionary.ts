@@ -27,7 +27,6 @@ export async function pruneDictionary() {
 		nRead++;
 
 		if (e.lang_code !== 'en') continue;
-		const w = (e.word || '').toLowerCase();
 
 		// if (!answers.has(w)) continue;
 
@@ -36,12 +35,8 @@ export async function pruneDictionary() {
 			word: e.word,
 			pos: e.pos,
 			enprs: (e.sounds || []).filter((s: any) => s.enpr)
-				.map((s: any) => (s.enpr )),
-			senses: (e.senses || []).map((s: any) => ({
-				// qualifier: s.qualifier,
-				glosses: s.glosses,
-				// examples: s.examples?.map((x: any) => x.text),
-			})),
+				.map((s: any) => (s.enpr)),
+			senses: (e.senses || []).map((s: any) => (s.glosses)),
 		};
 
 
