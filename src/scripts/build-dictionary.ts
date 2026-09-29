@@ -36,7 +36,7 @@ export async function pruneDictionary() {
 			pos: e.pos,
 			enprs: (e.sounds || []).filter((s: any) => s.enpr)
 				.map((s: any) => (s.enpr)),
-			senses: (e.senses || []).map((s: any) => (s.glosses)),
+			defs: (e.senses || []).map((s: any) => (s.glosses)),
 		};
 
 
