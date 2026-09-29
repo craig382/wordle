@@ -34,13 +34,10 @@ export async function pruneDictionary() {
 		const p = {
 			word: e.word,
 			pos: e.pos,
+			// enprs: (e.sounds || []).filter((s: any) => s.enpr)
+			// 	.map((s: any) => (s.enpr)),
 			enprs: (e.sounds || []).filter((s: any) => s.enpr)
 				.map((s: any) => (s.enpr)),
-			// defs: (e.senses || []).reduce((acc: string[], s: any) => {
-			// 	(s.glosses || []).map((d: string) => acc.push(d)); return acc;}, []),
-			// defs: (e.senses || []).reduce((acc: string[], s: any) => {
-			// 	(s.glosses || []).forEach((d: string) => {if (d) acc.push(d)});
-			// 	return acc;}, []),
 			defs: (e.senses || [])
 				.reduce((acc: string[], s: any) => acc.concat(s.glosses), []),
 			};
