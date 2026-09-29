@@ -40,7 +40,7 @@ export async function pruneDictionary() {
 				.reduce((acc: string[], s: any) => acc.concat(s.glosses), []),
 		};
 
-		if (!p.enprs) delete(p.enprs);
+		if (p.enprs.length === 0) delete p.enprs;
 
 		const pStr = JSON.stringify(p);
 		out.write(pStr + '\n');
