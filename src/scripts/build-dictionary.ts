@@ -9,7 +9,7 @@ import * as zlib from 'node:zlib';
 const answers = new Set(['saint', 'crane', 'slate', /* ...your word list... */]);
 const rawDictionaryDir = `src/dictionary`;
 
-// pruneDictionary();
+pruneDictionary();
 
 export async function pruneDictionary() {
 	// const reader = new FileReader();
@@ -35,12 +35,12 @@ export async function pruneDictionary() {
 		const p = {
 			word: e.word,
 			pos: e.pos,
-			// sounds: (e.sounds || []).filter((s: any) => s.ipa || s.enpr)
-			// 	.map((s: any) => ({ enpr: s.enpr, ipa: s.ipa })),
+			enprs: (e.sounds || []).filter((s: any) => s.enpr)
+				.map((s: any) => (s.enpr )),
 			senses: (e.senses || []).map((s: any) => ({
-				qualifier: s.qualifier,
+				// qualifier: s.qualifier,
 				glosses: s.glosses,
-				examples: s.examples?.map((x: any) => x.text),
+				// examples: s.examples?.map((x: any) => x.text),
 			})),
 		};
 
@@ -49,11 +49,11 @@ export async function pruneDictionary() {
 		out.write(pStr + '\n');
 		nWrote++;
 
-		console.log(`.`);
-		console.log(`word "${e.word}", input line ${nRead } length: ${line.length}, output line ${nWrote} length ${pStr.length} `);
-		console.log(`pruned dicitionary json:`, p);
+		// console.log(`.`);
+		console.log(`word "${e.word}/${e.pos}", input line ${nRead } length: ${line.length}, output line ${nWrote} length ${pStr.length} `);
+		// console.log(`pruned dicitionary json:`, p);
 
-		if (nRead >= 5) break;
+		if (nRead >= 500) break;
 
 	}
 

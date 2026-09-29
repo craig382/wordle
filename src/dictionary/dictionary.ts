@@ -1,35 +1,54 @@
 // src/lib/dictionary.ts
-import raw from '$lib/data/wikt.jsonl?raw';   // Vite/SvelteKit raw import
 
-type Sense = { glosses: string[]; tags?: string[]; examples?: string[] };
-type Entry = {
-  word: string; pos: string;
-  senses: Sense[];
-  sounds?: { ipa?: string; audio?: string; tags?: string[] }[];
-  etymology?: string;
+// Vite/SvelteKit raw import
+import raw from './kaikki.org.dictionary.pruned.jsonl?raw';
+
+type Sense = { 
+	qualifier?: string;
+	glosses: string[];
+	examples?: string[]
 };
 
-const map = new Map<string, Entry[]>();
+type Sound = {
+		enpr?: string;
+		ipa?: string;
+		tags?: string[]
+};
+
+type PrunedEntry = {
+	word: string; 
+	pos: string;
+	sounds?: Sound[];
+	senses: Sense[];
+};
+
+/** maps part of speech pos to a senses array */
+type PosMap = Map<string, Sense[]>;
+
+type StructuredEntry = {
+	sounds?: Sound[];
+	posMap: PosMap;
+}
+
+/** maps word to PosMap */
+type WordMap = Map<string, StructuredEntry>;
+
+export const wordMap : WordMap = new Map<string, StructuredEntry>();
+
 for (const line of raw.split('\n')) {
-  if (!line.trim()) continue;
-  const e: Entry = JSON.parse(line);
-  const arr = map.get(e.word) ?? [];
-  arr.push(e);                       // one entry per part of speech
-  map.set(e.word, arr);
+	if (!line.trim()) continue;
+	const pe: PrunedEntry = JSON.parse(line);
+	var se: StructuredEntry = wordMap.get(pe.word) ||
+		{ sounds: pe.sounds, posMap: new Map<string, Sense[]>() };
+	// if (!se) {
+	// 	se.sounds = pe.sounds;
+	// 	// se.posMap = new Map<string, Sense[]>([ [pe.pos, pe.senses] ]);
+	// }
+	se.posMap.set(pe.pos, pe.senses);
+	wordMap.set(pe.word, se);
 }
+console.log(`dictionary map:`, wordMap);
 
-export function lookup(word: string): Entry[] {
-  return map.get(word.toLowerCase()) ?? [];
-}
-
-export function tree(word: string) {
-  const entries = lookup(word);
-  return {
-    word,
-    pronunciations: [...new Set(entries.flatMap(e => e.sounds?.map(s => s.ipa).filter(Boolean)))],
-    partsOfSpeech: entries.map(e => ({
-      pos: e.pos,
-      definitions: e.senses.map(s => s.glosses.join('; ')),
-    })),
-  };
+export function lookup(word: string): StructuredEntry {
+	return wordMap.get(word.toLowerCase());
 }

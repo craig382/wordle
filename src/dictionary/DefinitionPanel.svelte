@@ -1,20 +1,22 @@
-<!-- src/lib/DefinitionPanel.svelte -->
+<!-- src/dictionary/DefinitionPanel.svelte -->
 <script lang="ts">
-  import { tree } from '$lib/dictionary';
-  export let word: string;
-  $: t = tree(word);
+	import { lookup } from './dictionary';
+	export let word: string;
+	$: se = lookup(word);
 </script>
 
-{#if t.partsOfSpeech.length}
-  <h2>{t.word}</h2>
-  {#if t.pronunciations.length}<span class="ipa">{t.pronunciations.join(' · ')}</span>{/if}
-  <ul>
-    {#each t.partsOfSpeech as pos}
-      <li><em>{pos.pos}</em>
-        <ol>{#each pos.definitions as d}<li>{d}</li>{/each}</ol>
-      </li>
-    {/each}
-  </ul>
-{:else}
-  <p>No definition found.</p>
+{#if se.posMap}
+	<h2>{word.toLowerCase()}</h2>
+	{#if se.sounds}
+		<span class="ipa">{se.pronunciations.join(' · ')}</span>
+	{/if}
+	<ul>
+	{#each se.posMap as pos}
+		<li><em>{pos.key}</em>
+		<ol>{#each pos.definitions as d}<li>{d}</li>{/each}</ol>
+		</li>
+	{/each}
+		</ul>
+	{:else}
+		<p>No definition found.</p>
 {/if}
