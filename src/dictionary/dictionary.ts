@@ -47,9 +47,6 @@ export function lookup(word: string): StructuredEntry {
 	return wordMap.get(word.toLowerCase());
 }
 
-// DELETE following line. Placeholder for now.
-const answers = new Set(['saint', 'crane', 'slate', /* ...your word list... */]);
-
 /** pruneDictionary() creates a *.pruned.jsonl 
  * dictionary file from a postprocessed  *.full.jsonl file downloaded from
  * https://kaikki.org/dictionary/English/kaikki.org-dictionary-English.jsonl 
@@ -60,9 +57,9 @@ const answers = new Set(['saint', 'crane', 'slate', /* ...your word list... */])
  * ```npx tsx src/dictionary/dictionary.ts --build```
  * */
 async function pruneDictionary(): Promise<void> {
+	const out = createWriteStream(PRUNED);
 	const bigDictionary  = readline.createInterface({ 
 		input: createReadStream(FULL), crlfDelay: Infinity });
-	const out = createWriteStream(PRUNED);
 	let nWrote = 0;
 	let nRead = 0;
 
@@ -106,16 +103,22 @@ async function pruneDictionary(): Promise<void> {
  * ```npx tsx src/dictionary/dictionary.ts --build```
  * */
 async function buildAndSaveWordMap() {
+	let nRead = 0;
 	const prunedDictionary = readFileSync(join(__dirname, 'kaikki.org.dictionary.pruned.jsonl'), 'utf-8');
+
+	// DELETE following line. Placeholder for now.
+	const answers = new Set(['saint', 'crane', 'slate', /* ...your word list... */]);
 
 	for (const line of prunedDictionary.split('\n')) {
 		if (!line.trim()) continue;
 		// if (!answers.has(w)) continue;
 		const pe: PrunedEntry = JSON.parse(line);
+		nRead++;
 		var se: StructuredEntry = wordMap.get(pe.word) ||
 			{ enprs: pe.enprs, posMap: new Map<string, string[]>() };
 		se.posMap.set(pe.pos, pe.defs);
 		wordMap.set(pe.word, se);
+		if (nRead >= 500) break; // DELETE this line. For testing only.
 	}
 	console.log(`buildAndSaveWordMap() created wordMap(size: ${wordMap.size}).`);
 	// console.log(`wordMap :`, wordMap);
@@ -128,7 +131,7 @@ async function buildAndSaveWordMap() {
  * */
 async function build(): Promise<void> {
 	pruneDictionary()
-	.then (() => buildAndSaveWordMap())
+	// .then (() => buildAndSaveWordMap())
 	.then (() => console.log(`Executed pruneDictionary.ts build().`))
 	.catch (err => console.error(`pruneDictionary.ts build() ERROR:`, err));
 }
