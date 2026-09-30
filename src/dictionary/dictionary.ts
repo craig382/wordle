@@ -87,12 +87,12 @@ async function pruneDictionary(): Promise<void> {
 		const pStr = JSON.stringify(p);
 		out.write(pStr + '\n');
 		nWrote++;
-		console.log(`word "${e.word}/${e.pos}", input line ${nRead } length: ${line.length}, output line ${nWrote} length ${pStr.length} `);
+		// console.log(`word "${e.word} : ${e.pos}", input line ${nRead } length: ${line.length}, output line ${nWrote} length ${pStr.length} `);
 		if (nRead >= 500) break; // DELETE this line. For testing only.
 	}
 
-	await new Promise<void>((res) => out.on('close', res));
 	out.end();
+	await new Promise<void>((res) => out.once('close', res));
 	console.log(`Read ${nRead} entries, wrote ${nWrote} entries`);
 }
 
@@ -116,7 +116,8 @@ async function buildAndSaveWordMap() {
 		se.posMap.set(pe.pos, pe.defs);
 		wordMap.set(pe.word, se);
 	}
-	console.log(`wordMap:`, wordMap);
+	console.log(`buildAndSaveWordMap() created wordMap(size: ${wordMap.size}).`);
+	// console.log(`wordMap :`, wordMap);
 }
 
 /** To run:
@@ -127,8 +128,8 @@ async function buildAndSaveWordMap() {
 async function build(): Promise<void> {
 	pruneDictionary()
 	.then (() => buildAndSaveWordMap())
-	.then (() => console.log(`finished running pruneDictionary.ts/build() function.`))
-	.catch (err => console.error(`pruneDictionary.ts/build() ERROR:`, err));
+	.then (() => console.log(`Executed pruneDictionary.ts build().`))
+	.catch (err => console.error(`pruneDictionary.ts build() ERROR:`, err));
 }
 
 // ---------- CLI entry ----------
