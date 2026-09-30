@@ -227,11 +227,20 @@ export function easyOrHard(guess: string, ri: number) {
 	}
 }
 
-export function randomSample(anArray: Array<any>) {
+/** randomSample() returns a randomSample from anArray. */
+export function randomSample(anArray: Array<any>): any {
 	let i: number = Math.random() * anArray.length;
 	let [rs] = anArray.splice(i, 1);
 	// console.log("randomSample", rs, anArray);
 	return rs;
+}
+
+/** deDupe() returns a deDupedArray from anArrayWithDuplicates. */
+export function deDupe(anArray: Array<any>): Array<any> {
+	const deDupedArray: Array<any> = [...new Set(anArray)];
+	// if (deDupedArray.length < anArray.length) console.log(`    [${deDupedArray}], [${anArray}]`);
+	// console.log(`deDupe original and deDuped array lengths: ${anArray.length}, ${deDupedArray.length}.`);
+	return deDupedArray;
 }
 
 export enum GameStatus {

@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync, createReadStream,
 import * as readline from 'node:readline';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { deDupe } from '../utils';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const FULL   = join(__dirname, 'kaikki.org.dictionary.full.jsonl');
@@ -71,7 +72,6 @@ async function pruneDictionary(): Promise<void> {
 		const e = JSON.parse(line);
 		nRead++;
 		if (e.lang_code !== 'en') continue;
-		// if (!answers.has(w)) continue;
 		// Keep only the fields your UI actually renders
 		const p: PrunedEntry = {
 			word: e.word,
@@ -82,6 +82,8 @@ async function pruneDictionary(): Promise<void> {
 				.reduce((acc: string[], s: any) => acc.concat(s.glosses), []),
 		};
 		if (p.enprs.length === 0) delete p.enprs;
+		else p.enprs = deDupe(p.enprs);
+		p.defs = deDupe(p.defs);
 		const pStr = JSON.stringify(p);
 		out.write(pStr + '\n');
 		nWrote++;
@@ -108,6 +110,7 @@ async function buildAndSaveWordMap() {
 
 	for (const line of prunedDictionary.split('\n')) {
 		if (!line.trim()) continue;
+		// if (!answers.has(w)) continue;
 		const pe: PrunedEntry = JSON.parse(line);
 		var se: StructuredEntry = wordMap.get(pe.word) ||
 			{ enprs: pe.enprs, posMap: new Map<string, string[]>() };
