@@ -29,8 +29,8 @@ type WordMap = Map<string, StructuredEntry>;
 
 export var wordMap : WordMap = new Map<string, StructuredEntry>();
 
-// import wordMap from './wordMap.json';
 try {
+	// import wordMap from './wordMap.json';
 	// Vite/SvelteKit raw import
 	const plainRaw = readFileSync(MAP, 'utf-8');
 	// const plainRawObj: PlainMap = JSON.parse(plainRaw);
@@ -48,8 +48,6 @@ export function lookup(word: string): StructuredEntry {
 
 // DELETE following line. Placeholder for now.
 const answers = new Set(['saint', 'crane', 'slate', /* ...your word list... */]);
-
-pruneDictionary(); // run once then comment out
 
 /** pruneDictionary() creates a *.pruned.jsonl 
  * dictionary file from a postprocessed  *.full.jsonl file downloaded from
@@ -138,6 +136,6 @@ if (import.meta.main) {
 	if (args.includes('--build')) {
 		await build();
 	} else {
-		console.log(`Loaded ${wordMap.size} words from ${MAP}`);
+		console.log(`Loaded wordMap(size: ${wordMap.size}) from ${MAP}.`);
 	}
 }
