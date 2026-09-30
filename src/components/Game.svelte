@@ -20,7 +20,7 @@
 		Historical,
 	} from "./widgets";
 	import {getWordData, fetchTest1, fetchTest2, fetchTest3, fetchTest4} from "./widgets/Definition.svelte";
-	import { wordMap } from "../dictionary/buildWordMap";
+	import { lookup } from "../dictionary/wordMap";
 	import {
 		contractNum,
 		randomSample,
@@ -266,7 +266,7 @@
 
 		// pruneDictionary();
 
-		console.log(`dictionary.ts map:`, wordMap);
+		// console.log(`dictionary.ts map:`, wordMap);
 
 		console.log("newGame:", appG);
 	}

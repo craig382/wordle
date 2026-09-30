@@ -10,13 +10,14 @@ import {
 	type PosMap,
 	type StructuredEntry,
 	type WordMap,
-	wordMap,
 } from './wordMap';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const FULL   = join(__dirname, 'kaikki.org.dictionary.full.jsonl');
+const FULL = join(__dirname, 'kaikki.org.dictionary.full.jsonl');
 const PRUNED = join(__dirname, 'kaikki.org.dictionary.pruned.jsonl');
-const MAP    = join(__dirname, 'wordMap.json');
+const MAP = join(__dirname, 'wordMap.json');
+
+const wordMap: WordMap = {}; 
 
 /** pruneDictionary() creates a *.pruned.jsonl 
  * dictionary file from a postprocessed  *.full.jsonl file downloaded from
@@ -85,13 +86,13 @@ async function buildAndSaveWordMap() {
 		// if (!answers.has(w)) continue;
 		const pe: PrunedEntry = JSON.parse(line);
 		nRead++;
-		var se: StructuredEntry = wordMap.get(pe.word) ||
-			{ enprs: pe.enprs, posMap: new Map<string, string[]>() };
-		se.posMap.set(pe.pos, pe.defs);
-		wordMap.set(pe.word, se);
+		var se: StructuredEntry = wordMap[pe.word] ||
+			{ enprs: pe.enprs, posMap: {} };
+		se.posMap[pe.pos] = pe.defs;
+		wordMap[pe.word] =  se;
 		if (nRead >= 500) break; // DELETE this line. For testing only.
 	}
-	console.log(`buildAndSaveWordMap() created wordMap(size: ${wordMap.size}).`);
+	console.log(`buildAndSaveWordMap() created wordMap(length: ${Object.keys(wordMap).length}).`);
 	// console.log(`wordMap :`, wordMap);
 }
 
