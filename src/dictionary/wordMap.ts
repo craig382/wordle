@@ -16,20 +16,10 @@ export type StructuredEntry = {
 /** maps word to StructuredEntry */
 export type WordMap = Record<string, StructuredEntry>;
 
+export var wordMap : WordMap;
+
 // Vite handles JSON imports natively — no node:fs needed
 import wordMap from './wordMap.json';
-
-// const plain = raw as Record<string, StructuredEntry>;
-
-// export const wordMap: WordMap = new Map(
-// 	Object.entries(plain).map(([word, se]) => [
-// 		word,
-// 		{
-// 			enprs: se.enprs,
-// 			posMap: new Map(Object.entries(se.posMap)),
-// 		},
-// 	])
-// );
 
 /** lookup(word) returns the word's StructuredEntry 
  * includes the word's: "enprs" (English pronunciations),

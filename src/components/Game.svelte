@@ -20,7 +20,7 @@
 		Historical,
 	} from "./widgets";
 	import {getWordData, fetchTest1, fetchTest2, fetchTest3, fetchTest4} from "./widgets/Definition.svelte";
-	import { wordMap } from "../dictionary/dictionary";
+	import { wordMap } from "../dictionary/buildWordMap";
 	import {
 		contractNum,
 		randomSample,
