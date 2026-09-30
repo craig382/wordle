@@ -1,20 +1,13 @@
-export type PrunedEntry = {
-	word: string;
-	enprs?: string[];
-	pos: string;
-	defs: string[];
-};
-
 /** maps part of speech pos to the defs array */
 export type PosMap = Record<string, string[]>;
 
-export type StructuredEntry = {
+export type WordEntry = {
 	enprs?: string[];
-	posMap: PosMap;
+	pMap: PosMap;
 }
 
-/** maps word to StructuredEntry */
-export type WordMap = Record<string, StructuredEntry>;
+/** maps word to WordEntry */
+export type WordMap = Record<string, WordEntry>;
 
 var wordMap: WordMap = {};
 
@@ -25,6 +18,6 @@ var wordMap: WordMap = {};
  * and pos (parts of speech) and defs (definitions for each
  * part of speech).
  */
-export function lookup(word: string): StructuredEntry | undefined {
+export function lookup(word: string): WordEntry | undefined {
 	return wordMap[word.toLowerCase()];
 }

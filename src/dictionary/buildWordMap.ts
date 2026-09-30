@@ -6,9 +6,8 @@ import { dirname, join } from 'node:path';
 import { deDupe } from '../utils';
 
 import {
-	type PrunedEntry,
 	type PosMap,
-	type StructuredEntry,
+	type WordEntry,
 	type WordMap,
 } from './wordMap';
 
@@ -36,27 +35,26 @@ async function pruneDictionary(): Promise<void> {
 	let nRead = 0;
 
 	for await (const line of bigDictionary) {
-		// console.log(`pruneDictionary line: "\n${line}\n"`);
 		if (!line.trim()) continue;
-		const e = JSON.parse(line);
+		const j = JSON.parse(line);
 		nRead++;
-		if (e.lang_code !== 'en') continue;
-		// Keep only the fields your UI actually renders
-		const p: PrunedEntry = {
-			word: e.word,
-			enprs: (e.sounds || []).filter((s: any) => s.enpr)
+		if (j.lang_code !== 'en') continue;
+		var defsArray: string[] = (j.senses || [])
+			.reduce((acc: string[], s: any) => acc.concat(s.glosses), [])
+		defsArray = deDupe(defsArray);
+		const pMap: PosMap = { [j.pos]: defsArray};
+		const s: WordEntry = {
+			enprs: (j.sounds || []).filter((s: any) => s.enpr)
 				.map((s: any) => (s.enpr)),
-			pos: e.pos,
-			defs: (e.senses || [])
-				.reduce((acc: string[], s: any) => acc.concat(s.glosses), []),
+			pMap: pMap,
 		};
-		if (p.enprs.length === 0) delete p.enprs;
-		else p.enprs = deDupe(p.enprs);
-		p.defs = deDupe(p.defs);
-		const pStr = JSON.stringify(p);
+		if (s.enprs.length === 0) delete s.enprs;
+		else s.enprs = deDupe(s.enprs);
+		const wMap: WordMap = { [j.word]: s};
+		const pStr = JSON.stringify(wMap);
 		out.write(pStr + '\n');
 		nWrote++;
-		// console.log(`word "${e.word} : ${e.pos}", input line ${nRead } length: ${line.length}, output line ${nWrote} length ${pStr.length} `);
+		console.log(`word "${j.word} : ${j.pos}", input (output) line ${nRead } (${nWrote}) length: ${line.length} (${pStr.length}).`);
 		if (nRead >= 500) break; // DELETE this line. For testing only.
 	}
 
@@ -75,6 +73,7 @@ async function pruneDictionary(): Promise<void> {
  * ```npx tsx src/dictionary/buildWordMap.ts```
  * */
 async function buildAndSaveWordMap() {
+	const out = createWriteStream(MAP);
 	let nRead = 0;
 	const prunedDictionary = readFileSync(join(__dirname, 'kaikki.org.dictionary.pruned.jsonl'), 'utf-8');
 
@@ -84,15 +83,36 @@ async function buildAndSaveWordMap() {
 	for (const line of prunedDictionary.split('\n')) {
 		if (!line.trim()) continue;
 		// if (!answers.has(w)) continue;
-		const pe: PrunedEntry = JSON.parse(line);
+		const j: WordMap = JSON.parse(line);
 		nRead++;
-		var se: StructuredEntry = wordMap[pe.word] ||
-			{ enprs: pe.enprs, posMap: {} };
-		se.posMap[pe.pos] = pe.defs;
-		wordMap[pe.word] =  se;
-		if (nRead >= 500) break; // DELETE this line. For testing only.
+		for (const [w, we] of Object.entries(j)) {
+			if (!wordMap[w]) {
+				wordMap[w] = we;
+				continue;
+			}
+			// merge and deDupe the enprs
+			we.enprs = wordMap[w].enprs.concat(we.enprs);
+			wordMap[w].enprs = deDupe(we.enprs);
+			for (var [p, ds] of Object.entries(we.pMap)) {
+				// merge and deDupe the defs
+				console.log(`line ${nRead} ${w} ${p} defs:`, ds);
+				console.log(`wordMap:`, wordMap[w]);
+				console.log(`pMap:`, wordMap[w]?.pMap[p]);
+				ds = ds.concat(wordMap[w].pMap[p]);
+				wordMap[w].pMap[p] = deDupe(ds);
+			};
+
+		}
+
+		if (nRead >= 10) break; // DELETE this line. For testing only.
 	}
-	console.log(`buildAndSaveWordMap() created wordMap(length: ${Object.keys(wordMap).length}).`);
+
+	const wmStr = JSON.stringify(wordMap);
+	out.write(wmStr);
+	out.end();
+	await new Promise<void>((res) => out.once('close', res));
+
+	console.log(`buildAndSaveWordMap() created wordMap(length: ${Object.keys(wordMap).length}), read ${nRead} lines from ${PRUNED}.`);
 	// console.log(`wordMap :`, wordMap);
 }
 
@@ -102,10 +122,12 @@ async function buildAndSaveWordMap() {
  * ```npx tsx src/dictionary/buildWordMap.ts```
  * */
 function build(): void {
-	pruneDictionary()
-	// .then (() => buildAndSaveWordMap())
-	.then (() => console.log(`Executed pruneDictionary.ts build().`))
-	.catch (err => console.error(`pruneDictionary.ts build() ERROR:`, err));
+	// pruneDictionary();
+	// .then (() => 
+	buildAndSaveWordMap()
+	// )
+	.then (() => console.log(`Executed buildWordMap.ts build().`))
+	.catch (err => console.error(`buildWordMap.ts build() ERROR:`, err));
 }
 
 // ---- CLI (Command Line Interface) entry ----------

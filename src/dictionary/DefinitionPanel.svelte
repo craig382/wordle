@@ -9,13 +9,13 @@
 	$: se = lookup(word);
 </script>
 
-{#if se.posMap}
+{#if se.pMap}
 	<h2>{word.toLowerCase()}</h2>
 	{#if se.enprs}
 		<span class="ipa">{se.enprs}</span>
 	{/if}
 	<ul>
-	{#each Object.entries(se.posMap) as [pos, defs]}
+	{#each Object.entries(se.pMap) as [pos, defs]}
 		<li><em>{pos}</em> {randomSample(defs)}</li>
 		<li><em>{pos}</em>
 		<ol>{#each defs as d}<li>{d}</li>{/each}</ol>

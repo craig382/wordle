@@ -236,8 +236,8 @@ export function randomSample(anArray: Array<any>): any {
 }
 
 /** deDupe() returns a deDupedArray from anArrayWithDuplicates. */
-export function deDupe(anArray: Array<any>): Array<any> {
-	const deDupedArray: Array<any> = [...new Set(anArray)];
+export function deDupe<T>(anArray: T[]): T[] {
+	const deDupedArray: T[] = [...new Set(anArray)];
 	// if (deDupedArray.length < anArray.length) console.log(`    [${deDupedArray}], [${anArray}]`);
 	// console.log(`deDupe original and deDuped array lengths: ${anArray.length}, ${deDupedArray.length}.`);
 	return deDupedArray;
