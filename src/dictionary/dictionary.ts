@@ -1,10 +1,13 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, createReadStream, 
+	createWriteStream } from 'node:fs';
+import * as readline from 'node:readline';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { createWriteStream } from 'node:fs';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const FULL   = join(__dirname, 'kaikki.org.dictionary.full.jsonl');
+const PRUNED = join(__dirname, 'kaikki.org.dictionary.pruned.jsonl');
+const MAP    = join(__dirname, 'wordMap.json');
 
 type PrunedEntry = {
 	word: string;
@@ -24,14 +27,19 @@ type StructuredEntry = {
 /** maps word to StructuredEntry */
 type WordMap = Map<string, StructuredEntry>;
 
+export var wordMap : WordMap = new Map<string, StructuredEntry>();
 
-export const wordMap : WordMap = new Map<string, StructuredEntry>();
-
+// import wordMap from './wordMap.json';
 try {
 	// Vite/SvelteKit raw import
-	// import wordMap from './wordMap.json';
-} catch {
-	console.log(e);
+	const plainRaw = readFileSync(MAP, 'utf-8');
+	// const plainRawObj: PlainMap = JSON.parse(plainRaw);
+	const plainRawObj = JSON.parse(plainRaw);
+	// wordMap = plainToMap(plainRawObj);
+	console.log(`Imported wordMap from ${MAP}:`, wordMap);
+} catch(e) {
+	console.log(`ERROR. Imported of wordMap from ${MAP} failed.`);
+	console.error(e);
 }
 
 export function lookup(word: string): StructuredEntry {
@@ -41,42 +49,31 @@ export function lookup(word: string): StructuredEntry {
 // DELETE following line. Placeholder for now.
 const answers = new Set(['saint', 'crane', 'slate', /* ...your word list... */]);
 
-// Vite/SvelteKit raw import
-// import raw1 from './kaikki.org.dictionary.full.jsonl?raw';
-// var raw1: string; // uncomment when import raw1 is commented
-// uncomment import line above and prune line below,
-// then run once, then comment them both out again.
-
 pruneDictionary(); // run once then comment out
 
 /** pruneDictionary() creates a *.pruned.jsonl 
- * dictionary file from a postprocessed  *.full.jsonl file downloaded
+ * dictionary file from a postprocessed  *.full.jsonl file downloaded from
  * https://kaikki.org/dictionary/English/kaikki.org-dictionary-English.jsonl 
  * 
  * To run pruneDictionary():
- * 1) uncomment pruneDictionary() in the line 
- *    above this comment block
+ * 1) If needed, edit the build() function.
  * 2) run the following in a terminal:
- * ```npx tsx src/dictionary/dictionary.ts```
- * 
- * 3) re-comment pruneDictionary() in the line above.
+ * ```npx tsx src/dictionary/dictionary.ts --build```
  * */
-async function pruneDictionary() {
-	const bigDictionary = readFileSync(join(__dirname, 'kaikki.org.dictionary.pruned.jsonl'), 'utf-8');
-	const out = createWriteStream(`./kaikki.org.dictionary.pruned.jsonl`);
+async function pruneDictionary(): Promise<void> {
+	const bigDictionary  = readline.createInterface({ 
+		input: createReadStream(FULL), crlfDelay: Infinity });
+	const out = createWriteStream(PRUNED);
 	let nWrote = 0;
 	let nRead = 0;
 
-	for (const line of bigDictionary.split('\n')) {
-		console.log(`pruneDictionary line: "\n${line}\n"`);
+	for await (const line of bigDictionary) {
+		// console.log(`pruneDictionary line: "\n${line}\n"`);
 		if (!line.trim()) continue;
 		const e = JSON.parse(line);
 		nRead++;
-
 		if (e.lang_code !== 'en') continue;
-
 		// if (!answers.has(w)) continue;
-
 		// Keep only the fields your UI actually renders
 		const p: PrunedEntry = {
 			word: e.word,
@@ -86,40 +83,27 @@ async function pruneDictionary() {
 			defs: (e.senses || [])
 				.reduce((acc: string[], s: any) => acc.concat(s.glosses), []),
 		};
-
 		if (p.enprs.length === 0) delete p.enprs;
-
 		const pStr = JSON.stringify(p);
 		out.write(pStr + '\n');
 		nWrote++;
-
 		console.log(`word "${e.word}/${e.pos}", input line ${nRead } length: ${line.length}, output line ${nWrote} length ${pStr.length} `);
-
 		if (nRead >= 500) break; // DELETE this line. For testing only.
-
 	}
 
+	await new Promise<void>((res) => out.on('close', res));
 	out.end();
 	console.log(`Read ${nRead} entries, wrote ${nWrote} entries`);
 }
 
-// buildAndSaveWordMap(); // run once then comment out
-
 /** buildAndSaveWordMap() builds the wordMap 
- * from a *.pruned.jsonl dictionary file
- * then saves it to the
- * kaikki.org.dictionary.wordle.json file.
+ * from a "*.pruned.jsonl" dictionary file
+ * then saves it to the "wordMap.json" file.
  * 
  * To run buildAndSaveWordMap():
- * 1) if the *.pruned.jsonl file does not exist,
- *    see the pruneDictionary() function and its
- *    instructions above.
- * 2) uncomment buildAndSaveWordMap() in the line 
- *    above this comment block
- * 3) run the following in a terminal:
- * ```npx tsx src/dictionary/dictionary.ts```
- * 
- * 4) re-comment buildAndSaveWordMap() in the line above.
+ * 1) If needed, edit the build() function.
+ * 2) run the following in a terminal:
+ * ```npx tsx src/dictionary/dictionary.ts --build```
  * */
 async function buildAndSaveWordMap() {
 	const prunedDictionary = readFileSync(join(__dirname, 'kaikki.org.dictionary.pruned.jsonl'), 'utf-8');
@@ -133,4 +117,26 @@ async function buildAndSaveWordMap() {
 		wordMap.set(pe.word, se);
 	}
 	console.log(`wordMap:`, wordMap);
+}
+
+/** To run:
+ * 1) If needed, edit the build() function.
+ * 2) run the following in a terminal:
+ * ```npx tsx src/dictionary/dictionary.ts --build```
+ * */
+async function build(): Promise<void> {
+	pruneDictionary()
+	.then (() => buildAndSaveWordMap())
+	.then (() => console.log(`finished running pruneDictionary.ts/build() function.`))
+	.catch (err => console.error(`pruneDictionary.ts/build() ERROR:`, err));
+}
+
+// ---------- CLI entry ----------
+if (import.meta.main) {
+	const args = process.argv.slice(2);
+	if (args.includes('--build')) {
+		await build();
+	} else {
+		console.log(`Loaded ${wordMap.size} words from ${MAP}`);
+	}
 }
