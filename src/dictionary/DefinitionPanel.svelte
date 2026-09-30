@@ -15,9 +15,10 @@
 		<span class="ipa">{se.enprs}</span>
 	{/if}
 	<ul>
-	{#each se.posMap. as pos}
-		<li><em>{pos.key}</em>
-		<ol>{#each pos.definitions as d}<li>{d}</li>{/each}</ol>
+	{#each Object.entries(se.posMap) as [pos, defs]}
+		<li><em>{pos}</em> {randomSample(defs)}</li>
+		<li><em>{pos}</em>
+		<ol>{#each defs as d}<li>{d}</li>{/each}</ol>
 		</li>
 	{/each}
 		</ul>
