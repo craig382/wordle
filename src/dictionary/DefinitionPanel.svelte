@@ -1,17 +1,21 @@
 <!-- src/dictionary/DefinitionPanel.svelte -->
+<script context="module" lang="ts">
+	import { lookup } from './wordMap';
+	import { randomSample } from '../utils';
+</script>
+
 <script lang="ts">
-	import { lookup } from './dictionary';
 	export let word: string;
 	$: se = lookup(word);
 </script>
 
 {#if se.posMap}
 	<h2>{word.toLowerCase()}</h2>
-	{#if se.sounds}
-		<span class="ipa">{se.pronunciations.join(' · ')}</span>
+	{#if se.enprs}
+		<span class="ipa">{se.enprs}</span>
 	{/if}
 	<ul>
-	{#each se.posMap as pos}
+	{#each se.posMap. as pos}
 		<li><em>{pos.key}</em>
 		<ol>{#each pos.definitions as d}<li>{d}</li>{/each}</ol>
 		</li>
