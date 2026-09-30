@@ -91,20 +91,25 @@ async function buildAndSaveWordMap() {
 				continue;
 			}
 			// merge and deDupe the enprs
-			we.enprs = wordMap[w].enprs.concat(we.enprs);
+			if (wordMap[w].enprs?.length !== we.enprs?.length)
+				console.log(`line ${nRead} ${w} enprs: wordMap: ${wordMap[w].enprs}, json: ${we.enprs}.`);
+			we.enprs = wordMap[w].enprs?.concat(we.enprs);
 			wordMap[w].enprs = deDupe(we.enprs);
 			for (var [p, ds] of Object.entries(we.pMap)) {
+				if (!wordMap[w].pMap[p]) {
+					wordMap[w].pMap[p] = ds;
+					continue;
+				}
 				// merge and deDupe the defs
-				console.log(`line ${nRead} ${w} ${p} defs:`, ds);
-				console.log(`wordMap:`, wordMap[w]);
-				console.log(`pMap:`, wordMap[w]?.pMap[p]);
-				ds = ds.concat(wordMap[w].pMap[p]);
+				// console.log(`json line ${nRead} ${w} ${p} defs.length: ${ds.length}.`);
+				ds = wordMap[w].pMap[p]?.concat(ds);
 				wordMap[w].pMap[p] = deDupe(ds);
+				// console.log(`wordMap line ${nRead} ${w} ${p} defs.length: ${wordMap[w].pMap[p].length}.`);
 			};
 
 		}
 
-		if (nRead >= 10) break; // DELETE this line. For testing only.
+		if (nRead >= 500) break; // DELETE this line. For testing only.
 	}
 
 	const wmStr = JSON.stringify(wordMap);
