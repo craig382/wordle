@@ -108,23 +108,41 @@ async function buildAndSaveWordMap() {
 		nRead++;
 		for (const [w, we] of Object.entries(j)) {
 			if (!wordMap[w]) {
+				// add a new word to wordMap
 				wordMap[w] = we;
 				continue;
 			}
-			// merge and deDupe the enprs
-			if (wordMap[w].enprs?.length !== we.enprs?.length)
-				console.log(`line ${nRead} ${w} enprs: wordMap: ${wordMap[w].enprs}, json: ${we.enprs}.`);
-			we.enprs = wordMap[w].enprs?.concat(we.enprs);
-			wordMap[w].enprs = deDupe(we.enprs);
+			if (we.enprs) {
+				// new enprs available
+				if (!wordMap[w].enprs) {
+					wordMap[w].enprs = we.enprs;
+					// console.log(`${w}: added new enprs: enprs.length: ( before, after ): ( 0, ${we.enprs.length} ).`);
+				} else {
+					// merge and deDupe the enprs
+					wordMap[w].enprs = deDupe(wordMap[w].enprs?.concat(we.enprs));
+					// console.log(`${w}: merged and deDuped new enprs: ( number added, new total enprs.length ): ( ${we.enprs.length}, ${wordMap[w].enprs.length} ).`);
+				}
+			}
+
 			for (var [p, ds] of Object.entries(we.pMap)) {
 				if (!wordMap[w].pMap[p]) {
+					// add a new part of speech to wordMap
 					wordMap[w].pMap[p] = ds;
 					continue;
 				}
-				// merge and deDupe the defs
-				// console.log(`json line ${nRead} ${w} ${p} defs.length: ${ds.length}.`);
-				ds = wordMap[w].pMap[p]?.concat(ds);
-				wordMap[w].pMap[p] = deDupe(ds);
+
+				if (ds) {
+					// new defs available
+					if (!wordMap[w].pMap[p]) {
+						wordMap[w].pMap[p] = ds;
+						console.log(`${w} ${p}: added new defs: defs.length: (before, after): ( 0, ${ds.length} ).`);
+					} else {
+						// merge and deDupe the defs
+						wordMap[w].pMap[p] = deDupe(wordMap[w].pMap[p].concat(ds));
+						console.log(`${w} ${p}: merged and deDuped new defs: (number added, new total defs.length ): ( ${ds.length}, ${wordMap[w].pMap[p].length} ).`);
+					}
+				}
+
 				// console.log(`wordMap line ${nRead} ${w} ${p} defs.length: ${wordMap[w].pMap[p].length}.`);
 			};
 
