@@ -19,7 +19,7 @@
 		Tips,
 		Historical,
 	} from "./widgets";
-	import {getWordData, fetchTest1, fetchTest2, fetchTest3, fetchTest4} from "./widgets/Definition.svelte";
+	import { getWordData } from "./widgets/Definition.svelte";
 	import { lookup } from "../dictionary/wordMap";
 	import {
 		contractNum,
@@ -258,13 +258,6 @@
 			appG.board.guesses[0] = appG.opener;
 			processValidGuess(); 
 		}
-
-		// fetchTest1(appG.opener);
-		// fetchTest2(appG.opener);
-		// fetchTest3(appG.opener);
-		// fetchTest4(appG.opener);
-
-		// pruneDictionary();
 
 		// console.log(`dictionary.ts map:`, wordMap);
 

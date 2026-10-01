@@ -5,3 +5,4 @@
 package-lock.json
 test.html
 setVersion.mjs
+src/dictionary/kaikki.org.dictionary.*

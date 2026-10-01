@@ -42,99 +42,9 @@
 
 		return res.text().then(jsonText => {
 			const json = JSON.parse(jsonText);
-			console.log("fetchWiktionary raw JSON data object:", json);
+			// console.log("fetchWiktionary raw JSON data object:", json);
 			// console.log("fetchWiktionary raw JSON text:", jsonText);
 			return toDictionaryEntry(json, word);
-		});
-	}
-
-	export async function fetchTest1() {
-		const word = "sound";
-
-		const url = `https://api.wikimedia.org/core/v1/wiktionary/en/page/${encodeURIComponent(word)}`;
-
-		const res = await fetch(url, {
-		headers: {
-			Accept: "application/json",
-			"User-Agent": "MyDictApp/1.0 (contact@example.com)"
-		}
-		});
-
-		const data = await res.json();
-		const json = data.source; // raw wikitext string
-		console.log("fetchTest raw JSON data object:", json);
-	}
-
-	export function fetchTest2(word: string){
-		const url = `https://api.wikimedia.org/core/v1/wiktionary/en/page/`;
-		// var params = "action=query&ailimit=3&format=json";
-		const params = "?action=parse&origin=*";
-		fetch(`${url}${encodeURIComponent(word)}${params}`)
-		// fetch( url + "?" + params )
-		.then(function(r1){
-			console.log("r1:", r1)
-			return r1.json();
-		})
-		.then(function(r2) {
-			console.log("r2:", r2)
-			// return r2.text();
-		})
-		// .then(function(r3){
-		// 	console.log("r3:", r3)
-		// 	return r3.blob();
-		// })
-		.catch(function(e) {
-			console.error("fetchTest3 ERROR.", e);
-		});
-	}
-
-	export function fetchTest3(word: string){
-		const url = `https://en.wiktionary.org/w/rest.php/v1/page/`;
-		const params = "?origin=*";
-		fetch(`${url}${encodeURIComponent(word)}${params}`)
-		.then(function(r1){
-			console.log("r1:", r1)
-			return r1.json();
-		})
-		.then(function(r2) {
-			console.log("r2:", r2);
-			console.log("r2.source:wikitext", r2.source);
-			// return r2.text();
-		})
-		// .then(function(r3){
-		// 	console.log("r3:", r3)
-		// 	return r3.blob();
-		// })
-		.catch(function(e) {
-			console.error("fetchTest3 ERROR.", e);
-		});
-	}
-
-	export function fetchTest4(word: string){
-		// https://www.mediawiki.org/wiki/API:Parsing_wikitext
-		const url = `https://en.wiktionary.org/w/api.php`;
-		const p1 = `?origin=*&action=parse`;
-		const p2 = `&page=${encodeURIComponent(word)}`;
-		const p3 = `&prop=wikitext|parsetree|text|properties&parser=parsoid`;
-		const p4 = `&format=json&formatversion=2`;
-		fetch(`${url}${p1}${p2}${p3}${p4}`)
-		.then(function(r1){
-			console.log("r1:", r1);
-			return r1.json();
-		})
-		.then(function(r2) {
-			console.log("r2:", r2);
-			// console.log("r2.parse.parsetree:", r2.parse.parsetree);
-			// console.log("r2.parse.text:", r2.parse.text);
-			// console.log("r2.source:wikitext", r2.source);
-			// return r2.text();
-		})
-		// .then(function(r3){
-		// 	console.log("r3:", r3)
-		// 	return r3.blob();
-		// })
-		.catch(function(e) {
-			console.error("fetchTest4 ERROR.", e);
 		});
 	}
 
@@ -155,7 +65,7 @@
 		// { en: [ { partOfSpeech, language, definitions:[{ definition, example }] }, ... ] }
 		const senses: any[] = Array.isArray(json?.en) ? json.en : [];
 
-		console.log(`toDictionaryEntry.senses: `, senses);
+		// console.log(`toDictionaryEntry.senses: `, senses);
 
 		const meanings: Meaning[] = senses.map(sense => ({
 			partOfSpeech: sense.partOfSpeech ?? "",
