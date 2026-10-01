@@ -33,11 +33,25 @@ async function pruneDictionary(): Promise<void> {
 		input: createReadStream(FULL), crlfDelay: Infinity });
 	let nWrote = 0;
 	let nRead = 0;
+	let nSkipped = 0;
+	let nCaught = 0;
+	let nDrained = 0;
+	let j: any;
 
 	for await (const line of bigDictionary) {
-		if (!line.trim()) continue;
-		const j = JSON.parse(line);
 		nRead++;
+		try {
+			if (!line.trim()) {
+				nSkipped++;
+				console.log(`pruneDictionary() skipped line ${nRead} (${nSkipped} lines skipped in total).`);
+				continue;
+			} 
+			j = JSON.parse(line);
+		} catch (err) {
+			nCaught++;
+			console.log(`ERROR. pruneDictionary(). Caught error ${nCaught} when reading line ${nRead}:`, err);
+			continue;
+		}
 		if (j.lang_code !== 'en') continue;
 		var defsArray: string[] = (j.senses || [])
 			.reduce((acc: string[], s: any) => acc.concat(s.glosses), [])
@@ -52,7 +66,11 @@ async function pruneDictionary(): Promise<void> {
 		else s.enprs = deDupe(s.enprs);
 		const wMap: WordMap = { [j.word]: s};
 		const pStr = JSON.stringify(wMap);
-		out.write(pStr + '\n');
+		if (!out.write(pStr + '\n')) {
+			console.log(`pruneDictionary() is waiting for the out stream to drain.`);
+			await new Promise<void>((res) => out.once('drain', res));
+			console.log(`pruneDictionary(). The out stream finished draining.`);
+		};
 		nWrote++;
 		// console.log(`word "${j.word} : ${j.pos}", input (output) line ${nRead } (${nWrote}) length: ${line.length} (${pStr.length}).`);
 
@@ -61,7 +79,9 @@ async function pruneDictionary(): Promise<void> {
 
 	out.end();
 	await new Promise<void>((res) => out.once('close', res));
-	console.log(`Read ${nRead} entries, wrote ${nWrote} entries.`);
+	console.log(`pruneDictionary() read ${nRead} lines, wrote ${nWrote} entries.`);
+	console.log(`pruneDictionary() skipped ${nSkipped} lines, caught ${nCaught} errors.`);
+	console.log(`pruneDictionary() paused ${nDrained} times to let the out stream drain.`);
 }
 
 /** buildAndSaveWordMap() builds the wordMap 
@@ -129,8 +149,8 @@ async function buildAndSaveWordMap() {
  * */
 async function build(): Promise<void> {
 	try {
-		await pruneDictionary();
-		// await buildAndSaveWordMap();
+		// await pruneDictionary();
+		await buildAndSaveWordMap();
 		console.log(`Executed buildWordMap.ts build().`);
 	} catch (err) {
 		console.error(`ERROR. buildWordMap.ts build() failed:`, err);
