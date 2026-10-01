@@ -54,13 +54,14 @@ async function pruneDictionary(): Promise<void> {
 		const pStr = JSON.stringify(wMap);
 		out.write(pStr + '\n');
 		nWrote++;
-		console.log(`word "${j.word} : ${j.pos}", input (output) line ${nRead } (${nWrote}) length: ${line.length} (${pStr.length}).`);
-		if (nRead >= 500) break; // DELETE this line. For testing only.
+		// console.log(`word "${j.word} : ${j.pos}", input (output) line ${nRead } (${nWrote}) length: ${line.length} (${pStr.length}).`);
+
+		// if (nRead >= 500) break; // DELETE this line. For testing only.
 	}
 
 	out.end();
 	await new Promise<void>((res) => out.once('close', res));
-	console.log(`Read ${nRead} entries, wrote ${nWrote} entries`);
+	console.log(`Read ${nRead} entries, wrote ${nWrote} entries.`);
 }
 
 /** buildAndSaveWordMap() builds the wordMap 
@@ -126,14 +127,15 @@ async function buildAndSaveWordMap() {
  * 2) run the following in a terminal:
  * ```npx tsx src/dictionary/buildWordMap.ts```
  * */
-function build(): void {
-	// pruneDictionary();
-	// .then (() => 
-	buildAndSaveWordMap()
-	// )
-	.then (() => console.log(`Executed buildWordMap.ts build().`))
-	.catch (err => console.error(`buildWordMap.ts build() ERROR:`, err));
+async function build(): Promise<void> {
+	try {
+		await pruneDictionary();
+		// await buildAndSaveWordMap();
+		console.log(`Executed buildWordMap.ts build().`);
+	} catch (err) {
+		console.error(`ERROR. buildWordMap.ts build() failed:`, err);
+	}
 }
 
 // ---- CLI (Command Line Interface) entry ----------
-build();
+await build();
