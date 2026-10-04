@@ -134,11 +134,11 @@ async function buildAndSaveWordMap() {
 					// new defs available
 					if (!wordMap[w].pMap[p]) {
 						wordMap[w].pMap[p] = ds;
-						console.log(`${w} ${p}: added new defs: defs.length: (before, after): ( 0, ${ds.length} ).`);
+						// console.log(`${w} ${p}: added new defs: defs.length: (before, after): ( 0, ${ds.length} ).`);
 					} else {
 						// merge and deDupe the defs
 						wordMap[w].pMap[p] = deDupe(wordMap[w].pMap[p].concat(ds));
-						console.log(`${w} ${p}: merged and deDuped new defs: (number added, new total defs.length ): ( ${ds.length}, ${wordMap[w].pMap[p].length} ).`);
+						// console.log(`${w} ${p}: merged and deDuped new defs: (number added, new total defs.length ): ( ${ds.length}, ${wordMap[w].pMap[p].length} ).`);
 					}
 				}
 
@@ -152,23 +152,25 @@ async function buildAndSaveWordMap() {
 
 	// Write an easy to view wordMap.json 
 	// file with one record per line.
-	let first = true;
+	let nWrote = 0;
+
 	for (const [word, entry] of Object.entries(wordMap)) {
-		if (first) {
+		if (nWrote === 0) {
 			out.write(`{"${word}":${JSON.stringify(entry)}`);
-			first = false;
 		} else if ( !out.write(`,\n"${word}":${JSON.stringify(entry)}`) ) {
 			nDrained++;
-			console.log(`buildAndSaveWordMap() is waiting for the out stream to drain.`);
+			// console.log(`buildAndSaveWordMap() is waiting for the out stream to drain, nWrote: ${nWrote}.`);
 			await new Promise<void>((res) => out.once('drain', res));
-			console.log(`buildAndSaveWordMap(). The out stream finished draining.`);
+			console.log(`buildAndSaveWordMap(). The out stream finished draining, nWrote: ${nWrote}.`);
 		}
+		nWrote++;
 	};
 	out.write(`}\n`);
 	out.end();
 	await new Promise<void>((res) => out.once('close', res));
 
-	console.log(`buildAndSaveWordMap() created wordMap(length: ${Object.keys(wordMap).length}), read ${nRead} lines from ${PRUNED}.`);
+	console.log(`buildAndSaveWordMap() wrote ${nWrote} word entries to wordMap(length: ${Object.keys(wordMap).length}), read ${nRead} lines from ${PRUNED.split('/').pop()}.`);
+	console.log(`buildAndSaveWordMap() paused ${nDrained} times to let the out stream drain.`);
 	// console.log(`wordMap :`, wordMap);
 }
 
