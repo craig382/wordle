@@ -1,3 +1,5 @@
+import { GameMode, BotNode } from "./utils";
+
 /** A list of words of the same length */
 type Words = WordData & {
 	contains: (word: string) => boolean;
