@@ -1,3 +1,6 @@
+import type { ModeData, LetterState, GameBoard, 
+	GangTuple, HardModeData, Mode, Gangs, KidTuple, 
+	BotNodeTuple } from "./types";
 import seedRandom from "seedrandom";
 import {maxAnswersIndex, words} from "./words_5";
 
