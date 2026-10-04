@@ -1,5 +1,4 @@
-import { readFileSync, writeFileSync, createReadStream, 
-	createWriteStream } from 'node:fs';
+import { readFileSync, createReadStream, createWriteStream } from 'node:fs';
 import * as readline from 'node:readline';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -154,23 +153,21 @@ async function buildAndSaveWordMap() {
 		if (nRead >= 500) break; // DELETE this line. For testing only.
 	}
 
-	// const wmStr = JSON.stringify(wordMap);
-	// out.write(wmStr);
-
 	// Write an easy to view wordMap.json 
 	// file with one record per line.
-	out.write(`{`);
-	Object.entries(wordMap).forEach(([word, entry], i) => {
-		if ( !out.write(`${i !== 0 ? ',\n' : ''}"${word}":${JSON.stringify(entry)}`) ) {
+	let first = true;
+	for (const [word, entry] of Object.entries(wordMap)) {
+		if (first) {
+			out.write(`{"${word}":${JSON.stringify(entry)}`);
+			first = false;
+		} else if ( !out.write(`,\n"${word}":${JSON.stringify(entry)}`) ) {
 			nDrained++;
 			console.log(`buildAndSaveWordMap() is waiting for the out stream to drain.`);
-			// await new Promise<void>((res) => out.once('drain', res));
+			await new Promise<void>((res) => out.once('drain', res));
 			console.log(`buildAndSaveWordMap(). The out stream finished draining.`);
-		};
-
-	});
+		}
+	};
 	out.write(`}\n`);
-
 	out.end();
 	await new Promise<void>((res) => out.once('close', res));
 
