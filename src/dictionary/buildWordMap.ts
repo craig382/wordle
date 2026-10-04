@@ -151,8 +151,18 @@ async function buildAndSaveWordMap() {
 		if (nRead >= 500) break; // DELETE this line. For testing only.
 	}
 
-	const wmStr = JSON.stringify(wordMap);
-	out.write(wmStr);
+	// const wmStr = JSON.stringify(wordMap);
+	// out.write(wmStr);
+
+	// Write an easy to view wordMap.json 
+	// file with one record per line.
+	out.write('{' + '\n');
+	Object.entries(wordMap).forEach(([word, entry]) => {
+		out.write(`"${word}":${JSON.stringify(entry)},\n`);
+	});
+	// delete the trailing comma on the last entry
+	out.write('}' + '\n');
+
 	out.end();
 	await new Promise<void>((res) => out.once('close', res));
 
