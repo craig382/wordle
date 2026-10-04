@@ -1,11 +1,11 @@
 import { GameMode, BotNode } from "./utils";
 
 /** A list of words of the same length */
-type Words = WordData & {
+export type Words = WordData & {
 	contains: (word: string) => boolean;
 };
 
-type WordData = {
+export type WordData = {
 	/** A list of possible answers to guess */
 	answers: string[];
 	/** A list of allowed other guesses that 
@@ -13,22 +13,22 @@ type WordData = {
 	otherGuesses: string[];
 };
 
-type RowData = {
+export type RowData = {
 	length: number;
 	guess: number;
 };
 
 /** undefined | blank | yellow | green */
-type LetterState = "🔳" | "⬛" | "🟨" | "🟩";
+export type LetterState = "🔳" | "⬛" | "🟨" | "🟩";
 
-type GameBoard = {
+export type GameBoard = {
 	guesses: string[],
 	state: LetterState[][],
 };
 
-type SettingType = "switch" | "dropdown" | "custom";
+export type SettingType = "switch" | "dropdown" | "custom";
 
-type DictionaryEntry = {
+export type DictionaryEntry = {
 	word: string;
 	phonetic: string;
 	phonetics: Phonetic[];
@@ -36,24 +36,24 @@ type DictionaryEntry = {
 	meanings: Meaning[];
 };
 
-type Meaning = {
+export type Meaning = {
 	partOfSpeech: string;
 	definitions: Definition[];
 };
 
-type Definition = {
+export type Definition = {
 	definition: string;
 	synonyms: string[];
 	antonyms: any[];
 	examples?: string[];
 };
 
-type Phonetic = {
+export type Phonetic = {
 	text: string;
 	audio: string;
 };
 
-type Guesses = {
+export type Guesses = {
 	"1": number;
 	"2": number;
 	"3": number;
@@ -63,12 +63,12 @@ type Guesses = {
 	"fail": number;
 };
 
-type ModeData = {
+export type ModeData = {
 	default: GameMode,
 	modes: Mode[],
 };
 
-type Mode = {
+export type Mode = {
 	name: string,
 	unit: number,
 	start: number,
@@ -78,25 +78,25 @@ type Mode = {
 	useTimeZone?: boolean,
 };
 
-type HardModeData = {
+export type HardModeData = {
 	pos: number,
 	char: string,
 	type: "🟩" | "🟨" | "⬛",
 };
 
-type Subscriber<T> = [(val: T) => void, (val?: T) => void];
+export type Subscriber<T> = [(val: T) => void, (val?: T) => void];
 
-type Direction = "top" | "right" | "bottom" | "left";
+export type Direction = "top" | "right" | "bottom" | "left";
 
-type Swipe = CustomEvent<{ direction: Direction; }>;
+export type Swipe = CustomEvent<{ direction: Direction; }>;
 
-type GangTuple = [
+export type GangTuple = [
 	group: Array<string>, 
 	kids: KidTuple,
 	groupNodes: Array<BotNode>,
 ];
 
-type KidTuple = [
+export type KidTuple = [
 	perfectKid: boolean,
 	maxGroupsKidHard: BotNode | null, 
 	maxGroupsKidEasy: BotNode | null,
@@ -105,9 +105,9 @@ type KidTuple = [
 ];
 
 //** Map< groupId, BotMapTuple > */
-type Gangs = Map< string, GangTuple >;
+export type Gangs = Map< string, GangTuple >;
 
-type BotNodeTuple = [
+export type BotNodeTuple = [
 	guess: string, // 0
 	ri: number, // 1
 	nGroups: number, // 2
@@ -140,15 +140,15 @@ type BotNodeTuple = [
 ];
 
 /** maps part of speech pos to the defs array */
-type PosMap = Record<string, string[]>;
+export type PosMap = Record<string, string[]>;
 
 /** In a WordMap, the word is used as a key to 
  * lookup a WordEntry that containsthe the english 
  * pronunciations enprs and the parts of speech map. */
-type WordEntry = {
+export type WordEntry = {
 	enprs?: string[];
 	pMap: PosMap;
 };
 
 /** maps word to WordEntry */
-type WordMap = Record<string, WordEntry>;
+export type WordMap = Record<string, WordEntry>;

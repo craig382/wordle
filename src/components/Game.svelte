@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Swipe } from "../types" ;
 	import { fade } from "svelte/transition";
 	import Header from "./Header.svelte";
 	import { Board } from "./board";

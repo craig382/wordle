@@ -1,4 +1,5 @@
 <script context="module" lang="ts">
+		import type { DictionaryEntry, Meaning, Definition } from "../../types";
     import { randomSample } from "../../utils";
 
 	const cache = new Map<string, Promise<DictionaryEntry>>();
