@@ -4,11 +4,8 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { deDupe } from '../utils';
 
-import {
-	type PosMap,
-	type WordEntry,
-	type WordMap,
-} from './wordMap';
+import type { PosMap, WordEntry, WordMap } from '../types';
+
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const FULL = join(__dirname, 'kaikki.org.dictionary.full.jsonl');
