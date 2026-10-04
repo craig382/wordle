@@ -5,6 +5,7 @@ import { dirname, join } from 'node:path';
 import { deDupe } from '../utils';
 
 import type { PosMap, WordEntry, WordMap } from '../types';
+import {words} from "../words_5";
 
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -93,19 +94,25 @@ async function pruneDictionary(): Promise<void> {
 async function buildAndSaveWordMap() {
 	const out = createWriteStream(MAP);
 	let nRead = 0;
+	let nSkipped = 0;
 	let nDrained = 0;
 
 	const prunedDictionary = readFileSync(join(__dirname, 'kaikki.org.dictionary.pruned.jsonl'), 'utf-8');
 
-	// DELETE following line. Placeholder for now.
-	const answers = new Set(['saint', 'crane', 'slate', /* ...your word list... */]);
+	/** wordle words, a list of around 12,971 5-letter words. */
+	let ww = words.answers.concat(words.otherGuesses);
 
+	// Pass 1. Add all 5 letter words to the wordMap.
+	// wordMap.json, 5.8 MB with all 5 letter words,
+	// 3.6 MB (25,324 words) with words with uppercase removed.
 	for (const line of prunedDictionary.split('\n')) {
 		if (!line.trim()) continue;
-		// if (!answers.has(w)) continue;
-		const j: WordMap = JSON.parse(line);
 		nRead++;
+		const j: WordMap = JSON.parse(line);
 		for (const [w, we] of Object.entries(j)) {
+			// skip 5 letter words and words with uppercase letters
+			if ( w.length !== 5 || w !== w.toLowerCase() ) 
+				{ nSkipped++; continue; };
 			if (!wordMap[w]) {
 				// add a new word to wordMap
 				wordMap[w] = we;
@@ -122,14 +129,12 @@ async function buildAndSaveWordMap() {
 					// console.log(`${w}: merged and deDuped new enprs: ( number added, new total enprs.length ): ( ${we.enprs.length}, ${wordMap[w].enprs.length} ).`);
 				}
 			}
-
 			for (var [p, ds] of Object.entries(we.pMap)) {
 				if (!wordMap[w].pMap[p]) {
 					// add a new part of speech to wordMap
 					wordMap[w].pMap[p] = ds;
 					continue;
 				}
-
 				if (ds) {
 					// new defs available
 					if (!wordMap[w].pMap[p]) {
@@ -141,14 +146,13 @@ async function buildAndSaveWordMap() {
 						// console.log(`${w} ${p}: merged and deDuped new defs: (number added, new total defs.length ): ( ${ds.length}, ${wordMap[w].pMap[p].length} ).`);
 					}
 				}
-
 				// console.log(`wordMap line ${nRead} ${w} ${p} defs.length: ${wordMap[w].pMap[p].length}.`);
 			};
-
 		}
-
-		if (nRead >= 500) break; // DELETE this line. For testing only.
+		// if (nRead >= 500) break; // DELETE this line. For testing only.
 	}
+
+	console.log(`wordMap pass 1. Read ${nRead} lines, skipped ${nSkipped}, added ${Object.keys(wordMap).length} 5-letter words to the wordMap.`);
 
 	// Write an easy to view wordMap.json 
 	// file with one record per line.
@@ -161,7 +165,7 @@ async function buildAndSaveWordMap() {
 			nDrained++;
 			// console.log(`buildAndSaveWordMap() is waiting for the out stream to drain, nWrote: ${nWrote}.`);
 			await new Promise<void>((res) => out.once('drain', res));
-			console.log(`buildAndSaveWordMap(). The out stream finished draining, nWrote: ${nWrote}.`);
+			// console.log(`buildAndSaveWordMap(). The out stream finished draining, nWrote: ${nWrote}.`);
 		}
 		nWrote++;
 	};

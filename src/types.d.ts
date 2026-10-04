@@ -100,7 +100,7 @@ type KidTuple = [
 	maxGroupsKidEasy: BotNode | null,
 	minSumOfSquaresKidHard: BotNode | null,
 	minSumOfSquaresKidEasy: BotNode | null
-]
+];
 
 //** Map< groupId, BotMapTuple > */
 type Gangs = Map< string, GangTuple >;
@@ -135,18 +135,18 @@ type BotNodeTuple = [
 
 	skillPercent: number, // 20
 	skillGrade: string, // 21
-]
+];
 
 /** maps part of speech pos to the defs array */
-export type PosMap = Record<string, string[]>;
+type PosMap = Record<string, string[]>;
 
 /** In a WordMap, the word is used as a key to 
  * lookup a WordEntry that containsthe the english 
  * pronunciations enprs and the parts of speech map. */
-export type WordEntry = {
+type WordEntry = {
 	enprs?: string[];
 	pMap: PosMap;
-}
+};
 
 /** maps word to WordEntry */
-export type WordMap = Record<string, WordEntry>;
+type WordMap = Record<string, WordEntry>;
