@@ -67,6 +67,7 @@ async function pruneDictionary(): Promise<void> {
 		const wMap: WordMap = { [j.word]: s};
 		const pStr = JSON.stringify(wMap);
 		if (!out.write(pStr + '\n')) {
+			nDrained++;
 			console.log(`pruneDictionary() is waiting for the out stream to drain.`);
 			await new Promise<void>((res) => out.once('drain', res));
 			console.log(`pruneDictionary(). The out stream finished draining.`);
@@ -96,6 +97,8 @@ async function pruneDictionary(): Promise<void> {
 async function buildAndSaveWordMap() {
 	const out = createWriteStream(MAP);
 	let nRead = 0;
+	let nDrained = 0;
+
 	const prunedDictionary = readFileSync(join(__dirname, 'kaikki.org.dictionary.pruned.jsonl'), 'utf-8');
 
 	// DELETE following line. Placeholder for now.
@@ -156,12 +159,17 @@ async function buildAndSaveWordMap() {
 
 	// Write an easy to view wordMap.json 
 	// file with one record per line.
-	out.write('{' + '\n');
-	Object.entries(wordMap).forEach(([word, entry]) => {
-		out.write(`"${word}":${JSON.stringify(entry)},\n`);
+	out.write(`{`);
+	Object.entries(wordMap).forEach(([word, entry], i) => {
+		if ( !out.write(`${i !== 0 ? ',\n' : ''}"${word}":${JSON.stringify(entry)}`) ) {
+			nDrained++;
+			console.log(`buildAndSaveWordMap() is waiting for the out stream to drain.`);
+			// await new Promise<void>((res) => out.once('drain', res));
+			console.log(`buildAndSaveWordMap(). The out stream finished draining.`);
+		};
+
 	});
-	// delete the trailing comma on the last entry
-	out.write('}' + '\n');
+	out.write(`}\n`);
 
 	out.end();
 	await new Promise<void>((res) => out.once('close', res));

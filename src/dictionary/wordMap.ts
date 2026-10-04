@@ -16,6 +16,8 @@ export type WordMap = Record<string, WordEntry>;
 // above and uncomment the line below.
 import wordMap from './wordMap.json';
 
+console.log(wordMap);
+
 /** lookup(word) returns the word's StructuredEntry 
  * includes the word's: "enprs" (English pronunciations),
  * and pos (parts of speech) and defs (definitions for each
