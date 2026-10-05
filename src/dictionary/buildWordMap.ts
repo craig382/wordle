@@ -99,19 +99,19 @@ async function buildAndSaveWordMap() {
 
 	const prunedDictionary = readFileSync(join(__dirname, 'kaikki.org.dictionary.pruned.jsonl'), 'utf-8');
 
-	/** wordle words, a list of around 12,971 5-letter words. */
-	let ww = words.answers.concat(words.otherGuesses);
-
-	// Pass 1. Add all 5 letter words to the wordMap.
+	// wordMap Pass 1.
+	// Add all 5 letter words to the wordMap.
 	// wordMap.json, 5.8 MB with all 5 letter words,
-	// 3.6 MB (25,324 words) with words with uppercase removed.
+	// 3.6 MB (25,324 words) with words with uppercase removed,
+	// 3.6 MB (25,048 words) with words with numbers removed.
 	for (const line of prunedDictionary.split('\n')) {
 		if (!line.trim()) continue;
 		nRead++;
 		const j: WordMap = JSON.parse(line);
 		for (const [w, we] of Object.entries(j)) {
-			// skip 5 letter words and words with uppercase letters
-			if ( w.length !== 5 || w !== w.toLowerCase() ) 
+			// skip 5 letter words and words with any
+			// numbers or uppercase letters
+			if ( w.length !== 5 || w !== w.toLowerCase() || /\d/.test(w) ) 
 				{ nSkipped++; continue; };
 			if (!wordMap[w]) {
 				// add a new word to wordMap
@@ -154,27 +154,54 @@ async function buildAndSaveWordMap() {
 
 	console.log(`wordMap pass 1. Read ${nRead} lines, skipped ${nSkipped}, added ${Object.keys(wordMap).length} 5-letter words to the wordMap.`);
 
-	// Write an easy to view wordMap.json 
-	// file with one record per line.
+	// wordMap Pass 2.
+	// Write only wordle words to an easy to view 
+	// wordMap.json file with one record per line.
+	// Of the 12,972 wordle words, found only 11,782 words
+	// in wordMap.json (1,190 missing words).
+	// wordMap.json is 2.5 MB when it contains only wordle words.
 	let nWrote = 0;
+	/** wordle words, a list of around 12,971 5-letter words. */
+	let ww = words.answers.concat(words.otherGuesses);
+	let missing: string[] = [];
 
-	for (const [word, entry] of Object.entries(wordMap)) {
-		if (nWrote === 0) {
-			out.write(`{"${word}":${JSON.stringify(entry)}`);
-		} else if ( !out.write(`,\n"${word}":${JSON.stringify(entry)}`) ) {
-			nDrained++;
-			// console.log(`buildAndSaveWordMap() is waiting for the out stream to drain, nWrote: ${nWrote}.`);
-			await new Promise<void>((res) => out.once('drain', res));
-			// console.log(`buildAndSaveWordMap(). The out stream finished draining, nWrote: ${nWrote}.`);
-		}
-		nWrote++;
-	};
+	for (let i = 0; i < ww.length; i++) {
+		const word = ww[i];
+		const entry = wordMap[word];
+		if (entry) {
+			if (nWrote === 0) {
+				out.write(`{"${word}":${JSON.stringify(entry)}`);
+			} else if ( !out.write(`,\n"${word}":${JSON.stringify(entry)}`) ) {
+				nDrained++;
+				// console.log(`buildAndSaveWordMap() is waiting for the out stream to drain, nWrote: ${nWrote}.`);
+				await new Promise<void>((res) => out.once('drain', res));
+				// console.log(`buildAndSaveWordMap(). The out stream finished draining, nWrote: ${nWrote}.`);
+			}
+			nWrote++;
+		} else {
+			missing.push(word);
+		};
+	}
+
+	// for (const [word, entry] of Object.entries(wordMap)) {
+	// 	if (nWrote === 0) {
+	// 		out.write(`{"${word}":${JSON.stringify(entry)}`);
+	// 	} else if ( !out.write(`,\n"${word}":${JSON.stringify(entry)}`) ) {
+	// 		nDrained++;
+	// 		// console.log(`buildAndSaveWordMap() is waiting for the out stream to drain, nWrote: ${nWrote}.`);
+	// 		await new Promise<void>((res) => out.once('drain', res));
+	// 		// console.log(`buildAndSaveWordMap(). The out stream finished draining, nWrote: ${nWrote}.`);
+	// 	}
+	// 	nWrote++;
+	// };
+
 	out.write(`}\n`);
 	out.end();
 	await new Promise<void>((res) => out.once('close', res));
 
-	console.log(`buildAndSaveWordMap() wrote ${nWrote} word entries to wordMap(length: ${Object.keys(wordMap).length}), read ${nRead} lines from ${PRUNED.split('/').pop()}.`);
+	console.log(`buildAndSaveWordMap() wrote ${nWrote} word entries to wordMap(length: ${Object.keys(wordMap).length}) (vs ${ww.length} wordle words), read ${nRead} lines from ${PRUNED.split('/').pop()}.`);
 	console.log(`buildAndSaveWordMap() paused ${nDrained} times to let the out stream drain.`);
+	console.log(`buildAndSaveWordMap(). The following ${missing.length} wordle words were not found in the wordMap: ${missing.join(' ')}.`);
 	// console.log(`wordMap :`, wordMap);
 }
 

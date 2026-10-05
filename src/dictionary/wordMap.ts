@@ -4,7 +4,8 @@ import wordMapJson from './wordMap.json';
 
 export const wordMap = wordMapJson as WordMap;
 
-console.log(wordMap);
+// console.log(wordMap);
+console.log(`Imported wordMap.json file with ${Object.keys(wordMap).length} entries.`);
 
 /** lookup(word) returns the word's WordEntry that 
  * has the word's: enprs (English pronunciations),
