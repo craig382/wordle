@@ -231,10 +231,12 @@ export function easyOrHard(guess: string, ri: number) {
 }
 
 /** randomSample() returns a randomSample from anArray. */
-export function randomSample(anArray: Array<any>): any {
+export function randomSample<T>(anArray: T[]): T {
 	let i: number = Math.random() * anArray.length;
-	let [rs] = anArray.splice(i, 1);
-	// console.log("randomSample", rs, anArray);
+	let rs = anArray[i];
+	// let [rs] = anArray.splice(i, 1);
+	// let [rs] = anArray.splice(i, 0);
+	console.log(`randomSample: ${rs} = anArray[${i}].`);
 	return rs;
 }
 

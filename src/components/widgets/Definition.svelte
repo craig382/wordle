@@ -1,6 +1,11 @@
 <script context="module" lang="ts">
-		import type { DictionaryEntry, Meaning, Definition } from "../../types";
-    import { randomSample } from "../../utils";
+	import type { DictionaryEntry, Meaning, Definition } from "../../types";
+
+	import type { PosMap, WordEntry, WordMap } from '../../types';
+
+	import { lookup } from '../../dictionary/wordMap';
+
+	import { randomSample } from "../../utils";
 
 	const cache = new Map<string, Promise<DictionaryEntry>>();
 
@@ -100,7 +105,32 @@
 	export let word: string;
 	/** The maximum number of alternate definitions to provide*/
 	export let alternates = 9;
+	$: we = lookup(word);
 </script>
+
+<div class="def">
+	{#if we}
+		<h2>{word}</h2>
+		{#if we.enprs}
+			<p>  [ {we.enprs.join(', ') } ]</p>
+		{/if}
+		<ol>
+			{#each Object.entries(we.pMap) as [pos, defs]}
+				<li><em>{defs.length} {pos}(s)</em> {randomSample(defs)}</li>
+			{/each}
+		</ol>
+		<h2>{word}</h2>
+		<ol>
+			{#each Object.entries(we.pMap) as [pos, defs]}
+				<li><em>{pos}</em>
+				<ol>{#each defs as d}<li>{d}</li>{/each}</ol>
+				</li>
+			{/each}
+		</ol>
+	{:else}
+		<div>Cannot find "{word}" in the wordMap.json dictionary file.</div>
+	{/if}
+</div>
 
 <div class="def">
 	{#await getWordData(word)}
