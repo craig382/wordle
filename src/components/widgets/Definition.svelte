@@ -5,23 +5,34 @@
 
 <script lang="ts">
 	export let word: string;
-	/** The maximum number of alternate definitions to provide*/
-	export let alternates = 9;
+	/** The maximum number of definitions to show (per pos). */
+	export let maxDefs = 9;
 	$: we = lookup(word);
 </script>
 
 <div class="def">
 	{#if we}
-		<h2>{word}</h2>
-		{#if we.enprs}
-			<p>  [ {we.enprs.join(', ') } ]</p>
-		{/if}
+
+		<h2>
+			{word}
+			{#if we.enprs}
+				<pr>  [ {we.enprs.join(', ') } ]</pr>
+			{/if}
+		</h2>
+
 		<ol>
 			{#each Object.entries(we.pMap) as [pos, defs]}
 				<li><em>{defs.length} {pos}(s)</em> {randomSample(defs)}</li>
 			{/each}
 		</ol>
-		<h2>{word}</h2>
+
+		<h2>
+			{word}
+			{#if we.enprs}
+				<pr>  [ {we.enprs.join(', ') } ]</pr>
+			{/if}
+		</h2>
+
 		<ol>
 			{#each Object.entries(we.pMap) as [pos, defs]}
 				<li><em>{pos}</em>
@@ -29,14 +40,17 @@
 				</li>
 			{/each}
 		</ol>
-	{:else}
+
+		{:else}
 		<div>Cannot find "{word}" in the wordMap.json dictionary file.</div>
-	{/if}
+
+		{/if}
 </div>
 
 <style>
 	h2 {
-		display: inline-block;
+		/* display: inline-block; */
+		display: block;
 		margin-right: 1rem;
 		margin-bottom: 0.8rem;
 	}
@@ -51,5 +65,12 @@
 	}
 	li::marker {
 		color: var(--fg-secondary);
+	}
+	pr {
+			font-weight: normal;
+			/* optional: slightly smaller than the heading */
+			font-size: 0.8em;
+			/* optional: matches your marker color */
+			color: var(--fg-secondary);
 	}
 </style>

@@ -51,7 +51,7 @@
 		{/if}
 	</div>
 	{#if word !== ""}
-		<Definition {word} alternates={1} />
+		<Definition {word} maxDefs={1} />
 	{/if}
 </div>
 
