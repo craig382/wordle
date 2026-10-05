@@ -79,7 +79,8 @@
 
 		<ol>
 			{#each Object.entries(defs) as [pos, def]}
-				<li><em>{pos} {newDefIndexes[pos] + 1} of {we.pMap[pos].length}.</em> {def}</li>
+				<li><em>{pos} {newDefIndexes[pos] + 1} of {we.pMap[pos].length}</em></li>
+				<li class = "last-def">{def}</li>
 			{/each}
 		</ol>
 
@@ -96,16 +97,21 @@
 		margin-bottom: 0.8rem;
 	}
 	ol {
-		padding-left: 1.5rem;
+		/* padding: top right bot left */
+		padding: 0 0.5rem 0 0;
 	}
 	li {
-		margin-bottom: 0.5rem;
+		list-style-type: none;
 	}
 	li::first-letter {
 		text-transform: uppercase;
 	}
-	li::marker {
+	/* li::marker {
 		color: var(--fg-secondary);
+	} */
+	.last-def {
+		margin-left: 1.0rem;
+		margin-bottom: 0.5rem;
 	}
 	pr {
 			font-weight: normal;
