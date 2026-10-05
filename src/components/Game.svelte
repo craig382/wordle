@@ -10,7 +10,6 @@
 	import {
 		Share,
 		Separator,
-		Definition,
 		Tutorial,
 		Statistics,
 		Distribution,
@@ -20,6 +19,7 @@
 		Tips,
 		Historical,
 	} from "./widgets";
+	import Definition from "../dictionary/Definition.svelte";
 	import {
 		contractNum,
 		randomSample,
