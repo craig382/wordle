@@ -4,21 +4,73 @@
 </script>
 
 <script lang="ts">
+
 	export let word: string;
 	/** The maximum number of definitions to show (per pos). */
 	export let maxDefs = 9;
-	$: we = lookup(word);
+
+	const we = lookup(word);
+	let newDefs: Record<string, string> = {};
+	let newDefIndexes: Record<string, number> = {};
+
+	// getRandomDefs();
+
+	// initialize all the new def indexes to 0
+	// and all the new defs to defintion 0.
+	if (we) for (const [pos, defs] of Object.entries(we.pMap) ) {
+		newDefIndexes[pos] = 0;
+		newDefs[pos] = defs[0];
+	}
+
+	let defs = newDefs;
+
+	function getRandomDefs() {
+		newDefs = {};
+		if (we) {
+			for (const [pos, defs] of Object.entries(we.pMap)) {
+				newDefs[pos] = randomSample(defs);
+			}
+			// console.log(`Definition< ${word} > ran getRandomDefs().`);
+		}
+	}
+
+	function incDefs() {
+		newDefs = {};
+		if (we) {
+			for (const [pos, defs] of Object.entries(we.pMap)) {
+				newDefIndexes[pos] = (newDefIndexes[pos] + 1) % defs.length;
+				newDefs[pos] = defs[newDefIndexes[pos]];
+			}
+			// console.log(`Definition< ${word} > ran incDefs().`);
+		}
+	}
+
+	function decDefs() {
+		newDefs = {};
+		if (we) {
+			for (const [pos, defs] of Object.entries(we.pMap)) {
+				newDefIndexes[pos] = (newDefIndexes[pos] - 1 + defs.length) % defs.length;
+				newDefs[pos] = defs[newDefIndexes[pos]];
+			}
+			// console.log(`Definition< ${word} > ran decDefs().`);
+		}
+	}
+
+	$: {
+		defs = newDefs;
+		// console.log(`Definition< ${word} > ran reactive block.`);
+	}
+
 </script>
 
 <div class="def">
 
 	{#if we}
 		<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<h2
-		on:click|self={() => {
-			console.log(`Refreshed definitions of "${word}".`);
-		}}
-	>
+		<h2
+			on:click|self = {incDefs}
+			on:contextmenu|preventDefault = {decDefs}
+		>
 			{word}
 			{#if we.enprs}
 				<pr>  [ {we.enprs.join(', ') } ]</pr>
@@ -26,25 +78,10 @@
 		</h2>
 
 		<ol>
-			{#each Object.entries(we.pMap) as [pos, defs]}
-				<li><em>{defs.length} {pos}(s)</em> {randomSample(defs)}</li>
+			{#each Object.entries(defs) as [pos, def]}
+				<li><em>{pos} {newDefIndexes[pos] + 1} of {we.pMap[pos].length}.</em> {def}</li>
 			{/each}
 		</ol>
-
-		<!-- <h2>
-			{word}
-			{#if we.enprs}
-				<pr>  [ {we.enprs.join(', ') } ]</pr>
-			{/if}
-		</h2>
-
-		<ol>
-			{#each Object.entries(we.pMap) as [pos, defs]}
-				<li><em>{pos}</em>
-				<ol>{#each defs as d}<li>{d}</li>{/each}</ol>
-				</li>
-			{/each}
-		</ol> -->
 
 		{:else}
 		<div>Cannot find "{word}" in the wordMap.json dictionary file.</div>
@@ -54,7 +91,6 @@
 
 <style>
 	h2 {
-		/* display: inline-block; */
 		display: block;
 		margin-right: 1rem;
 		margin-bottom: 0.8rem;
