@@ -20,7 +20,12 @@
 			{/if}
 		</h2>
 
-		<ol>
+		<!-- svelte-ignore a11y-click-events-have-key-events -->
+		<ol
+			on:click|self={() => {
+				console.log(`Refreshed definitions of "${word}".`);
+			}}
+		>
 			{#each Object.entries(we.pMap) as [pos, defs]}
 				<li><em>{defs.length} {pos}(s)</em> {randomSample(defs)}</li>
 			{/each}
