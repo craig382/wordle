@@ -26,7 +26,7 @@
 			{/each}
 		</ol>
 
-		<h2>
+		<!-- <h2>
 			{word}
 			{#if we.enprs}
 				<pr>  [ {we.enprs.join(', ') } ]</pr>
@@ -39,7 +39,7 @@
 				<ol>{#each defs as d}<li>{d}</li>{/each}</ol>
 				</li>
 			{/each}
-		</ol>
+		</ol> -->
 
 		{:else}
 		<div>Cannot find "{word}" in the wordMap.json dictionary file.</div>
