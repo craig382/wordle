@@ -69,7 +69,7 @@
 	pr {
 			font-weight: normal;
 			/* optional: slightly smaller than the heading */
-			font-size: 0.8em;
+			/* font-size: 0.8em; */
 			/* optional: matches your marker color */
 			color: var(--fg-secondary);
 	}
