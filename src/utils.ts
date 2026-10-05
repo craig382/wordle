@@ -234,7 +234,7 @@ export function easyOrHard(guess: string, ri: number) {
 export function randomSample<T>(anArray: T[]): T {
 	let i: number = Math.floor(Math.random() * anArray.length);
 	let rs = anArray[i];
-	console.log(`randomSample = anArray[${i}] = "${rs}".`);
+	// console.log(`randomSample = anArray[${i}] = "${rs}".`);
 	return rs;
 }
 
