@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Definition from "./Definition.svelte";
+	import Definition from "../../dictionary/Definition.svelte";
 	import {GameState, botNodeInfo, ROWS} from "../../utils";
 
 	export let appCM: GameState;

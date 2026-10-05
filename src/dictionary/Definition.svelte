@@ -1,6 +1,6 @@
 <script context="module" lang="ts">
-	import { lookup } from '../../dictionary/wordMap';
-	import { randomSample } from "../../utils";
+	import { lookup } from './wordMap';
+	import { randomSample } from "../utils";
 </script>
 
 <script lang="ts">
